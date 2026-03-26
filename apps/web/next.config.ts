@@ -7,7 +7,6 @@ const nextConfig: NextConfig = {
     "@funberry/game-engine",
     "@funberry/supabase",
   ],
-  serverExternalPackages: ["framer-motion", "canvas-confetti"],
 };
 
 export default nextConfig;

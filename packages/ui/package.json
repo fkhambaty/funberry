@@ -8,8 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@funberry/config": "*",
-    "react": "^19.0.0"
+    "@funberry/config": "*"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
