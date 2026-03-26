@@ -1,0 +1,115 @@
+import type { GameConfig } from "../../types";
+
+export const othersGames: GameConfig[] = [
+  {
+    id: "others-who-helps-quiz",
+    zoneId: "others-in-my-world",
+    type: "picture_quiz",
+    title: "Who Helps Us?",
+    description: "Learn about people who help in our community!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Who does this important job? Pick the right helper!",
+      questions: [
+        {
+          id: "q1",
+          question: "Who brings letters and packages to your home?",
+          options: [
+            { id: "doctor", label: "Doctor", emoji: "🩺" },
+            { id: "postman", label: "Postman", emoji: "📮" },
+            { id: "chef", label: "Chef", emoji: "👨‍🍳" },
+            { id: "pilot", label: "Pilot", emoji: "✈️" },
+          ],
+          correctId: "postman",
+          explanation: "The postman delivers mail and packages so we can get letters from friends!",
+        },
+        {
+          id: "q2",
+          question: "Who helps you when you feel sick?",
+          options: [
+            { id: "teacher", label: "Teacher", emoji: "👩‍🏫" },
+            { id: "doctor", label: "Doctor", emoji: "🩺" },
+            { id: "farmer", label: "Farmer", emoji: "👨‍🌾" },
+            { id: "artist", label: "Artist", emoji: "🎨" },
+          ],
+          correctId: "doctor",
+          explanation: "Doctors and nurses help us stay healthy and feel better!",
+        },
+        {
+          id: "q3",
+          question: "Who teaches you new things at school?",
+          options: [
+            { id: "firefighter", label: "Firefighter", emoji: "🧑‍🚒" },
+            { id: "teacher", label: "Teacher", emoji: "👩‍🏫" },
+            { id: "driver", label: "Bus Driver", emoji: "🚌" },
+            { id: "baker", label: "Baker", emoji: "🥖" },
+          ],
+          correctId: "teacher",
+          explanation: "Teachers help us read, count, and discover the world!",
+        },
+        {
+          id: "q4",
+          question: "Who puts out fires and keeps us safe from fire?",
+          options: [
+            { id: "police", label: "Police", emoji: "👮" },
+            { id: "librarian", label: "Librarian", emoji: "📚" },
+            { id: "firefighter", label: "Firefighter", emoji: "🧑‍🚒" },
+            { id: "gardener", label: "Gardener", emoji: "🌻" },
+          ],
+          correctId: "firefighter",
+          explanation: "Firefighters are brave helpers who stop fires and rescue people!",
+        },
+      ],
+    },
+  },
+  {
+    id: "others-family-sort",
+    zoneId: "others-in-my-world",
+    type: "drag_sort",
+    title: "My Family",
+    description: "Sort who is in your family and who is a friend or neighbor!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Is this person usually in your family, or not? Sort each one!",
+      categories: [
+        { id: "family", label: "Family", emoji: "👨‍👩‍👧" },
+        { id: "not-family", label: "Not Family", emoji: "🤝" },
+      ],
+      items: [
+        { id: "mom", label: "Mom", emoji: "👩", category: "family" },
+        { id: "dad", label: "Dad", emoji: "👨", category: "family" },
+        { id: "sister", label: "Sister", emoji: "👧", category: "family" },
+        { id: "grandma", label: "Grandma", emoji: "👵", category: "family" },
+        { id: "classmate", label: "Classmate", emoji: "🧒", category: "not-family" },
+        { id: "neighbor", label: "Neighbor", emoji: "🏠", category: "not-family" },
+        { id: "teacher", label: "Teacher", emoji: "👩‍🏫", category: "not-family" },
+        { id: "cousin", label: "Cousin", emoji: "🧑", category: "family" },
+      ],
+    },
+  },
+  {
+    id: "others-helpers-match",
+    zoneId: "others-in-my-world",
+    type: "memory_match",
+    title: "Community Helpers Match",
+    description: "Match each helper with their tool or vehicle!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "memory_match",
+      instruction: "Flip the cards and find matching pairs of helpers!",
+      pairs: [
+        { id: "doctor", front: "Doctor", emoji: "🩺" },
+        { id: "nurse", front: "Nurse", emoji: "💉" },
+        { id: "police", front: "Police", emoji: "🚓" },
+        { id: "firefighter", front: "Firefighter", emoji: "🚒" },
+        { id: "teacher", front: "Teacher", emoji: "📖" },
+        { id: "postman", front: "Postman", emoji: "📬" },
+      ],
+    },
+  },
+];

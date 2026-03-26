@@ -1,0 +1,115 @@
+import type { GameConfig } from "../../types";
+
+export const communicationGames: GameConfig[] = [
+  {
+    id: "communication-old-new-sort",
+    zoneId: "communication",
+    type: "drag_sort",
+    title: "Old vs New Communication",
+    description: "How people shared messages long ago and today!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Sort old-fashioned ways and newer ways to communicate!",
+      categories: [
+        { id: "old", label: "Long Ago", emoji: "📜" },
+        { id: "new", label: "Today", emoji: "📱" },
+      ],
+      items: [
+        { id: "letter", label: "Handwritten letter", emoji: "✉️", category: "old" },
+        { id: "email", label: "Email", emoji: "📧", category: "new" },
+        { id: "pigeon", label: "Carrier pigeon", emoji: "🕊️", category: "old" },
+        { id: "phone", label: "Mobile phone call", emoji: "📞", category: "new" },
+        { id: "telegram", label: "Telegram (old wire message)", emoji: "📠", category: "old" },
+        { id: "video", label: "Video chat", emoji: "💻", category: "new" },
+        { id: "smoke", label: "Smoke signals (storybook)", emoji: "💨", category: "old" },
+        { id: "text", label: "Text message", emoji: "💬", category: "new" },
+      ],
+    },
+  },
+  {
+    id: "communication-letter-sequence",
+    zoneId: "communication",
+    type: "sequence_builder",
+    title: "Send a Letter",
+    description: "Put the steps to send a real letter in order!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction: "How does a letter travel to grandma's house?",
+      steps: [
+        { id: "write", label: "Write your message", emoji: "✍️", order: 1 },
+        { id: "fold", label: "Fold and put in envelope", emoji: "📨", order: 2 },
+        { id: "stamp", label: "Add address & stamp", emoji: "📮", order: 3 },
+        { id: "mailbox", label: "Post in mailbox", emoji: "📬", order: 4 },
+        { id: "postman", label: "Post office sorts & sends", emoji: "🚚", order: 5 },
+        { id: "deliver", label: "Delivered — they read it!", emoji: "😊", order: 6 },
+      ],
+    },
+  },
+  {
+    id: "communication-quiz",
+    zoneId: "communication",
+    type: "picture_quiz",
+    title: "Communication Quiz",
+    description: "How do we share ideas and feelings?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Pick the best way to communicate!",
+      questions: [
+        {
+          id: "q1",
+          question: "You want to say hello to a friend far away quickly. What works well?",
+          options: [
+            { id: "shout", label: "Shout out the window", emoji: "📢" },
+            { id: "call", label: "Phone or video call with help", emoji: "📱" },
+            { id: "buried", label: "Bury a note in sand", emoji: "🏖️" },
+            { id: "ignore", label: "Say nothing forever", emoji: "🙊" },
+          ],
+          correctId: "call",
+          explanation: "Phones and apps let us talk to people anywhere in seconds!",
+        },
+        {
+          id: "q2",
+          question: "Which is a kind way to communicate in person?",
+          options: [
+            { id: "listen", label: "Listen and use polite words", emoji: "🙂" },
+            { id: "yell", label: "Yell over everyone", emoji: "😡" },
+            { id: "point", label: "Point and laugh meanly", emoji: "👎" },
+            { id: "walk-away", label: "Walk away mid-sentence always", emoji: "🚶" },
+          ],
+          correctId: "listen",
+          explanation: "Listening and kind words help friends understand each other!",
+        },
+        {
+          id: "q3",
+          question: "Books and stories communicate using…",
+          options: [
+            { id: "words", label: "Words and pictures", emoji: "📚" },
+            { id: "only-beeps", label: "Only loud beeps", emoji: "📢" },
+            { id: "smell-only", label: "Only smells", emoji: "👃" },
+            { id: "blank", label: "Blank pages only", emoji: "⬜" },
+          ],
+          correctId: "words",
+          explanation: "Writers share adventures and facts through reading!",
+        },
+        {
+          id: "q4",
+          question: "Sign language helps people who…",
+          options: [
+            { id: "deaf", label: "Are deaf or hard of hearing talk with hands", emoji: "🤟" },
+            { id: "sleep", label: "Are always sleeping", emoji: "😴" },
+            { id: "fly", label: "Can fly", emoji: "🦅" },
+            { id: "plants", label: "Are plants", emoji: "🌱" },
+          ],
+          correctId: "deaf",
+          explanation: "Sign language is a beautiful language using hands and expressions!",
+        },
+      ],
+    },
+  },
+];
