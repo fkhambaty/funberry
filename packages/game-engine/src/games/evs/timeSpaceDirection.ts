@@ -1,0 +1,152 @@
+import type { GameConfig } from "../../types";
+
+export const timeSpaceDirectionGames: GameConfig[] = [
+  {
+    id: "timespace-clock-quiz",
+    zoneId: "time-space-direction",
+    type: "picture_quiz",
+    title: "Read the Clock",
+    description: "Practice telling time the simple way!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Think like the short hand on a clock!",
+      questions: [
+        {
+          id: "q1",
+          question: "The short hand points to 3 and the long hand points to 12. What time is it?",
+          options: [
+            { id: "three", label: "3 o'clock", emoji: "🕒" },
+            { id: "twelve", label: "12 o'clock", emoji: "🕛" },
+            { id: "six", label: "6 o'clock", emoji: "🕕" },
+            { id: "nine", label: "9 o'clock", emoji: "🕘" },
+          ],
+          correctId: "three",
+          explanation: "When the long hand is on 12, we say the hour the short hand shows — three!",
+        },
+        {
+          id: "q2",
+          question: "How many big numbers are on a normal clock face?",
+          options: [
+            { id: "ten", label: "Ten", emoji: "🔟" },
+            { id: "twelve", label: "Twelve", emoji: "1️⃣2️⃣" },
+            { id: "twenty", label: "Twenty", emoji: "2️⃣0️⃣" },
+            { id: "five", label: "Five", emoji: "5️⃣" },
+          ],
+          correctId: "twelve",
+          explanation: "A clock shows twelve hours going around in a circle!",
+        },
+        {
+          id: "q3",
+          question: "Which comes first in the day — morning or night?",
+          options: [
+            { id: "morning", label: "Morning starts the day", emoji: "🌅" },
+            { id: "night-first", label: "Night is always first", emoji: "🌙" },
+            { id: "same", label: "They are the same instant", emoji: "⚡" },
+            { id: "lunch", label: "Lunch only", emoji: "🥪" },
+          ],
+          correctId: "morning",
+          explanation: "After night sleep, morning wakes us up for a new day!",
+        },
+        {
+          id: "q4",
+          question: "What do we use to know when to get to school on time?",
+          options: [
+            { id: "clock", label: "Clock or watch", emoji: "⏰" },
+            { id: "guess", label: "Only guessing", emoji: "🤷" },
+            { id: "color", label: "Favorite color", emoji: "🎨" },
+            { id: "shoes", label: "Shoe size", emoji: "👟" },
+          ],
+          correctId: "clock",
+          explanation: "Clocks help families plan meals, school, and bedtime!",
+        },
+      ],
+    },
+  },
+  {
+    id: "timespace-left-right-quiz",
+    zoneId: "time-space-direction",
+    type: "picture_quiz",
+    title: "Left or Right?",
+    description: "Learn left, right, and where things are!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Imagine you are standing the same way as the picture in your mind!",
+      questions: [
+        {
+          id: "q1",
+          question: "Hold up your hands. Which hand makes a small L with thumb and pointer? (Usually)",
+          options: [
+            { id: "left", label: "Left hand", emoji: "👈" },
+            { id: "right", label: "Right hand", emoji: "👉" },
+            { id: "both", label: "Both at once", emoji: "🙌" },
+            { id: "feet", label: "Your feet", emoji: "🦶" },
+          ],
+          correctId: "left",
+          explanation: "For many people, the left hand makes an L shape — a trick to remember!",
+        },
+        {
+          id: "q2",
+          question: "If you face forward, your right side is…",
+          options: [
+            { id: "right-side", label: "The side with your right hand", emoji: "➡️" },
+            { id: "behind", label: "Always behind you", emoji: "🔙" },
+            { id: "above", label: "Above your head only", emoji: "⬆️" },
+            { id: "under", label: "Under the floor", emoji: "⬇️" },
+          ],
+          correctId: "right-side",
+          explanation: "Right and left are from your own body's point of view!",
+        },
+        {
+          id: "q3",
+          question: "Something 'between' two toys is…",
+          options: [
+            { id: "middle", label: "In the middle of them", emoji: "↔️" },
+            { id: "above-both", label: "Above both only", emoji: "☁️" },
+            { id: "gone", label: "Nowhere", emoji: "🚫" },
+            { id: "same", label: "On top of only one", emoji: "1️⃣" },
+          ],
+          correctId: "middle",
+          explanation: "Between means in the space in the middle of two things!",
+        },
+        {
+          id: "q4",
+          question: "You are 'in front of' the door when…",
+          options: [
+            { id: "facing", label: "You face the door on the outside side", emoji: "🚪" },
+            { id: "inside-wall", label: "You are inside the wall", emoji: "🧱" },
+            { id: "roof", label: "You sit on the roof only", emoji: "🏠" },
+            { id: "under-mat", label: "Under the mat", emoji: "🧹" },
+          ],
+          correctId: "facing",
+          explanation: "In front of means the side you walk toward before opening!",
+        },
+      ],
+    },
+  },
+  {
+    id: "timespace-my-day-sequence",
+    zoneId: "time-space-direction",
+    type: "sequence_builder",
+    title: "My Day",
+    description: "From morning routine to bedtime — in order!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction: "Build your day from wake-up to sweet dreams!",
+      steps: [
+        { id: "wake", label: "Wake up", emoji: "⏰", order: 1 },
+        { id: "wash", label: "Wash up & get dressed", emoji: "🪥", order: 2 },
+        { id: "breakfast", label: "Breakfast", emoji: "🥣", order: 3 },
+        { id: "school", label: "School or playtime", emoji: "🎒", order: 4 },
+        { id: "dinner", label: "Dinner & family time", emoji: "🍽️", order: 5 },
+        { id: "bath-story", label: "Bath, pajamas, story", emoji: "🛁", order: 6 },
+        { id: "sleep", label: "Lights out — good night!", emoji: "😴", order: 7 },
+      ],
+    },
+  },
+];

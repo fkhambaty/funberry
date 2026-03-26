@@ -1,0 +1,115 @@
+import type { GameConfig } from "../../types";
+
+export const foodGames: GameConfig[] = [
+  {
+    id: "food-healthy-junk-sort",
+    zoneId: "food",
+    type: "drag_sort",
+    title: "Healthy vs Junk",
+    description: "Learn which foods help your body grow strong!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Sort foods into healthy treats and sometimes-junk foods!",
+      categories: [
+        { id: "healthy", label: "Healthy", emoji: "🥗" },
+        { id: "junk", label: "Junk / Sometimes Food", emoji: "🍟" },
+      ],
+      items: [
+        { id: "apple", label: "Apple", emoji: "🍎", category: "healthy" },
+        { id: "broccoli", label: "Broccoli", emoji: "🥦", category: "healthy" },
+        { id: "carrot", label: "Carrot", emoji: "🥕", category: "healthy" },
+        { id: "milk", label: "Milk", emoji: "🥛", category: "healthy" },
+        { id: "candy", label: "Candy", emoji: "🍬", category: "junk" },
+        { id: "chips", label: "Chips", emoji: "🥔", category: "junk" },
+        { id: "soda", label: "Soda", emoji: "🥤", category: "junk" },
+        { id: "banana", label: "Banana", emoji: "🍌", category: "healthy" },
+      ],
+    },
+  },
+  {
+    id: "food-where-grows-quiz",
+    zoneId: "food",
+    type: "picture_quiz",
+    title: "Where Does It Grow?",
+    description: "Do fruits and veggies grow on trees, under the ground, or on vines?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Think about where this yummy food grows!",
+      questions: [
+        {
+          id: "q1",
+          question: "Where do carrots usually grow?",
+          options: [
+            { id: "tree", label: "On a tree", emoji: "🌳" },
+            { id: "underground", label: "Under the ground", emoji: "🥕" },
+            { id: "water", label: "In the ocean", emoji: "🌊" },
+            { id: "sky", label: "In the sky", emoji: "☁️" },
+          ],
+          correctId: "underground",
+          explanation: "Carrots are root vegetables — they grow hidden under the soil!",
+        },
+        {
+          id: "q2",
+          question: "Where do apples usually grow?",
+          options: [
+            { id: "bush", label: "On a bush", emoji: "🌿" },
+            { id: "tree", label: "On a tree", emoji: "🍎" },
+            { id: "sand", label: "In the sand", emoji: "🏖️" },
+            { id: "vine", label: "On a vine on the ground", emoji: "🍉" },
+          ],
+          correctId: "tree",
+          explanation: "Apples hang from branches on apple trees!",
+        },
+        {
+          id: "q3",
+          question: "Where do grapes usually grow?",
+          options: [
+            { id: "tree", label: "On a tall tree", emoji: "🌲" },
+            { id: "vine", label: "On a vine", emoji: "🍇" },
+            { id: "underground", label: "Under the ground", emoji: "🥔" },
+            { id: "lake", label: "In a lake", emoji: "🏞️" },
+          ],
+          correctId: "vine",
+          explanation: "Grapes grow in bunches on grapevines!",
+        },
+        {
+          id: "q4",
+          question: "Where do potatoes grow?",
+          options: [
+            { id: "tree", label: "On a tree", emoji: "🌳" },
+            { id: "underground", label: "Under the ground", emoji: "🥔" },
+            { id: "water", label: "Floating on water", emoji: "💧" },
+            { id: "flower", label: "Inside a flower", emoji: "🌸" },
+          ],
+          correctId: "underground",
+          explanation: "Potatoes are tubers — they grow under the soil like buried treasure!",
+        },
+      ],
+    },
+  },
+  {
+    id: "food-groups-match",
+    zoneId: "food",
+    type: "memory_match",
+    title: "Food Groups Match",
+    description: "Match each food with its food group!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "memory_match",
+      instruction: "Find pairs that belong to the same idea — fruits, veggies, grains, and more!",
+      pairs: [
+        { id: "fruits", front: "Fruits", emoji: "🍎" },
+        { id: "veggies", front: "Vegetables", emoji: "🥦" },
+        { id: "grains", front: "Grains", emoji: "🍞" },
+        { id: "protein", front: "Protein", emoji: "🥚" },
+        { id: "dairy", front: "Dairy", emoji: "🧀" },
+        { id: "water", front: "Water", emoji: "💧" },
+      ],
+    },
+  },
+];

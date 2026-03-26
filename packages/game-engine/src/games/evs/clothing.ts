@@ -1,0 +1,115 @@
+import type { GameConfig } from "../../types";
+
+export const clothingGames: GameConfig[] = [
+  {
+    id: "clothing-season-sort",
+    zoneId: "clothing",
+    type: "drag_sort",
+    title: "Season Dress-Up",
+    description: "Sort clothes for hot summer days and chilly winter days!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Would you wear this in summer sun or winter cold?",
+      categories: [
+        { id: "summer", label: "Summer", emoji: "☀️" },
+        { id: "winter", label: "Winter", emoji: "❄️" },
+      ],
+      items: [
+        { id: "shorts", label: "Shorts", emoji: "🩳", category: "summer" },
+        { id: "coat", label: "Warm coat", emoji: "🧥", category: "winter" },
+        { id: "sandals", label: "Sandals", emoji: "🩴", category: "summer" },
+        { id: "scarf", label: "Scarf & mittens", emoji: "🧣", category: "winter" },
+        { id: "cap", label: "Sun cap", emoji: "🧢", category: "summer" },
+        { id: "boots", label: "Snow boots", emoji: "🥾", category: "winter" },
+        { id: "tank", label: "Tank top", emoji: "👕", category: "summer" },
+        { id: "sweater", label: "Wool sweater", emoji: "🧶", category: "winter" },
+      ],
+    },
+  },
+  {
+    id: "clothing-fabric-match",
+    zoneId: "clothing",
+    type: "memory_match",
+    title: "Fabric Match",
+    description: "Match materials we use to make clothes!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "memory_match",
+      instruction: "Find matching fabric friends!",
+      pairs: [
+        { id: "cotton", front: "Cotton", emoji: "🧵" },
+        { id: "wool", front: "Wool", emoji: "🐑" },
+        { id: "silk", front: "Silk", emoji: "🐛" },
+        { id: "leather", front: "Leather", emoji: "👢" },
+        { id: "denim", front: "Denim", emoji: "👖" },
+        { id: "rubber", front: "Rubber boots", emoji: "🌧️" },
+      ],
+    },
+  },
+  {
+    id: "clothing-wear-quiz",
+    zoneId: "clothing",
+    type: "picture_quiz",
+    title: "What to Wear?",
+    description: "Pick the right outfit for each situation!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "What should you wear?",
+      questions: [
+        {
+          id: "q1",
+          question: "It's raining outside. What helps you stay dry?",
+          options: [
+            { id: "flipflops", label: "Flip-flops only", emoji: "🩴" },
+            { id: "raincoat", label: "Raincoat & boots", emoji: "🧥" },
+            { id: "pajamas", label: "Pajamas", emoji: "😴" },
+            { id: "crown", label: "A crown", emoji: "👑" },
+          ],
+          correctId: "raincoat",
+          explanation: "A raincoat and boots keep you cozy when puddles splash!",
+        },
+        {
+          id: "q2",
+          question: "You're going to play in the snow. What do you need on your hands?",
+          options: [
+            { id: "mittens", label: "Mittens or gloves", emoji: "🧤" },
+            { id: "socks-hands", label: "Socks on hands", emoji: "🧦" },
+            { id: "nothing", label: "Nothing", emoji: "🚫" },
+            { id: "tape", label: "Tape", emoji: "📎" },
+          ],
+          correctId: "mittens",
+          explanation: "Gloves or mittens keep fingers from getting too cold!",
+        },
+        {
+          id: "q3",
+          question: "Sunny day at the beach — what protects your eyes?",
+          options: [
+            { id: "blindfold", label: "Blindfold", emoji: "🙈" },
+            { id: "sunglasses", label: "Sunglasses", emoji: "🕶️" },
+            { id: "mask", label: "Sleep mask", emoji: "😴" },
+            { id: "hat-eyes", label: "A hat on your eyes", emoji: "🎩" },
+          ],
+          correctId: "sunglasses",
+          explanation: "Sunglasses shield your eyes from bright sunlight!",
+        },
+        {
+          id: "q4",
+          question: "Bedtime! What do you usually wear to sleep?",
+          options: [
+            { id: "party", label: "Party dress", emoji: "👗" },
+            { id: "pajamas", label: "Pajamas or comfy clothes", emoji: "🛏️" },
+            { id: "uniform", label: "School uniform", emoji: "🎒" },
+            { id: "armor", label: "Knight armor", emoji: "🛡️" },
+          ],
+          correctId: "pajamas",
+          explanation: "Soft pajamas help you relax and sleep well!",
+        },
+      ],
+    },
+  },
+];

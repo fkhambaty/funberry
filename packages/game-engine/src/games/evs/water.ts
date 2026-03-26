@@ -1,0 +1,116 @@
+import type { GameConfig } from "../../types";
+
+export const waterGames: GameConfig[] = [
+  {
+    id: "water-uses-sort",
+    zoneId: "water",
+    type: "drag_sort",
+    title: "Uses of Water",
+    description: "Sort how we use water every day!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Where does this use of water fit best?",
+      categories: [
+        { id: "drink", label: "Drinking", emoji: "🥤" },
+        { id: "bathe", label: "Bathing", emoji: "🛁" },
+        { id: "clean", label: "Cleaning", emoji: "🧼" },
+        { id: "farm", label: "Farming", emoji: "🌾" },
+      ],
+      items: [
+        { id: "glass", label: "Glass of water", emoji: "🥛", category: "drink" },
+        { id: "shower", label: "Shower", emoji: "🚿", category: "bathe" },
+        { id: "brush-teeth", label: "Brushing teeth", emoji: "🪥", category: "clean" },
+        { id: "crops", label: "Watering crops", emoji: "💧", category: "farm" },
+        { id: "swim", label: "Swimming pool", emoji: "🏊", category: "bathe" },
+        { id: "mop", label: "Mopping floor", emoji: "🧹", category: "clean" },
+        { id: "thirsty", label: "When thirsty", emoji: "😋", category: "drink" },
+        { id: "irrigation", label: "Farm sprinklers", emoji: "🚜", category: "farm" },
+      ],
+    },
+  },
+  {
+    id: "water-save-sequence",
+    zoneId: "water",
+    type: "sequence_builder",
+    title: "Save Water",
+    description: "Put the steps in order to save water at home!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction: "Arrange these smart water-saving ideas from start to daily habit!",
+      steps: [
+        { id: "think", label: "Think: water is precious", emoji: "💭", order: 1 },
+        { id: "turn-off", label: "Turn off tap while brushing", emoji: "🚰", order: 2 },
+        { id: "shorter", label: "Take shorter showers", emoji: "⏱️", order: 3 },
+        { id: "reuse", label: "Reuse water for plants if safe", emoji: "🪴", order: 4 },
+        { id: "leak", label: "Tell a grown-up about leaks", emoji: "🔧", order: 5 },
+      ],
+    },
+  },
+  {
+    id: "water-quiz",
+    zoneId: "water",
+    type: "picture_quiz",
+    title: "Water Quiz",
+    description: "Fun facts about water!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Pick the best answer about water!",
+      questions: [
+        {
+          id: "q1",
+          question: "What do we need water for most every day?",
+          options: [
+            { id: "paint", label: "To paint walls", emoji: "🎨" },
+            { id: "drink", label: "To drink and stay alive", emoji: "💧" },
+            { id: "fly", label: "To fly kites", emoji: "🪁" },
+            { id: "sleep", label: "To sleep", emoji: "😴" },
+          ],
+          correctId: "drink",
+          explanation: "Our bodies need water to work — drinking keeps us healthy!",
+        },
+        {
+          id: "q2",
+          question: "Where do we find fresh water to use at home?",
+          options: [
+            { id: "clouds-only", label: "Only in clouds", emoji: "☁️" },
+            { id: "tap", label: "From taps and pipes", emoji: "🚰" },
+            { id: "desert", label: "Only in deserts", emoji: "🏜️" },
+            { id: "moon", label: "On the moon", emoji: "🌙" },
+          ],
+          correctId: "tap",
+          explanation: "Clean water comes through pipes to our taps at home and school!",
+        },
+        {
+          id: "q3",
+          question: "Is it good to leave the tap running for a long time?",
+          options: [
+            { id: "yes", label: "Yes, always", emoji: "✅" },
+            { id: "no", label: "No, turn it off when not needed", emoji: "🚫" },
+            { id: "maybe", label: "Only at night", emoji: "🌃" },
+            { id: "fun", label: "Only for fun", emoji: "🎉" },
+          ],
+          correctId: "no",
+          explanation: "Turning off the tap saves water for people, animals, and plants!",
+        },
+        {
+          id: "q4",
+          question: "What covers most of Earth?",
+          options: [
+            { id: "grass", label: "Grass", emoji: "🌾" },
+            { id: "water", label: "Water (oceans & seas)", emoji: "🌊" },
+            { id: "sand", label: "Sand only", emoji: "🏖️" },
+            { id: "ice-cream", label: "Ice cream", emoji: "🍦" },
+          ],
+          correctId: "water",
+          explanation: "Earth is called the blue planet because so much is covered by water!",
+        },
+      ],
+    },
+  },
+];

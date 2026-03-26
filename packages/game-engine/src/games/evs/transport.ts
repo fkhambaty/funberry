@@ -1,0 +1,116 @@
+import type { GameConfig } from "../../types";
+
+export const transportGames: GameConfig[] = [
+  {
+    id: "transport-medium-sort",
+    zoneId: "transport",
+    type: "drag_sort",
+    title: "Land, Water, Air",
+    description: "Sort vehicles by where they travel!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction: "Does this vehicle go on land, water, or in the air?",
+      categories: [
+        { id: "land", label: "Land", emoji: "🛣️" },
+        { id: "water", label: "Water", emoji: "🌊" },
+        { id: "air", label: "Air", emoji: "✈️" },
+      ],
+      items: [
+        { id: "car", label: "Car", emoji: "🚗", category: "land" },
+        { id: "train", label: "Train", emoji: "🚂", category: "land" },
+        { id: "boat", label: "Boat", emoji: "⛵", category: "water" },
+        { id: "ship", label: "Ship", emoji: "🚢", category: "water" },
+        { id: "plane", label: "Airplane", emoji: "✈️", category: "air" },
+        { id: "heli", label: "Helicopter", emoji: "🚁", category: "air" },
+        { id: "bus", label: "Bus", emoji: "🚌", category: "land" },
+        { id: "submarine", label: "Submarine", emoji: "🛥️", category: "water" },
+      ],
+    },
+  },
+  {
+    id: "transport-traffic-quiz",
+    zoneId: "transport",
+    type: "picture_quiz",
+    title: "Traffic Rules",
+    description: "Stay safe on roads and crossings!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "What do smart kids do near traffic?",
+      questions: [
+        {
+          id: "q1",
+          question: "The traffic light is RED for people walking. You should…",
+          options: [
+            { id: "run", label: "Run fast across", emoji: "🏃" },
+            { id: "wait", label: "Stop and wait", emoji: "🛑" },
+            { id: "dance", label: "Dance in the road", emoji: "💃" },
+            { id: "hide", label: "Hide under a car", emoji: "🚗" },
+          ],
+          correctId: "wait",
+          explanation: "Red means stop — wait until it is safe and the signal says go!",
+        },
+        {
+          id: "q2",
+          question: "Before crossing a street, you should…",
+          options: [
+            { id: "look", label: "Look left, right, left again", emoji: "👀" },
+            { id: "close-eyes", label: "Close your eyes", emoji: "😑" },
+            { id: "phone", label: "Stare at phone only", emoji: "📱" },
+            { id: "backward", label: "Walk backward without looking", emoji: "↩️" },
+          ],
+          correctId: "look",
+          explanation: "Looking both ways helps you see cars, bikes, and buses coming!",
+        },
+        {
+          id: "q3",
+          question: "Where is the safest place to cross a busy road?",
+          options: [
+            { id: "middle", label: "Middle of the road", emoji: "⬛" },
+            { id: "crosswalk", label: "Zebra crossing with a grown-up", emoji: "🚸" },
+            { id: "between-cars", label: "Between parked cars", emoji: "🅿️" },
+            { id: "highway", label: "High-speed highway", emoji: "🏎️" },
+          ],
+          correctId: "crosswalk",
+          explanation: "Crosswalks and signals are made to help pedestrians cross safely!",
+        },
+        {
+          id: "q4",
+          question: "In a car, little kids should sit…",
+          options: [
+            { id: "roof", label: "On the roof", emoji: "🚙" },
+            { id: "seatbelt", label: "In a proper seat with seat belt / car seat", emoji: "🔒" },
+            { id: "trunk", label: "In the trunk", emoji: "📦" },
+            { id: "driver", label: "On the driver's lap steering", emoji: "🧑‍✈️" },
+          ],
+          correctId: "seatbelt",
+          explanation: "Seat belts and car seats protect you if the car stops suddenly!",
+        },
+      ],
+    },
+  },
+  {
+    id: "transport-journey-sequence",
+    zoneId: "transport",
+    type: "sequence_builder",
+    title: "Journey Steps",
+    description: "Order a fun trip from home to a far place!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction: "What happens first on a long journey?",
+      steps: [
+        { id: "pack", label: "Pack bags & tickets", emoji: "🧳", order: 1 },
+        { id: "leave", label: "Leave home", emoji: "🚪", order: 2 },
+        { id: "vehicle", label: "Get on bus, train, or car", emoji: "🚌", order: 3 },
+        { id: "travel", label: "Travel along the route", emoji: "🛤️", order: 4 },
+        { id: "arrive", label: "Arrive at station or airport", emoji: "🏁", order: 5 },
+        { id: "enjoy", label: "Enjoy your destination!", emoji: "🎉", order: 6 },
+      ],
+    },
+  },
+];
