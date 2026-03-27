@@ -78,7 +78,7 @@ export function TrueFalse({ data, onComplete, accentColor = "#379df9", onNextGam
         playCorrect();
         fireMiniBurst();
         setStreak((s) => s + 1);
-        if (streak >= 2) playStreak();
+        if (streak >= 2) playStreak(streak);
       } else {
         playWrong();
         setStreak(0);
