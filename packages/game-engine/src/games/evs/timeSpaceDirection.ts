@@ -149,4 +149,41 @@ export const timeSpaceDirectionGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "tsd-odd-out",
+    zoneId: "time-space-direction",
+    type: "odd_one_out",
+    title: "Odd Time Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "times of the day", items: [{ id: "morning", label: "Morning", emoji: "🌅" }, { id: "afternoon", label: "Afternoon", emoji: "☀️" }, { id: "night", label: "Night", emoji: "🌙" }, { id: "pizza", label: "Pizza", emoji: "🍕" }], oddId: "pizza", explanation: "Pizza is food — it's not a time of day!" },
+        { id: "r2", category: "directions", items: [{ id: "north", label: "North", emoji: "⬆️" }, { id: "south", label: "South", emoji: "⬇️" }, { id: "east", label: "East", emoji: "➡️" }, { id: "banana", label: "Banana", emoji: "🍌" }], oddId: "banana", explanation: "A banana is a fruit, not a direction!" },
+        { id: "r3", category: "days of the week", items: [{ id: "monday", label: "Monday", emoji: "1️⃣" }, { id: "friday", label: "Friday", emoji: "5️⃣" }, { id: "sunday", label: "Sunday", emoji: "7️⃣" }, { id: "elephant", label: "Elephant", emoji: "🐘" }], oddId: "elephant", explanation: "An elephant is an animal, not a day of the week!" },
+      ],
+    },
+  },
+  {
+    id: "tsd-true-false",
+    zoneId: "time-space-direction",
+    type: "true_false",
+    title: "Time & Direction Facts",
+    description: "True or false?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this fact true or false?",
+      questions: [
+        { id: "tf1", statement: "A clock tells us the time", emoji: "🕐", isTrue: true, explanation: "Yes! Clocks show hours and minutes." },
+        { id: "tf2", statement: "There are 8 days in a week", emoji: "📅", isTrue: false, explanation: "No! There are 7 days in a week." },
+        { id: "tf3", statement: "The sun rises in the east", emoji: "🌅", isTrue: true, explanation: "Correct! The sun always rises in the east." },
+        { id: "tf4", statement: "January comes after December", emoji: "❄️", isTrue: true, explanation: "Yes! January is the first month of the new year." },
+      ],
+    },
+  },
 ];

@@ -113,123 +113,120 @@ export function toggleMute(): boolean {
 }
 
 // ─────────────────────────────────────────────
-// GAME SOUND EFFECTS — tuned for kids aged 4–8
+// GAME SOUND EFFECTS — soft, musical, kid-friendly
+// Piano/flute/guitar tones: gentle attack, warm sustain
 // ─────────────────────────────────────────────
 
-/** Bubble pop tap — soft and satisfying */
+/** 🎹 Piano-style tap — gentle warm pluck */
 export function playTap() {
-  zzfx(0.5, 0.05, 900, 0, 0.01, 0.06, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.01);
+  zzfx(0.3, 0.02, 523, 0.01, 0.04, 0.18, 0, 1.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.05);
 }
 
-/** Bright ding-ding-ding — correct answer */
+/** 🎵 Three-note piano chime — correct answer */
 export function playCorrect() {
-  zzfx(0.6, 0, 523, 0, 0.05, 0.25, 0, 2, 0, 0, 300, 0.04, 0, 0, 0, 0, 0, 0.8, 0.03);
-  setTimeout(() => zzfx(0.5, 0, 659, 0, 0.04, 0.22, 0, 2, 0, 0, 200, 0.03, 0, 0, 0, 0, 0, 0.7, 0.02), 100);
+  zzfx(0.35, 0, 330, 0.01, 0.06, 0.35, 0, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.06);
+  setTimeout(() => zzfx(0.3, 0, 415, 0.01, 0.06, 0.4, 0, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.65, 0.06), 130);
+  setTimeout(() => zzfx(0.25, 0, 523, 0.01, 0.05, 0.5, 0, 1.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.07), 260);
 }
 
-/** Gentle low tuba boop — wrong answer (not scary) */
+/** 🎺 Gentle descending tones — wrong answer, soft not scary */
 export function playWrong() {
-  zzfx(0.35, 0.03, 180, 0.02, 0.06, 0.25, 0, 0.8, -8, 0, 0, 0, 0, 0.4, 0, 0, 0, 0.5, 0.1);
+  zzfx(0.22, 0.01, 330, 0.02, 0.08, 0.3, 0, 0.9, -4, 0, 0, 0, 0, 0, 0, 0, 0, 0.4, 0.08);
+  setTimeout(() => zzfx(0.18, 0.01, 262, 0.02, 0.06, 0.25, 0, 0.9, -3, 0, 0, 0, 0, 0, 0, 0, 0, 0.35, 0.07), 150);
 }
 
-/** Sparkly ping — for each star earned */
+/** 🌟 Bright flute sparkle — star earned */
 export function playStar(pitch = 0) {
-  zzfx(0.55, 0, 880 + pitch * 220, 0, 0.04, 0.45, 0, 2.5, 0, 0, 500, 0.06, 0, 0, 0, 0, 0, 0.85, 0.02);
+  zzfx(0.3, 0, 784 + pitch * 196, 0.02, 0.06, 0.55, 0, 2.0, 0, 0, 400, 0.05, 0, 0, 0, 0, 0, 0.65, 0.06);
 }
 
 /**
- * 🎉 TRIUMPHANT FANFARE — game completion
- * Plays a full ascending musical sequence: C-E-G-C5-G5-C6
- * Sounds like a proper celebration jingle.
+ * 🎹 PIANO CELEBRATION FANFARE — game completion
+ * Ascending C major arpeggio, warm piano sound.
  */
 export function playComplete() {
-  // Ascending arpeggio: C4 E4 G4 C5
-  zzfx(0.65, 0, 262, 0, 0.07, 0.4, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.03);
-  setTimeout(() => zzfx(0.65, 0, 330, 0, 0.06, 0.38, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.02), 120);
-  setTimeout(() => zzfx(0.65, 0, 392, 0, 0.06, 0.36, 0, 1.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.02), 240);
-  setTimeout(() => zzfx(0.8, 0, 523, 0, 0.1, 0.6, 0, 2.2, 0, 0, 400, 0.06, 0, 0, 0, 0, 0, 0.95, 0.04), 400);
-  // Final high sparkle chord
-  setTimeout(() => zzfx(0.5, 0, 784, 0, 0.04, 0.5, 0, 2.5, 0, 0, 600, 0.07, 0, 0, 0, 0, 0, 0.8, 0.02), 650);
-  setTimeout(() => zzfx(0.6, 0, 1046, 0, 0.04, 0.7, 0, 3, 0, 0, 900, 0.09, 0, 0, 0, 0, 0, 0.9, 0.02), 800);
+  zzfx(0.4, 0, 262, 0.01, 0.07, 0.45, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.06);
+  setTimeout(() => zzfx(0.38, 0, 330, 0.01, 0.07, 0.45, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.78, 0.06), 140);
+  setTimeout(() => zzfx(0.36, 0, 392, 0.01, 0.07, 0.45, 0, 1.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.76, 0.06), 280);
+  setTimeout(() => zzfx(0.45, 0, 523, 0.01, 0.1, 0.65, 0, 1.9, 0, 0, 350, 0.05, 0, 0, 0, 0, 0, 0.85, 0.06), 440);
+  setTimeout(() => zzfx(0.25, 0, 784, 0.02, 0.04, 0.5, 0, 2.2, 0, 0, 500, 0.06, 0, 0, 0, 0, 0, 0.6, 0.05), 700);
+  setTimeout(() => zzfx(0.3, 0, 1047, 0.01, 0.04, 0.6, 0, 2.5, 0, 0, 800, 0.08, 0, 0, 0, 0, 0, 0.7, 0.05), 850);
 }
 
 /**
- * 🏆 EPIC VICTORY FANFARE — perfect score / 3 stars
- * A full musical celebration sequence.
+ * 🏆 GRAND PIANO VICTORY — perfect score / 3 stars
  */
 export function playVictory() {
-  // Fanfare pattern: C4-E4-G4-C5 then G5-E5-G5-C6
-  zzfx(0.7, 0, 262, 0, 0.06, 0.35, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.02);
-  setTimeout(() => zzfx(0.7, 0, 330, 0, 0.06, 0.35, 0, 1.8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.02), 100);
-  setTimeout(() => zzfx(0.7, 0, 392, 0, 0.06, 0.35, 0, 1.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.9, 0.02), 200);
-  setTimeout(() => zzfx(0.9, 0, 523, 0, 0.12, 0.7, 0, 2.2, 0, 0, 400, 0.07, 0, 0, 0, 0, 0, 0.95, 0.04), 350);
-  // Second phrase — triumphant resolution
-  setTimeout(() => zzfx(0.7, 0, 659, 0, 0.06, 0.4, 0, 2, 0, 0, 200, 0.04, 0, 0, 0, 0, 0, 0.85, 0.02), 700);
-  setTimeout(() => zzfx(0.7, 0, 784, 0, 0.06, 0.4, 0, 2, 0, 0, 300, 0.04, 0, 0, 0, 0, 0, 0.85, 0.02), 830);
-  setTimeout(() => zzfx(0.95, 0, 1046, 0, 0.14, 1.0, 0, 2.5, 0, 0, 800, 0.1, 0, 0, 0, 0, 0, 0.95, 0.05), 1000);
-  // Sparkle tail
-  setTimeout(() => zzfx(0.45, 0, 1568, 0, 0.03, 0.6, 0, 3, 0, 0, 1200, 0.1, 0, 0, 0, 0, 0, 0.7, 0.02), 1400);
+  zzfx(0.4, 0, 262, 0.01, 0.06, 0.4, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.06);
+  setTimeout(() => zzfx(0.4, 0, 330, 0.01, 0.06, 0.4, 0, 1.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.06), 110);
+  setTimeout(() => zzfx(0.4, 0, 392, 0.01, 0.06, 0.4, 0, 1.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8, 0.06), 220);
+  setTimeout(() => zzfx(0.5, 0, 523, 0.02, 0.12, 0.7, 0, 2.0, 0, 0, 380, 0.06, 0, 0, 0, 0, 0, 0.9, 0.06), 360);
+  setTimeout(() => zzfx(0.38, 0, 659, 0.03, 0.08, 0.45, 0, 1.8, 0, 0, 180, 0.04, 0, 0, 0, 0, 0, 0.78, 0.05), 720);
+  setTimeout(() => zzfx(0.38, 0, 784, 0.03, 0.08, 0.45, 0, 1.9, 0, 0, 260, 0.04, 0, 0, 0, 0, 0, 0.78, 0.05), 870);
+  setTimeout(() => zzfx(0.5, 0, 1047, 0.03, 0.14, 0.9, 0, 2.2, 0, 0, 700, 0.09, 0, 0, 0, 0, 0, 0.9, 0.06), 1050);
+  setTimeout(() => zzfx(0.28, 0, 1568, 0.01, 0.03, 0.55, 0, 2.8, 0, 0, 1100, 0.09, 0, 0, 0, 0, 0, 0.6, 0.05), 1450);
 }
 
-/** 🃏 Card flip whoosh */
+/** 🪗 Gentle card flip — soft whoosh */
 export function playFlip() {
-  zzfx(0.25, 0.1, 320, 0, 0.01, 0.1, 3, 0.5, 45, 0, 0, 0, 0, 1.2, 0, 0, 0, 0.35, 0.01);
+  zzfx(0.18, 0.06, 280, 0, 0.02, 0.12, 3, 0.4, 30, 0, 0, 0, 0, 0.8, 0, 0, 0, 0.28, 0.02);
 }
 
-/** 🔒 Satisfying click-lock on matched pair */
+/** 🎵 Warm piano two-note match sound */
 export function playMatch() {
-  zzfx(0.5, 0, 1050, 0, 0.02, 0.18, 0, 2.2, 0, 0, 400, 0.03, 0, 0, 0, 0, 0, 0.7, 0.02);
-  setTimeout(() => zzfx(0.4, 0, 1320, 0, 0.02, 0.15, 0, 2.5, 0, 0, 300, 0.02, 0, 0, 0, 0, 0, 0.6, 0.01), 80);
+  zzfx(0.35, 0, 523, 0.01, 0.04, 0.3, 0, 1.8, 0, 0, 350, 0.03, 0, 0, 0, 0, 0, 0.65, 0.05);
+  setTimeout(() => zzfx(0.3, 0, 659, 0.01, 0.04, 0.32, 0, 2.0, 0, 0, 280, 0.03, 0, 0, 0, 0, 0, 0.6, 0.05), 90);
 }
 
-/** 🎯 Soft thud on item drop into bucket */
+/** 🎯 Soft plop — item drop into bucket */
 export function playDrop() {
-  zzfx(0.4, 0.04, 140, 0.01, 0.04, 0.12, 0, 0.5, -6, 0, 0, 0, 0, 0.3, 0, 0, 0, 0.45, 0.06);
+  zzfx(0.28, 0.02, 220, 0.02, 0.05, 0.18, 0, 0.6, -4, 0, 0, 0, 0, 0.15, 0, 0, 0, 0.38, 0.07);
 }
 
-/** 🔥 Escalating pitch for consecutive correct answers */
+/** 🎶 Rising musical notes — streak */
 export function playStreak(count: number) {
-  const freq = 440 + Math.min(count, 10) * 90;
-  zzfx(0.5, 0, freq, 0, 0.04, 0.25, 0, 2.2, 0, 0, 280, 0.03, 0, 0, 0, 0, 0, 0.75, 0.02);
+  const notes = [523, 587, 659, 698, 784, 880, 988, 1047];
+  const note = notes[Math.min(count - 2, notes.length - 1)] ?? 1047;
+  zzfx(0.32, 0, note, 0.01, 0.05, 0.3, 0, 1.8, 0, 0, 240, 0.03, 0, 0, 0, 0, 0, 0.62, 0.05);
 }
 
-/** 📖 Page turn swoosh for stories */
+/** 📖 Soft page turn for stories */
 export function playPageTurn() {
-  zzfx(0.18, 0.1, 110, 0, 0.04, 0.14, 3, 0.3, 32, 0, 0, 0, 0, 1.6, 0, 0, 0, 0.22, 0.02);
+  zzfx(0.14, 0.06, 120, 0, 0.04, 0.12, 3, 0.25, 24, 0, 0, 0, 0, 1.0, 0, 0, 0, 0.18, 0.02);
 }
 
-/** 🎨 Paint splash for color activity */
+/** 🎨 Soft paint splash — color activity */
 export function playPaint() {
-  zzfx(0.38, 0.18, 270, 0.01, 0.06, 0.18, 3, 1.1, 0, 0, 0, 0, 0, 2.2, 0, 0, 0, 0.45, 0.06);
+  zzfx(0.26, 0.08, 330, 0.01, 0.06, 0.2, 0, 1.0, 0, 0, 0, 0, 0, 1.2, 0, 0, 0, 0.38, 0.06);
 }
 
-/** ✨ Sparkle glitter effect */
+/** ✨ Flute sparkle effect */
 export function playSparkle() {
-  zzfx(0.38, 0.08, 1600, 0, 0.02, 0.25, 0, 2.5, 0, 0, 700, 0.06, 0, 0, 0, 0, 0.02, 0.55, 0.02);
+  zzfx(0.26, 0.04, 1320, 0.01, 0.02, 0.3, 0, 2.2, 0, 0, 600, 0.05, 0, 0, 0, 0, 0, 0.45, 0.04);
 }
 
-/** 🫧 Bubble pop for BubblePop game */
+/** 🫧 Light bubble pop for BubblePop game */
 export function playBubblePop() {
-  zzfx(0.5, 0.02, 700, 0, 0.01, 0.12, 0, 1.5, -20, 0, 0, 0, 0, 0.5, 0, 0, 0, 0.6, 0.02);
+  zzfx(0.3, 0.01, 660, 0, 0.01, 0.1, 0, 1.4, -14, 0, 0, 0, 0, 0.3, 0, 0, 0, 0.5, 0.02);
 }
 
-/** ⭐ Collect / catch item sound */
+/** ⭐ Collect / catch item — bright piano notes */
 export function playCollect() {
-  zzfx(0.55, 0, 660, 0, 0.03, 0.2, 0, 2, 0, 0, 250, 0.04, 0, 0, 0, 0, 0, 0.8, 0.02);
-  setTimeout(() => zzfx(0.45, 0, 880, 0, 0.02, 0.18, 0, 2.5, 0, 0, 200, 0.03, 0, 0, 0, 0, 0, 0.7, 0.01), 90);
+  zzfx(0.35, 0, 659, 0.01, 0.04, 0.28, 0, 1.8, 0, 0, 220, 0.04, 0, 0, 0, 0, 0, 0.68, 0.04);
+  setTimeout(() => zzfx(0.28, 0, 880, 0.01, 0.03, 0.25, 0, 2.0, 0, 0, 180, 0.03, 0, 0, 0, 0, 0, 0.6, 0.04), 95);
 }
 
-/** 💥 Wrong item / miss sound */
+/** 💨 Soft miss — gentle descend, not punishing */
 export function playMiss() {
-  zzfx(0.4, 0.08, 200, 0.01, 0.04, 0.22, 0, 0.6, -12, 0, 0, 0, 0, 0.6, 0, 0, 0, 0.5, 0.08);
+  zzfx(0.25, 0.04, 262, 0.02, 0.05, 0.22, 0, 0.7, -8, 0, 0, 0, 0, 0.3, 0, 0, 0, 0.38, 0.07);
 }
 
-/** 🕹️ Jump sound for platform games */
+/** 🕹️ Bouncy jump — light piano bounce */
 export function playJump() {
-  zzfx(0.4, 0.04, 300, 0, 0.05, 0.3, 0, 1.2, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.03);
+  zzfx(0.28, 0.02, 392, 0, 0.04, 0.22, 0, 1.1, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.04);
 }
 
-/** ⏰ Tick for timer countdown warning */
+/** ⏰ Gentle tick — timer warning */
 export function playTick() {
-  zzfx(0.3, 0, 1200, 0, 0.005, 0.04, 0, 1.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.005);
+  zzfx(0.2, 0, 880, 0, 0.004, 0.04, 0, 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.38, 0.005);
 }

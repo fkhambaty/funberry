@@ -12,6 +12,7 @@ export interface SpotDifferenceProps {
   data: SpotDifferenceData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 function parseSceneCells(image: string): string[] {
@@ -89,6 +90,7 @@ export function SpotDifference({
   data,
   onComplete,
   accentColor = "#379df9",
+  onNextGame,
 }: SpotDifferenceProps) {
   const { instruction, imageA, imageB, differences } = data;
   const [foundIds, setFoundIds] = useState<Set<string>>(new Set());
@@ -102,7 +104,7 @@ export function SpotDifference({
 
   const { state, start, answerQuestion, reset, isPlaying, isCompleted } =
     useGameState({
-      totalQuestions: differences.length,
+      totalQuestions: Math.max(differences.length, 1),
       onComplete,
     });
 
@@ -242,6 +244,7 @@ export function SpotDifference({
         maxScore={state.maxScore}
         accentColor={accentColor}
         onPlayAgain={handlePlayAgain}
+        onNextGame={onNextGame}
       />
     );
   }
@@ -502,7 +505,12 @@ export function SpotDifference({
               x: [0, -6, 6, -4, 4, 0],
             }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            transition={{
+              opacity: { duration: 0.2 },
+              y: { duration: 0.25, ease: "easeOut" },
+              scale: { duration: 0.25, ease: "easeOut" },
+              x: { duration: 0.5, ease: "easeInOut" },
+            }}
             style={{
               marginTop: 16,
               padding: "14px 20px",

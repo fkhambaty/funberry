@@ -113,4 +113,42 @@ export const transportGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "transport-odd-out",
+    zoneId: "transport",
+    type: "odd_one_out",
+    title: "Odd Vehicle Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "road vehicles", items: [{ id: "car", label: "Car", emoji: "🚗" }, { id: "bus", label: "Bus", emoji: "🚌" }, { id: "truck", label: "Truck", emoji: "🚛" }, { id: "ship", label: "Ship", emoji: "🚢" }], oddId: "ship", explanation: "A ship travels on water, not on roads!" },
+        { id: "r2", category: "things that fly", items: [{ id: "plane", label: "Airplane", emoji: "✈️" }, { id: "helicopter", label: "Helicopter", emoji: "🚁" }, { id: "rocket", label: "Rocket", emoji: "🚀" }, { id: "bicycle", label: "Bicycle", emoji: "🚲" }], oddId: "bicycle", explanation: "Bicycles ride on the ground — they can't fly!" },
+        { id: "r3", category: "things with wheels", items: [{ id: "car2", label: "Car", emoji: "🚗" }, { id: "bike", label: "Bicycle", emoji: "🚲" }, { id: "skateboard", label: "Skateboard", emoji: "🛹" }, { id: "boat", label: "Boat", emoji: "⛵" }], oddId: "boat", explanation: "Boats float on water — they don't have wheels!" },
+      ],
+    },
+  },
+  {
+    id: "transport-true-false",
+    zoneId: "transport",
+    type: "true_false",
+    title: "Transport Facts: True or False?",
+    description: "How much do you know about transport?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this transport fact true or false?",
+      questions: [
+        { id: "tf1", statement: "Airplanes fly in the sky", emoji: "✈️", isTrue: true, explanation: "Yes! Airplanes carry people high above the clouds." },
+        { id: "tf2", statement: "Boats travel on roads", emoji: "⛵", isTrue: false, explanation: "No! Boats travel on water." },
+        { id: "tf3", statement: "A bicycle has two wheels", emoji: "🚲", isTrue: true, explanation: "Correct! 'Bi' means two, and 'cycle' means wheels." },
+        { id: "tf4", statement: "Trains run on tracks", emoji: "🚂", isTrue: true, explanation: "Yes! Trains follow metal tracks to go from place to place." },
+        { id: "tf5", statement: "Submarines fly in the air", emoji: "🚢", isTrue: false, explanation: "No! Submarines go deep under the water." },
+      ],
+    },
+  },
 ];

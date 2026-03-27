@@ -12,10 +12,18 @@ export interface PictureQuizProps {
   data: PictureQuizData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
-export function PictureQuiz({ data, onComplete, accentColor = "#379df9" }: PictureQuizProps) {
+function shuffleQuestions(qs: PictureQuizData["questions"]) {
+  return [...qs]
+    .sort(() => Math.random() - 0.5)
+    .map((q) => ({ ...q, options: [...q.options].sort(() => Math.random() - 0.5) }));
+}
+
+export function PictureQuiz({ data, onComplete, accentColor = "#379df9", onNextGame }: PictureQuizProps) {
   const { questions } = data;
+  const [shuffled, setShuffled] = useState(() => shuffleQuestions(questions));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -23,9 +31,9 @@ export function PictureQuiz({ data, onComplete, accentColor = "#379df9" }: Pictu
   const [questionKey, setQuestionKey] = useState(0);
 
   const { state, start, answerQuestion, reset, isPlaying, isCompleted } =
-    useGameState({ totalQuestions: questions.length, onComplete });
+    useGameState({ totalQuestions: Math.max(shuffled.length, 1), onComplete });
 
-  const currentQ = questions[state.currentQuestion];
+  const currentQ = shuffled[state.currentQuestion] ?? shuffled[0];
 
   const handleSelect = useCallback(
     (optionId: string) => {
@@ -84,7 +92,7 @@ export function PictureQuiz({ data, onComplete, accentColor = "#379df9" }: Pictu
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => { playTap(); start(); }}
+          onClick={() => { playTap(); setShuffled(shuffleQuestions(questions)); start(); }}
           style={{
             backgroundColor: accentColor,
             color: "white",
@@ -111,7 +119,8 @@ export function PictureQuiz({ data, onComplete, accentColor = "#379df9" }: Pictu
         score={state.score}
         maxScore={state.maxScore}
         accentColor={accentColor}
-        onPlayAgain={() => { playTap(); reset(); setStreak(0); setQuestionKey(0); }}
+        onPlayAgain={() => { playTap(); setShuffled(shuffleQuestions(questions)); reset(); setStreak(0); setQuestionKey(0); }}
+        onNextGame={onNextGame}
       />
     );
   }

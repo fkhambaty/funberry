@@ -11,13 +11,13 @@ const GLITTER = ["#ffd700", "#ff69b4", "#00ffff", "#ff6347", "#7fffd4", "#dda0dd
 export function fireConfetti() {
   if (typeof window === "undefined") return;
   confetti({
-    particleCount: 55,
-    spread: 75,
+    particleCount: 30,
+    spread: 60,
     origin: { y: 0.65 },
     colors: BRAND_COLORS,
-    ticks: 140,
-    gravity: 1.1,
-    scalar: 1.0,
+    ticks: 100,
+    gravity: 1.3,
+    scalar: 0.85,
     disableForReducedMotion: true,
   });
 }
@@ -25,146 +25,60 @@ export function fireConfetti() {
 /** Gold star-shaped confetti explosion — on game completion */
 export function fireStarExplosion() {
   if (typeof window === "undefined") return;
-  const starShape = confetti.shapeFromText({ text: "⭐", scalar: 2 });
-  const heartShape = confetti.shapeFromText({ text: "💖", scalar: 2 });
+  const starShape = confetti.shapeFromText({ text: "⭐", scalar: 1.5 });
+
+  confetti({
+    particleCount: 12,
+    spread: 80,
+    origin: { y: 0.45 },
+    shapes: [starShape],
+    scalar: 2,
+    ticks: 120,
+    gravity: 0.9,
+    disableForReducedMotion: true,
+  });
 
   confetti({
     particleCount: 30,
-    spread: 120,
-    origin: { y: 0.45 },
-    shapes: [starShape, heartShape],
-    scalar: 2.5,
-    ticks: 200,
-    gravity: 0.7,
-    disableForReducedMotion: true,
-  });
-
-  confetti({
-    particleCount: 80,
-    spread: 100,
+    spread: 70,
     origin: { y: 0.5 },
     colors: GOLD,
-    ticks: 200,
-    gravity: 0.75,
-    scalar: 1.1,
-    disableForReducedMotion: true,
-  });
-}
-
-/** Multi-burst fireworks — on 3-star completion (more intense) */
-export function fireFireworks() {
-  if (typeof window === "undefined") return;
-
-  const duration = 3500;
-  const end = Date.now() + duration;
-
-  const frame = () => {
-    confetti({
-      particleCount: 8,
-      angle: 60,
-      spread: 65,
-      origin: { x: 0, y: 0.55 },
-      colors: BRAND_COLORS,
-      ticks: 180,
-      disableForReducedMotion: true,
-    });
-    confetti({
-      particleCount: 8,
-      angle: 120,
-      spread: 65,
-      origin: { x: 1, y: 0.55 },
-      colors: BRAND_COLORS,
-      ticks: 180,
-      disableForReducedMotion: true,
-    });
-    confetti({
-      particleCount: 5,
-      angle: 90,
-      spread: 80,
-      origin: { x: 0.5, y: 0.2 },
-      colors: RAINBOW,
-      ticks: 200,
-      gravity: 0.6,
-      disableForReducedMotion: true,
-    });
-
-    if (Date.now() < end) requestAnimationFrame(frame);
-  };
-  frame();
-}
-
-/**
- * 🌈✨ EPIC GLITTER STORM — full-screen 4-second celebration
- * Designed to be the most exciting thing a child has ever seen.
- * Used for perfect scores and special achievements.
- */
-export function fireGlitterStorm() {
-  if (typeof window === "undefined") return;
-
-  const duration = 4500;
-  const end = Date.now() + duration;
-
-  const starShape = confetti.shapeFromText({ text: "⭐", scalar: 1.5 });
-  const heartShape = confetti.shapeFromText({ text: "💖", scalar: 1.5 });
-  const diamondShape = confetti.shapeFromText({ text: "💎", scalar: 1.5 });
-  const balloonShape = confetti.shapeFromText({ text: "🎈", scalar: 1.5 });
-
-  // Initial huge burst from center
-  confetti({
-    particleCount: 150,
-    spread: 180,
-    origin: { x: 0.5, y: 0.4 },
-    colors: GLITTER,
-    ticks: 300,
-    gravity: 0.5,
+    ticks: 120,
+    gravity: 1,
     scalar: 0.9,
     disableForReducedMotion: true,
   });
+}
 
-  confetti({
-    particleCount: 40,
-    spread: 160,
-    origin: { x: 0.5, y: 0.35 },
-    shapes: [starShape, heartShape, diamondShape, balloonShape],
-    scalar: 2.5,
-    ticks: 350,
-    gravity: 0.4,
-    disableForReducedMotion: true,
-  });
+/** Brief side-burst fireworks — on 3-star completion */
+export function fireFireworks() {
+  if (typeof window === "undefined") return;
+
+  const duration = 1200;
+  const end = Date.now() + duration;
+  let frameCount = 0;
 
   const frame = () => {
-    // Sides burst
+    frameCount++;
+    if (frameCount % 4 !== 0) { if (Date.now() < end) requestAnimationFrame(frame); return; }
     confetti({
-      particleCount: 10,
-      angle: 65,
-      spread: 80,
-      origin: { x: 0, y: Math.random() * 0.7 },
-      colors: GLITTER,
-      ticks: 250,
-      scalar: 0.85,
-      gravity: 0.6,
+      particleCount: 4,
+      angle: 60,
+      spread: 50,
+      origin: { x: 0, y: 0.55 },
+      colors: BRAND_COLORS,
+      ticks: 100,
+      gravity: 1.2,
       disableForReducedMotion: true,
     });
     confetti({
-      particleCount: 10,
-      angle: 115,
-      spread: 80,
-      origin: { x: 1, y: Math.random() * 0.7 },
-      colors: GLITTER,
-      ticks: 250,
-      scalar: 0.85,
-      gravity: 0.6,
-      disableForReducedMotion: true,
-    });
-    // Emoji shapes from top
-    confetti({
-      particleCount: 5,
-      spread: 130,
-      origin: { x: Math.random(), y: 0 },
-      shapes: [starShape, heartShape],
-      scalar: 2.2,
-      ticks: 300,
-      gravity: 0.5,
+      particleCount: 4,
+      angle: 120,
+      spread: 50,
+      origin: { x: 1, y: 0.55 },
+      colors: BRAND_COLORS,
+      ticks: 100,
+      gravity: 1.2,
       disableForReducedMotion: true,
     });
 
@@ -173,40 +87,69 @@ export function fireGlitterStorm() {
   frame();
 }
 
-/** 🌈 Rainbow arc across the screen */
+/** Brief glitter accent — for perfect scores */
+export function fireGlitterStorm() {
+  if (typeof window === "undefined") return;
+
+  const starShape = confetti.shapeFromText({ text: "⭐", scalar: 1.2 });
+
+  confetti({
+    particleCount: 40,
+    spread: 120,
+    origin: { x: 0.5, y: 0.4 },
+    colors: GLITTER,
+    ticks: 140,
+    gravity: 0.8,
+    scalar: 0.8,
+    disableForReducedMotion: true,
+  });
+
+  confetti({
+    particleCount: 10,
+    spread: 100,
+    origin: { x: 0.5, y: 0.35 },
+    shapes: [starShape],
+    scalar: 2,
+    ticks: 140,
+    gravity: 0.7,
+    disableForReducedMotion: true,
+  });
+}
+
+/** Subtle rainbow arc */
 export function fireRainbow() {
   if (typeof window === "undefined") return;
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 5; i++) {
     setTimeout(() => {
       confetti({
-        particleCount: 25,
+        particleCount: 8,
         angle: 90,
-        spread: 20,
-        origin: { x: 0.1 + i * 0.13, y: 0.5 },
+        spread: 15,
+        origin: { x: 0.15 + i * 0.175, y: 0.5 },
         colors: [RAINBOW[i]],
-        ticks: 220,
-        gravity: 0.7,
-        startVelocity: 35,
+        ticks: 100,
+        gravity: 1,
+        startVelocity: 25,
         disableForReducedMotion: true,
       });
-    }, i * 80);
+    }, i * 60);
   }
 }
 
 /** Zone-themed emoji rain */
 export function fireEmojiBurst(emojis: string[]) {
   if (typeof window === "undefined" || !emojis.length) return;
-  const shapes = emojis.map((e) => confetti.shapeFromText({ text: e, scalar: 2 }));
+  const shapes = emojis.map((e) => confetti.shapeFromText({ text: e, scalar: 1.5 }));
 
   confetti({
-    particleCount: 30,
-    spread: 180,
-    origin: { y: 0.25 },
+    particleCount: 12,
+    spread: 120,
+    origin: { y: 0.3 },
     shapes,
-    scalar: 2.8,
-    ticks: 220,
-    gravity: 0.55,
+    scalar: 2,
+    ticks: 120,
+    gravity: 0.8,
     disableForReducedMotion: true,
   });
 }
@@ -215,14 +158,14 @@ export function fireEmojiBurst(emojis: string[]) {
 export function fireSparkleAt(x: number, y: number) {
   if (typeof window === "undefined") return;
   confetti({
-    particleCount: 20,
-    spread: 50,
-    startVelocity: 18,
+    particleCount: 10,
+    spread: 40,
+    startVelocity: 14,
     origin: { x: x / window.innerWidth, y: y / window.innerHeight },
     colors: GOLD,
-    ticks: 80,
-    gravity: 1.4,
-    scalar: 0.65,
+    ticks: 60,
+    gravity: 1.6,
+    scalar: 0.55,
     disableForReducedMotion: true,
   });
 }
@@ -231,13 +174,13 @@ export function fireSparkleAt(x: number, y: number) {
 export function fireMiniBurst() {
   if (typeof window === "undefined") return;
   confetti({
-    particleCount: 25,
-    spread: 50,
+    particleCount: 12,
+    spread: 40,
     origin: { y: 0.62 },
     colors: ["#22c55e", "#86efac", "#fbbf24", "#a78bfa"],
-    ticks: 80,
-    gravity: 1.4,
-    scalar: 0.75,
+    ticks: 60,
+    gravity: 1.6,
+    scalar: 0.6,
     disableForReducedMotion: true,
   });
 }
@@ -246,14 +189,14 @@ export function fireMiniBurst() {
 export function fireBubbleBurst(x: number, y: number, color: string) {
   if (typeof window === "undefined") return;
   confetti({
-    particleCount: 18,
+    particleCount: 8,
     spread: 360,
-    startVelocity: 12,
+    startVelocity: 10,
     origin: { x: x / window.innerWidth, y: y / window.innerHeight },
     colors: [color, "#ffffff", "#ffd700"],
-    ticks: 70,
-    gravity: 1.6,
-    scalar: 0.55,
+    ticks: 50,
+    gravity: 1.8,
+    scalar: 0.45,
     disableForReducedMotion: true,
   });
 }

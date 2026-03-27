@@ -4,7 +4,14 @@ import type { Child, Parent, Progress, Unlock, Reward } from "./types";
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
 export async function signUp(email: string, password: string, name: string, pin?: string) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const siteUrl =
+    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
+    "https://funberry-web.vercel.app";
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: `${siteUrl}/dashboard` },
+  });
   if (error) throw error;
   if (data.user) {
     await supabase.from("parents").insert({
@@ -57,6 +64,17 @@ export async function updateParentPin(pin: string) {
   if (error) throw error;
 }
 
+export async function verifyParentPin(pin: string): Promise<boolean> {
+  const parent = await getParent();
+  if (!parent || !parent.pin) return false;
+  return parent.pin === pin;
+}
+
+export async function updateParentPassword(newPassword: string) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw error;
+}
+
 // ── Children ──────────────────────────────────────────────────────────────────
 
 export async function getChildren(): Promise<Child[]> {
@@ -88,6 +106,26 @@ export async function addChild(
       age,
       ...(photoUrl != null ? { photo_url: photoUrl } : {}),
     } as never)
+    .select()
+    .single();
+  if (error) throw error;
+  return data as Child;
+}
+
+export async function updateChild(
+  childId: string,
+  name: string,
+  age: number,
+  photoUrl?: string | null
+): Promise<Child> {
+  const { data, error } = await supabase
+    .from("children")
+    .update({
+      name,
+      age,
+      ...(photoUrl !== undefined ? { photo_url: photoUrl } : {}),
+    } as never)
+    .eq("id", childId)
     .select()
     .single();
   if (error) throw error;
@@ -161,14 +199,10 @@ export async function saveProgress(
 
   const existing = existingRaw as ProgressRow | null;
 
-  const rpc = (supabase as unknown as {
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ error: unknown }>;
-  }).rpc;
-
   if (existing) {
     const prevStars = existing.stars_earned ?? 0;
     const newBestStars = Math.max(prevStars, starsEarned);
-    const starDelta = Math.max(0, starsEarned - prevStars); // only credit improvement
+    const starDelta = Math.max(0, starsEarned - prevStars);
 
     const { data, error } = await supabase
       .from("progress")
@@ -187,10 +221,10 @@ export async function saveProgress(
     if (error) throw error;
 
     if (starDelta > 0) {
-      await rpc.call(supabase, "increment_stars", {
+      await supabase.rpc("increment_stars" as never, {
         p_child_id: childId,
         p_stars: starDelta,
-      });
+      } as never);
     }
 
     return data as Progress;
@@ -215,10 +249,10 @@ export async function saveProgress(
   if (error) throw error;
 
   if (starsEarned > 0) {
-    await rpc.call(supabase, "increment_stars", {
+    await supabase.rpc("increment_stars" as never, {
       p_child_id: childId,
       p_stars: starsEarned,
-    });
+    } as never);
   }
 
   return data as Progress;
@@ -275,6 +309,45 @@ export async function awardReward(
     .single();
   if (error) throw error;
   return data as Reward;
+}
+
+// ── Leaderboard ──────────────────────────────────────────────────────────────
+
+export interface LeaderboardEntry {
+  child_id: string;
+  child_name: string;
+  photo_url: string | null;
+  total_stars: number;
+  rank: number;
+}
+
+export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
+  const { data, error } = await supabase
+    .from("children")
+    .select("id, name, photo_url, total_stars")
+    .gt("total_stars", 0)
+    .order("total_stars", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) return [];
+
+  return (data as { id: string; name: string; photo_url: string | null; total_stars: number }[]).map(
+    (row, i) => ({
+      child_id: row.id,
+      child_name: row.name,
+      photo_url: row.photo_url,
+      total_stars: row.total_stars,
+      rank: i + 1,
+    })
+  );
+}
+
+export async function getChildRank(childId: string): Promise<{ rank: number; total: number } | null> {
+  const board = await getLeaderboard(200);
+  const total = board.length;
+  const entry = board.find((e) => e.child_id === childId);
+  if (!entry) return null;
+  return { rank: entry.rank, total };
 }
 
 // ── Zone / Game data (DB-backed) ──────────────────────────────────────────────

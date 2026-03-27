@@ -19,6 +19,7 @@ export interface MemoryMatchProps {
   data: MemoryMatchData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 interface Card {
@@ -60,21 +61,11 @@ const wiggleVariants = {
   },
 };
 
-const breatheVariants = {
-  breathe: (i: number) => ({
-    scale: [1, 1.04, 1],
-    transition: {
-      repeat: Infinity,
-      duration: 2.8 + i * 0.15,
-      ease: "easeInOut" as const,
-    },
-  }),
-};
-
 export function MemoryMatch({
   data,
   onComplete,
   accentColor = "#379df9",
+  onNextGame,
 }: MemoryMatchProps) {
   const { pairs, instruction } = data;
 
@@ -172,7 +163,10 @@ export function MemoryMatch({
               const sc = computeScore(newAttempts);
               const gameResult = buildGameResult(sc, pairs.length, elapsed);
               setResult(gameResult);
-              setTimeout(() => setPhase("complete"), 800);
+              setTimeout(() => {
+                setPhase("complete");
+                onComplete(gameResult);
+              }, 800);
             }
 
             lockRef.current = false;
@@ -310,6 +304,7 @@ export function MemoryMatch({
         maxScore={result.maxScore}
         accentColor={accentColor}
         onPlayAgain={handleStart}
+        onNextGame={onNextGame}
       />
     );
   }
@@ -413,25 +408,17 @@ export function MemoryMatch({
           return (
             <motion.button
               key={card.uid}
-              initial={{ opacity: 0, scale: 0, rotateY: 180 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={
                 isMismatch
                   ? "wiggle"
-                  : !isFaceUp && !isMatched
-                    ? "breathe"
-                    : { opacity: 1, scale: 1, rotateY: isFaceUp ? 0 : 180 }
+                  : { opacity: 1, scale: 1 }
               }
               transition={{
-                opacity: { delay: i * 0.05, duration: 0.3 },
-                scale: {
-                  delay: i * 0.05,
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 15,
-                },
-                rotateY: { duration: 0.4, ease: "easeOut" as const },
+                opacity: { delay: i * 0.04, duration: 0.25 },
+                scale: { delay: i * 0.04, duration: 0.3, ease: "easeOut" },
               }}
-              variants={isMismatch ? wiggleVariants : !isFaceUp ? breatheVariants : undefined}
+              variants={isMismatch ? wiggleVariants : undefined}
               custom={i}
               whileHover={
                 !isFaceUp && !isMatched && !lockRef.current
@@ -464,6 +451,7 @@ export function MemoryMatch({
                       ? "linear-gradient(135deg, #ffffff, #f0f7ff)"
                       : "linear-gradient(135deg, #f3f0ff, #ede9fe)",
                 cursor: isMatched ? "default" : "pointer",
+                touchAction: "manipulation",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -475,8 +463,6 @@ export function MemoryMatch({
                     : "0 4px 12px rgba(0,0,0,0.05)",
                 position: "relative",
                 overflow: "hidden",
-                transformStyle: "preserve-3d",
-                perspective: "600px",
               }}
             >
               {/* Green pulse ring on match */}
@@ -501,12 +487,11 @@ export function MemoryMatch({
               <motion.span
                 animate={
                   isGlowing
-                    ? { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
+                    ? { scale: [1, 1.2, 1], rotate: [0, 10, 0] }
                     : {}
                 }
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
                 style={{
-                  backfaceVisibility: "hidden",
                   display: "block",
                   userSelect: "none",
                 }}

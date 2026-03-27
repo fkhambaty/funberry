@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { playStar, playVictory, playComplete } from "../core/sound";
-import { fireStarExplosion, fireFireworks, fireGlitterStorm, fireRainbow } from "../core/confetti";
+import { fireStarExplosion, fireFireworks, fireGlitterStorm } from "../core/confetti";
 import { getEncouragementMessage } from "../core/scoring";
+import { useRankInfo } from "../core/RankContext";
 
 interface StarRevealProps {
   starsEarned: number;
@@ -13,6 +14,8 @@ interface StarRevealProps {
   accentColor?: string;
   characterEmoji?: string;
   onPlayAgain: () => void;
+  onNextGame?: () => void;
+  rankInfo?: { rank: number; total: number } | null;
 }
 
 const GLITTER_COLORS = [
@@ -27,18 +30,17 @@ function GlitterParticle({ color, delay, x }: { color: string; delay: number; x:
   return (
     <motion.div
       initial={{ y: -20, x, opacity: 1, rotate: 0, scale: 1 }}
-      animate={{ y: "110vh", opacity: [1, 1, 0.8, 0], rotate: 720, scale: [1, 1.3, 0.5] }}
-      transition={{ duration: 2.5 + Math.random() * 2, delay, ease: "linear", repeat: Infinity, repeatDelay: Math.random() * 2 }}
+      animate={{ y: "110vh", opacity: [1, 0.8, 0], rotate: 360, scale: [1, 0.6] }}
+      transition={{ duration: 2 + Math.random() * 1.5, delay, ease: "linear" }}
       style={{
         position: "fixed",
         top: 0,
-        width: 8 + Math.random() * 8,
-        height: 8 + Math.random() * 8,
+        width: 6 + Math.random() * 5,
+        height: 6 + Math.random() * 5,
         borderRadius: Math.random() > 0.5 ? "50%" : 2,
         backgroundColor: color,
         pointerEvents: "none",
         zIndex: 100,
-        boxShadow: `0 0 6px ${color}`,
       }}
     />
   );
@@ -51,7 +53,11 @@ export function StarReveal({
   accentColor = "#379df9",
   characterEmoji = "🦊",
   onPlayAgain,
+  onNextGame,
+  rankInfo: rankInfoProp,
 }: StarRevealProps) {
+  const contextRank = useRankInfo();
+  const rankInfo = rankInfoProp ?? contextRank;
   const [phase, setPhase] = useState(0);
   const [wordIdx, setWordIdx] = useState(0);
   const isPerfect = starsEarned >= 3;
@@ -73,16 +79,14 @@ export function StarReveal({
       timers.push(setTimeout(() => playStar(i), 500 + i * 380));
     }
 
-    // Confetti after stars
+    // Single confetti burst after stars
     timers.push(
       setTimeout(() => {
         fireStarExplosion();
         if (isPerfect) {
-          setTimeout(() => fireGlitterStorm(), 300);
-          setTimeout(() => fireFireworks(), 600);
-          setTimeout(() => fireRainbow(), 1200);
+          setTimeout(() => fireGlitterStorm(), 400);
         } else if (isGood) {
-          setTimeout(() => fireFireworks(), 400);
+          setTimeout(() => fireFireworks(), 300);
         }
       }, 500 + starsEarned * 380 + 200)
     );
@@ -91,11 +95,11 @@ export function StarReveal({
     timers.push(setTimeout(() => setPhase(1), 300));
     timers.push(setTimeout(() => setPhase(2), 600 + starsEarned * 380));
 
-    // Cycle celebration words
+    // Cycle celebration words (brief)
     const wordInterval = setInterval(() => {
       setWordIdx((i) => (i + 1) % celebWords.length);
-    }, 1200);
-    timers.push(setTimeout(() => clearInterval(wordInterval), 6000));
+    }, 1400);
+    timers.push(setTimeout(() => clearInterval(wordInterval), 3500));
 
     return () => {
       timers.forEach(clearTimeout);
@@ -103,7 +107,7 @@ export function StarReveal({
     };
   }, [starsEarned, isPerfect, isGood, celebWords.length]);
 
-  const glitterCount = isPerfect ? 30 : isGood ? 15 : 8;
+  const glitterCount = isPerfect ? 12 : isGood ? 6 : 0;
 
   return (
     <div style={{ position: "relative", overflow: "hidden", minHeight: "60vh" }}>
@@ -134,16 +138,14 @@ export function StarReveal({
         <motion.div
           initial={{ scale: 0, rotate: -20 }}
           animate={phase >= 1 ? {
-            scale: [1, 1.3, 0.9, 1.1, 1],
-            rotate: [0, -15, 15, -8, 0],
-            y: [0, -20, -10, -25, 0],
+            scale: [0, 1.3, 1],
+            rotate: [0, -15, 0],
+            y: [0, -20, 0],
           } : { scale: 0 }}
           transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 10,
+            duration: 0.8,
+            ease: "easeOut",
             delay: 0.1,
-            duration: 1.2,
           }}
           style={{ fontSize: 80, marginBottom: 8, display: "inline-block" }}
         >
@@ -220,20 +222,14 @@ export function StarReveal({
               animate={
                 s <= starsEarned
                   ? {
-                      scale: [1, 1.4, 0.9, 1.2, 1],
-                      rotate: [0, -15, 15, -5, 0],
-                      filter: [
-                        "drop-shadow(0 0 0px #fbbf24)",
-                        "drop-shadow(0 0 20px #fbbf24)",
-                        "drop-shadow(0 0 10px #fbbf24)",
-                      ],
+                      scale: [0, 1.3, 1],
+                      rotate: [0, -10, 0],
                     }
                   : { scale: 0.7, rotate: 0 }
               }
               transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 10,
+                duration: 0.5,
+                ease: "easeOut",
                 delay: 0.5 + s * 0.38,
               }}
               style={{
@@ -262,41 +258,110 @@ export function StarReveal({
           {getEncouragementMessage(starsEarned)}
         </motion.p>
 
-        {/* Play Again button */}
-        <motion.button
+        {/* Rank badge — competitive nudge */}
+        {rankInfo && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.8, ease: "easeOut", duration: 0.4 }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "linear-gradient(135deg, #eef2ff, #e0e7ff)",
+              border: "2px solid #a5b4fc",
+              padding: "10px 20px",
+              borderRadius: 20,
+              marginBottom: 20,
+            }}
+          >
+            <span style={{ fontSize: 24 }}>🏆</span>
+            <div style={{ textAlign: "left" }}>
+              <p style={{
+                fontSize: 14, fontWeight: 900, fontFamily: "Fredoka, sans-serif",
+                color: "#4338ca", margin: 0,
+              }}>
+                You&apos;re #{rankInfo.rank} of {rankInfo.total} players!
+              </p>
+              <p style={{
+                fontSize: 11, fontWeight: 700, color: "#6366f1",
+                fontFamily: "Nunito, sans-serif", margin: 0,
+              }}>
+                {rankInfo.rank <= 3
+                  ? "You're on the podium! Keep it up!"
+                  : `${rankInfo.rank - 1} more star${rankInfo.rank - 1 !== 1 ? "s" : ""} to climb! Play more to rise!`}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Action buttons */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.0, type: "spring", stiffness: 200, damping: 18 }}
-          whileHover={{ scale: 1.07, y: -4 }}
-          whileTap={{ scale: 0.94 }}
-          onClick={onPlayAgain}
+          transition={{ delay: 2.0, ease: "easeOut", duration: 0.5 }}
           style={{
-            background: isPerfect
-              ? "linear-gradient(135deg, #ff6b9d, #a855f7)"
-              : `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
-            color: "white",
-            border: "none",
-            padding: "18px 48px",
-            borderRadius: 28,
-            fontSize: 20,
-            fontWeight: 900,
-            fontFamily: "Fredoka, sans-serif",
-            cursor: "pointer",
-            boxShadow: isPerfect
-              ? "0 8px 28px rgba(168,85,247,0.5)"
-              : `0 8px 28px ${accentColor}55`,
-            letterSpacing: 0.5,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 12,
           }}
         >
-          🎮 Play Again!
-        </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.07, y: -4 }}
+            whileTap={{ scale: 0.94 }}
+            onClick={onPlayAgain}
+            style={{
+              background: isPerfect
+                ? "linear-gradient(135deg, #ff6b9d, #a855f7)"
+                : `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
+              color: "white",
+              border: "none",
+              padding: "18px 48px",
+              borderRadius: 28,
+              fontSize: 20,
+              fontWeight: 900,
+              fontFamily: "Fredoka, sans-serif",
+              cursor: "pointer",
+              boxShadow: isPerfect
+                ? "0 8px 28px rgba(168,85,247,0.5)"
+                : `0 8px 28px ${accentColor}55`,
+              letterSpacing: 0.5,
+            }}
+          >
+            🔄 Play Again!
+          </motion.button>
+
+          {onNextGame && (
+            <motion.button
+              whileHover={{ scale: 1.07, y: -3 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={onNextGame}
+              style={{
+                background: "linear-gradient(135deg, #10b981, #059669)",
+                color: "white",
+                border: "none",
+                padding: "14px 40px",
+                borderRadius: 28,
+                fontSize: 18,
+                fontWeight: 900,
+                fontFamily: "Fredoka, sans-serif",
+                cursor: "pointer",
+                boxShadow: "0 6px 22px rgba(16,185,129,0.45)",
+                letterSpacing: 0.5,
+              }}
+            >
+              ➡️ Next Game!
+            </motion.button>
+          )}
+        </motion.div>
 
         {/* Perfect score badge */}
         {isPerfect && (
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: [1, 1.2, 1] }}
-            transition={{ delay: 2.5, type: "spring", stiffness: 300 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 2.5, ease: "easeOut", duration: 0.4 }}
             style={{
               marginTop: 20,
               display: "inline-block",

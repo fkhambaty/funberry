@@ -106,4 +106,41 @@ export const healthSafetyGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "hs-odd-out",
+    zoneId: "health-safety",
+    type: "odd_one_out",
+    title: "Odd Safety Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "healthy habits", items: [{ id: "brush", label: "Brush teeth", emoji: "🪥" }, { id: "wash", label: "Wash hands", emoji: "🧼" }, { id: "sleep", label: "Sleep well", emoji: "😴" }, { id: "candy", label: "Eat lots of candy", emoji: "🍬" }], oddId: "candy", explanation: "Eating lots of candy isn't healthy — it gives you cavities!" },
+        { id: "r2", category: "safety gear", items: [{ id: "helmet", label: "Helmet", emoji: "⛑️" }, { id: "seatbelt", label: "Seatbelt", emoji: "🔒" }, { id: "goggles", label: "Goggles", emoji: "🥽" }, { id: "teddy", label: "Teddy Bear", emoji: "🧸" }], oddId: "teddy", explanation: "A teddy bear is a toy — it doesn't keep you safe!" },
+        { id: "r3", category: "ways to stay healthy", items: [{ id: "exercise", label: "Exercise", emoji: "🏃" }, { id: "fruit", label: "Eat fruit", emoji: "🍎" }, { id: "water", label: "Drink water", emoji: "💧" }, { id: "tv", label: "Watch TV all day", emoji: "📺" }], oddId: "tv", explanation: "Watching TV all day isn't healthy — your body needs to move!" },
+      ],
+    },
+  },
+  {
+    id: "hs-true-false",
+    zoneId: "health-safety",
+    type: "true_false",
+    title: "Health Facts: True or False?",
+    description: "Test your health knowledge!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this health fact true or false?",
+      questions: [
+        { id: "tf1", statement: "Washing hands stops germs from spreading", emoji: "🧼", isTrue: true, explanation: "Yes! Clean hands keep germs away." },
+        { id: "tf2", statement: "You should cross the road without looking", emoji: "🚶", isTrue: false, explanation: "No! Always look both ways before crossing the road." },
+        { id: "tf3", statement: "Exercise makes your body stronger", emoji: "💪", isTrue: true, explanation: "Correct! Running, jumping, and playing make you fit and strong." },
+        { id: "tf4", statement: "You should eat only sweets every day", emoji: "🍭", isTrue: false, explanation: "No! You need vegetables, fruits, and protein to grow healthy." },
+      ],
+    },
+  },
 ];

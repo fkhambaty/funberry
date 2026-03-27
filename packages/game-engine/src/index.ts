@@ -22,6 +22,9 @@ export {
 export { getZoneTheme, defaultTheme } from "./core/themes";
 export type { ZoneTheme } from "./core/themes";
 
+// Rank context (for leaderboard integration)
+export { RankProvider, useRankInfo } from "./core/RankContext";
+
 // Shared components
 export { StarReveal } from "./components/StarReveal";
 export { StreakCounter } from "./components/StreakCounter";
@@ -39,6 +42,8 @@ export { WordPictureLink } from "./templates/WordPictureLink";
 export { InteractiveStory } from "./templates/InteractiveStory";
 export { BubblePopAdventure } from "./templates/BubblePopAdventure";
 export { StarCatcher } from "./templates/StarCatcher";
+export { OddOneOut } from "./templates/OddOneOut";
+export { TrueFalse } from "./templates/TrueFalse";
 
 // Progression
 export {

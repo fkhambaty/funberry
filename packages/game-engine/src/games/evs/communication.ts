@@ -112,4 +112,41 @@ export const communicationGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "comm-odd-out",
+    zoneId: "communication",
+    type: "odd_one_out",
+    title: "Odd Communication Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "ways to communicate", items: [{ id: "phone", label: "Phone", emoji: "📱" }, { id: "letter", label: "Letter", emoji: "✉️" }, { id: "tv", label: "TV", emoji: "📺" }, { id: "rock", label: "Rock", emoji: "🪨" }], oddId: "rock", explanation: "A rock can't send messages — it's not a way to communicate!" },
+        { id: "r2", category: "things that make sound", items: [{ id: "bell", label: "Bell", emoji: "🔔" }, { id: "drum", label: "Drum", emoji: "🥁" }, { id: "whistle", label: "Whistle", emoji: "🎵" }, { id: "pillow", label: "Pillow", emoji: "🛏️" }], oddId: "pillow", explanation: "A pillow is soft and quiet — it doesn't make sound!" },
+        { id: "r3", category: "things you can read", items: [{ id: "book", label: "Book", emoji: "📖" }, { id: "newspaper", label: "Newspaper", emoji: "📰" }, { id: "sign", label: "Sign", emoji: "🪧" }, { id: "ball", label: "Ball", emoji: "⚽" }], oddId: "ball", explanation: "You can't read a ball — it has no words on it!" },
+      ],
+    },
+  },
+  {
+    id: "comm-true-false",
+    zoneId: "communication",
+    type: "true_false",
+    title: "Communication Facts",
+    description: "True or false about communication?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this communication fact true or false?",
+      questions: [
+        { id: "tf1", statement: "A telephone lets you talk to people far away", emoji: "📞", isTrue: true, explanation: "Yes! Phones help us talk to people even in other countries." },
+        { id: "tf2", statement: "Dogs can read books", emoji: "🐕", isTrue: false, explanation: "No! Dogs can't read — only people can read books." },
+        { id: "tf3", statement: "Sign language uses hands to talk", emoji: "🤟", isTrue: true, explanation: "Correct! People who can't hear use their hands to communicate." },
+        { id: "tf4", statement: "Letters are sent through the internet", emoji: "✉️", isTrue: false, explanation: "Paper letters go by post/mail — emails go through the internet!" },
+      ],
+    },
+  },
 ];

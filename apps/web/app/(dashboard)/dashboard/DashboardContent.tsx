@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { brand, zones } from "@funberry/config";
-import { getCurrentUser, getChildren, signOut, getParent } from "@funberry/supabase";
-import { getZoneTheme } from "@funberry/game-engine";
+import { getCurrentUser, getChildren, signOut, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
+import { Leaderboard } from "../../components/Leaderboard";
+import { getZoneTheme } from "@funberry/game-engine";
 import { TimerSetup } from "../../components/TimerSetup";
 import { useTimer } from "../../components/TimerProvider";
 import { playTap } from "@funberry/game-engine";
@@ -35,6 +36,286 @@ function ChildAvatar({ child }: { child: Child }) {
   );
 }
 
+function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPinUpdated: (pin: string) => void }) {
+  const [showSettings, setShowSettings] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pinMsg, setPinMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [pwMsg, setPwMsg] = useState<{ text: string; ok: boolean } | null>(null);
+  const [savingPin, setSavingPin] = useState(false);
+  const [savingPw, setSavingPw] = useState(false);
+
+  async function handlePinUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    setPinMsg(null);
+    if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+      setPinMsg({ text: "PIN must be exactly 4 digits", ok: false });
+      return;
+    }
+    if (newPin !== confirmPin) {
+      setPinMsg({ text: "PINs do not match", ok: false });
+      return;
+    }
+    setSavingPin(true);
+    try {
+      await updateParentPin(newPin);
+      onPinUpdated(newPin);
+      setPinMsg({ text: "PIN updated successfully!", ok: true });
+      setNewPin("");
+      setConfirmPin("");
+    } catch (err) {
+      setPinMsg({ text: err instanceof Error ? err.message : "Failed to update PIN", ok: false });
+    } finally {
+      setSavingPin(false);
+    }
+  }
+
+  async function handlePasswordUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    setPwMsg(null);
+    if (newPassword.length < 6) {
+      setPwMsg({ text: "Password must be at least 6 characters", ok: false });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwMsg({ text: "Passwords do not match", ok: false });
+      return;
+    }
+    setSavingPw(true);
+    try {
+      await updateParentPassword(newPassword);
+      setPwMsg({ text: "Password updated successfully!", ok: true });
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setPwMsg({ text: err instanceof Error ? err.message : "Failed to update password", ok: false });
+    } finally {
+      setSavingPw(false);
+    }
+  }
+
+  if (!showSettings) {
+    return (
+      <div style={{ padding: "0 24px 24px", maxWidth: 800, margin: "0 auto" }}>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => { playTap(); setShowSettings(true); }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "14px 24px",
+            borderRadius: 20,
+            border: "2px solid #e5e7eb",
+            background: "white",
+            cursor: "pointer",
+            width: "100%",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+          }}
+        >
+          <span style={{ fontSize: 24 }}>⚙️</span>
+          <span style={{ fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151", fontSize: 16 }}>
+            Account Settings
+          </span>
+          <span style={{ marginLeft: "auto", color: "#9ca3af", fontSize: 14 }}>
+            PIN: {parent?.pin ? "••••" : "Not set"} &nbsp;→
+          </span>
+        </motion.button>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        padding: "0 24px 32px",
+        maxWidth: 800,
+        margin: "0 auto",
+      }}
+    >
+      <div style={{
+        background: "white",
+        borderRadius: 24,
+        padding: "28px 24px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+        border: "2px solid #f3f4f6",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <h3 style={{ fontSize: 20, fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", margin: 0 }}>
+            ⚙️ Account Settings
+          </h3>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSettings(false)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 14,
+              border: "none",
+              background: "#f3f4f6",
+              color: "#6b7280",
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            Close
+          </motion.button>
+        </div>
+
+        {/* Update PIN */}
+        <form onSubmit={handlePinUpdate} style={{ marginBottom: 28 }}>
+          <h4 style={{ fontSize: 16, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151", margin: "0 0 4px" }}>
+            🔒 Update Parent PIN
+          </h4>
+          <p style={{ fontSize: 13, color: "#9ca3af", margin: "0 0 12px" }}>
+            This PIN is used to access the parent dashboard from the play area.
+          </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="New PIN"
+              style={{
+                width: 130,
+                padding: "10px 14px",
+                borderRadius: 14,
+                border: "2px solid #e5e7eb",
+                fontSize: 18,
+                fontWeight: 800,
+                textAlign: "center",
+                letterSpacing: "0.3em",
+                outline: "none",
+              }}
+            />
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={confirmPin}
+              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="Confirm"
+              style={{
+                width: 130,
+                padding: "10px 14px",
+                borderRadius: 14,
+                border: "2px solid #e5e7eb",
+                fontSize: 18,
+                fontWeight: 800,
+                textAlign: "center",
+                letterSpacing: "0.3em",
+                outline: "none",
+              }}
+            />
+            <motion.button
+              type="submit"
+              disabled={savingPin}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              style={{
+                padding: "10px 20px",
+                borderRadius: 14,
+                border: "none",
+                background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                color: "white",
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: savingPin ? "default" : "pointer",
+                opacity: savingPin ? 0.6 : 1,
+              }}
+            >
+              {savingPin ? "Saving..." : "Update PIN"}
+            </motion.button>
+          </div>
+          {pinMsg && (
+            <p style={{ fontSize: 13, fontWeight: 700, color: pinMsg.ok ? "#16a34a" : "#ef4444", margin: 0 }}>
+              {pinMsg.text}
+            </p>
+          )}
+        </form>
+
+        <div style={{ height: 1, background: "#f3f4f6", margin: "0 0 24px" }} />
+
+        {/* Update Password */}
+        <form onSubmit={handlePasswordUpdate}>
+          <h4 style={{ fontSize: 16, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151", margin: "0 0 4px" }}>
+            🔑 Update Password
+          </h4>
+          <p style={{ fontSize: 13, color: "#9ca3af", margin: "0 0 12px" }}>
+            Change the password used to log into your account.
+          </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="New password"
+              minLength={6}
+              style={{
+                flex: 1,
+                minWidth: 150,
+                padding: "10px 14px",
+                borderRadius: 14,
+                border: "2px solid #e5e7eb",
+                fontSize: 15,
+                outline: "none",
+              }}
+            />
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm"
+              minLength={6}
+              style={{
+                flex: 1,
+                minWidth: 150,
+                padding: "10px 14px",
+                borderRadius: 14,
+                border: "2px solid #e5e7eb",
+                fontSize: 15,
+                outline: "none",
+              }}
+            />
+            <motion.button
+              type="submit"
+              disabled={savingPw}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              style={{
+                padding: "10px 20px",
+                borderRadius: 14,
+                border: "none",
+                background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                color: "white",
+                fontSize: 14,
+                fontWeight: 800,
+                cursor: savingPw ? "default" : "pointer",
+                opacity: savingPw ? 0.6 : 1,
+              }}
+            >
+              {savingPw ? "Saving..." : "Update Password"}
+            </motion.button>
+          </div>
+          {pwMsg && (
+            <p style={{ fontSize: 13, fontWeight: 700, color: pwMsg.ok ? "#16a34a" : "#ef4444", margin: 0 }}>
+              {pwMsg.text}
+            </p>
+          )}
+        </form>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { setParentPin } = useTimer();
@@ -43,6 +324,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showTip, setShowTip] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
+  const [editingChild, setEditingChild] = useState<Child | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -265,7 +547,7 @@ export default function DashboardPage() {
             >
               <span className="text-4xl block mb-2">👶</span>
               <p className="font-display font-bold text-purple-700 text-base">Add your first child</p>
-              <p className="text-xs text-gray-400 mt-1 font-bold">They can pick a selfie or cartoon face!</p>
+              <p className="text-xs text-gray-400 mt-1 font-bold">Pick a fun character for them!</p>
             </motion.div>
           ) : (
             <div className="space-y-3">
@@ -282,15 +564,26 @@ export default function DashboardPage() {
                     <p className="font-display font-bold text-gray-800">{child.name}</p>
                     <p className="text-xs text-gray-400 font-bold">Age {child.age} • ⭐ {child.total_stars ?? 0} stars</p>
                   </div>
-                  <motion.a
-                    href="/play"
-                    whileHover={{ scale: 1.06 }}
-                    whileTap={{ scale: 0.94 }}
-                    className="px-4 py-2 rounded-xl text-sm font-bold text-white"
-                    style={{ background: "linear-gradient(135deg, #379df9, #2180ee)" }}
-                  >
-                    🎮 Play
-                  </motion.a>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.06 }}
+                      whileTap={{ scale: 0.94 }}
+                      onClick={() => setEditingChild(child)}
+                      className="px-3 py-2 rounded-xl text-sm font-bold"
+                      style={{ background: "linear-gradient(135deg, #f3f4f6, #e5e7eb)", color: "#6b7280" }}
+                    >
+                      ✏️
+                    </motion.button>
+                    <motion.a
+                      href="/play"
+                      whileHover={{ scale: 1.06 }}
+                      whileTap={{ scale: 0.94 }}
+                      className="px-4 py-2 rounded-xl text-sm font-bold text-white"
+                      style={{ background: "linear-gradient(135deg, #379df9, #2180ee)" }}
+                    >
+                      🎮 Play
+                    </motion.a>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -400,13 +693,94 @@ export default function DashboardPage() {
             <span className="ml-auto text-gray-400 text-xl">→</span>
           </motion.a>
         </motion.section>
+
+        {/* Family Leaderboard */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="mb-10"
+        >
+          <div className="rounded-kid glass-card" style={{ padding: "24px 20px", border: "2px solid #fef3c7" }}>
+            <Leaderboard compact />
+          </div>
+        </motion.section>
+
+        {/* Upgrade CTA — shown only for free users */}
+        {tier === "free" && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mb-10"
+          >
+            <motion.div
+              animate={{ boxShadow: ["0 0 0 0 rgba(167,139,250,0)", "0 0 0 8px rgba(167,139,250,0.2)", "0 0 0 0 rgba(167,139,250,0)"] }}
+              transition={{ repeat: Infinity, duration: 2.5 }}
+              className="rounded-kid p-6 text-center"
+              style={{
+                background: "linear-gradient(135deg, #fdf4ff, #ede9fe, #e0e7ff)",
+                border: "2px solid #c4b5fd",
+              }}
+            >
+              <motion.div
+                animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.15, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="text-5xl mb-3"
+              >
+                🚀
+              </motion.div>
+              <h3 className="font-display text-xl font-bold text-purple-800 mb-2">
+                Unlock All {zones.length} Worlds!
+              </h3>
+              <p className="text-gray-600 text-sm mb-4">
+                You&apos;re on the free plan — only {freeZones.length} zone{freeZones.length !== 1 ? "s" : ""} unlocked.
+                Upgrade to give your child access to all learning adventures!
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center mb-4">
+                {["🧠 All zones", "♾️ Endless games", "📊 Detailed reports", "🎯 Priority support"].map((f) => (
+                  <span key={f} className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "#a78bfa20", color: "#7c3aed" }}>
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-8 py-3 rounded-kid text-white font-bold text-base shadow-lg"
+                style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)", boxShadow: "0 8px 24px rgba(139,92,246,0.4)" }}
+                onClick={() => alert("Upgrade coming soon! Contact us for early access pricing.")}
+              >
+                ✨ Upgrade — Unlock Everything
+              </motion.button>
+            </motion.div>
+          </motion.section>
+        )}
       </div>
     </main>
+
+    {/* Account Settings Section */}
+    <AccountSettings parent={parent} onPinUpdated={(newPin) => {
+      setParentPin(newPin);
+      setParent(parent ? { ...parent, pin: newPin } : null);
+    }} />
 
     {/* Add Child Modal */}
     {showAddChild && (
       <AddChildModal
         onClose={() => setShowAddChild(false)}
+        onAdded={async () => {
+          const kids = await getChildren();
+          setChildrenState(kids);
+        }}
+      />
+    )}
+
+    {/* Edit Child Modal */}
+    {editingChild && (
+      <AddChildModal
+        editChild={editingChild}
+        onClose={() => setEditingChild(null)}
         onAdded={async () => {
           const kids = await getChildren();
           setChildrenState(kids);

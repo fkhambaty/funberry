@@ -113,4 +113,42 @@ export const waterGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "water-odd-out",
+    zoneId: "water",
+    type: "odd_one_out",
+    title: "Odd Water Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "things that use water", items: [{ id: "bath", label: "Bath", emoji: "🛁" }, { id: "washing", label: "Washing", emoji: "🧼" }, { id: "cooking", label: "Cooking", emoji: "🍳" }, { id: "reading", label: "Reading", emoji: "📖" }], oddId: "reading", explanation: "You don't need water to read a book!" },
+        { id: "r2", category: "water sources", items: [{ id: "river", label: "River", emoji: "🏞️" }, { id: "lake", label: "Lake", emoji: "🏊" }, { id: "ocean", label: "Ocean", emoji: "🌊" }, { id: "mountain", label: "Mountain", emoji: "⛰️" }], oddId: "mountain", explanation: "A mountain is land, not a water source!" },
+        { id: "r3", category: "water animals", items: [{ id: "fish", label: "Fish", emoji: "🐟" }, { id: "whale", label: "Whale", emoji: "🐋" }, { id: "octopus", label: "Octopus", emoji: "🐙" }, { id: "lion", label: "Lion", emoji: "🦁" }], oddId: "lion", explanation: "Lions live on land, not in water!" },
+      ],
+    },
+  },
+  {
+    id: "water-true-false",
+    zoneId: "water",
+    type: "true_false",
+    title: "Water Facts: True or False?",
+    description: "Test your water knowledge!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this water fact true or false?",
+      questions: [
+        { id: "tf1", statement: "Fish live in water", emoji: "🐟", isTrue: true, explanation: "Yes! Fish need water to breathe and swim." },
+        { id: "tf2", statement: "We should waste water", emoji: "🚿", isTrue: false, explanation: "No! We should save water — it's precious!" },
+        { id: "tf3", statement: "Rain comes from clouds", emoji: "🌧️", isTrue: true, explanation: "Correct! Clouds collect water and release it as rain." },
+        { id: "tf4", statement: "Ice is frozen water", emoji: "🧊", isTrue: true, explanation: "Yes! When water gets very cold, it turns into ice." },
+        { id: "tf5", statement: "The ocean has fresh water", emoji: "🌊", isTrue: false, explanation: "No! Ocean water is salty. Fresh water comes from rivers and lakes." },
+      ],
+    },
+  },
 ];

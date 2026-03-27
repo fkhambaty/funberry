@@ -12,6 +12,7 @@ export interface WordPictureLinkProps {
   data: WordPictureLinkData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 function shufflePairs(list: WordPicturePair[]): WordPicturePair[] {
@@ -58,7 +59,7 @@ function SvgConnector({ line, delay }: { line: ConnectorLine; delay: number }) {
   );
 }
 
-export function WordPictureLink({ data, onComplete, accentColor = "#379df9" }: WordPictureLinkProps) {
+export function WordPictureLink({ data, onComplete, accentColor = "#379df9", onNextGame }: WordPictureLinkProps) {
   const { instruction, pairs } = data;
   const [orderRight, setOrderRight] = useState<WordPicturePair[]>([]);
   const [selectedWordId, setSelectedWordId] = useState<string | null>(null);
@@ -267,6 +268,7 @@ export function WordPictureLink({ data, onComplete, accentColor = "#379df9" }: W
           setLines([]);
           matchOrder.current = [];
         }}
+        onNextGame={onNextGame}
       />
     );
   }
@@ -405,7 +407,11 @@ export function WordPictureLink({ data, onComplete, accentColor = "#379df9" }: W
                   x: 0,
                   scale: justMatched ? [1, 1.08, 1] : 1,
                 }}
-                transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 22 }}
+                transition={{
+                  opacity: { delay: i * 0.06, duration: 0.25 },
+                  x: { delay: i * 0.06, duration: 0.3, ease: "easeOut" },
+                  scale: justMatched ? { duration: 0.4, ease: "easeInOut" } : { delay: i * 0.06, duration: 0.3 },
+                }}
                 whileHover={!done ? { scale: 1.03, y: -2 } : {}}
                 whileTap={!done ? { scale: 0.96 } : {}}
                 onClick={() => handleWordTap(p.id)}
@@ -493,7 +499,11 @@ export function WordPictureLink({ data, onComplete, accentColor = "#379df9" }: W
                 transition={
                   isWrongFlash
                     ? wiggle.transition
-                    : { delay: i * 0.06, type: "spring", stiffness: 300, damping: 22 }
+                    : {
+                        opacity: { delay: i * 0.06, duration: 0.25 },
+                        x: { delay: i * 0.06, duration: 0.3, ease: "easeOut" },
+                        scale: justMatched ? { duration: 0.4, ease: "easeInOut" } : { delay: i * 0.06, duration: 0.3 },
+                      }
                 }
                 whileHover={!done ? { scale: 1.06 } : {}}
                 whileTap={!done ? { scale: 0.94 } : {}}

@@ -12,50 +12,60 @@ function formatTime(seconds: number): string {
 export function TimerBadge() {
   const { timer } = useTimer();
 
-  if (!timer.isActive || timer.isLocked) return null;
+  if (!timer.isActive || timer.isLocked || timer.isPaused) return null;
 
   const pct = timer.totalSeconds > 0 ? (timer.remainingSeconds / timer.totalSeconds) * 100 : 0;
-  const isWarning = timer.remainingSeconds <= 60;
-  const isCritical = timer.remainingSeconds <= 30;
-  const circumference = 2 * Math.PI * 12;
+  const isWarning = timer.remainingSeconds <= 120;
+  const isCritical = timer.remainingSeconds <= 60;
+  const ringR = 11;
+  const circumference = 2 * Math.PI * ringR;
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8, y: -10 }}
-      animate={
-        isCritical
-          ? { opacity: 1, scale: [1, 1.08, 1], y: 0 }
-          : { opacity: 1, scale: 1, y: 0 }
-      }
+      initial={{ opacity: 0, y: 20 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: isCritical ? [1, 1.06, 1] : 1,
+      }}
       transition={
         isCritical
-          ? { repeat: Infinity, duration: 0.6 }
+          ? { scale: { repeat: Infinity, duration: 0.9, ease: "easeInOut" } }
           : { duration: 0.3 }
       }
-      className="fixed top-3 right-3 z-50 flex items-center gap-2.5 px-3 py-2 rounded-full shadow-lg"
       style={{
-        backgroundColor: isCritical ? "#fee2e2" : isWarning ? "#fff7ed" : "#f0fdf4",
-        border: `2px solid ${isCritical ? "#fca5a5" : isWarning ? "#fed7aa" : "#bbf7d0"}`,
+        position: "fixed",
+        bottom: 16,
+        left: 16,
+        zIndex: 9990,
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        padding: "5px 12px 5px 6px",
+        borderRadius: 30,
+        pointerEvents: "none",
+        userSelect: "none",
+        backgroundColor: isCritical ? "#fef2f2" : isWarning ? "#fffbeb" : "#f0fdf4",
+        border: `2px solid ${isCritical ? "#fca5a5" : isWarning ? "#fcd34d" : "#86efac"}`,
         boxShadow: isCritical
-          ? "0 0 20px rgba(239,68,68,0.35)"
+          ? "0 2px 12px rgba(239,68,68,0.3)"
           : isWarning
-          ? "0 0 12px rgba(249,115,22,0.25)"
-          : "0 2px 10px rgba(0,0,0,0.08)",
+          ? "0 2px 10px rgba(245,158,11,0.2)"
+          : "0 2px 8px rgba(34,197,94,0.15)",
       }}
     >
-      {/* Circular progress ring */}
       <div style={{ position: "relative", width: 28, height: 28, flexShrink: 0 }}>
-        <svg width="28" height="28" style={{ transform: "rotate(-90deg)" }}>
+        <svg width="28" height="28" viewBox="0 0 28 28" style={{ transform: "rotate(-90deg)" }}>
           <circle
-            cx="14" cy="14" r="12"
+            cx="14" cy="14" r={ringR}
             fill="none"
-            stroke={isCritical ? "#fecaca" : isWarning ? "#fed7aa" : "#bbf7d0"}
+            stroke={isCritical ? "#fecaca" : isWarning ? "#fde68a" : "#bbf7d0"}
             strokeWidth="3"
           />
           <circle
-            cx="14" cy="14" r="12"
+            cx="14" cy="14" r={ringR}
             fill="none"
-            stroke={isCritical ? "#ef4444" : isWarning ? "#f97316" : "#22c55e"}
+            stroke={isCritical ? "#ef4444" : isWarning ? "#f59e0b" : "#22c55e"}
             strokeWidth="3"
             strokeDasharray={`${circumference}`}
             strokeDashoffset={`${circumference * (1 - pct / 100)}`}
@@ -68,17 +78,18 @@ export function TimerBadge() {
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 10,
         }}>
-          {isCritical ? "🔥" : isWarning ? "⚠️" : "⏱"}
+          {isCritical ? "🔥" : isWarning ? "⏳" : "⏱️"}
         </span>
       </div>
 
-      <span
-        className="text-sm font-bold font-mono"
-        style={{
-          color: isCritical ? "#dc2626" : isWarning ? "#c2410c" : "#16a34a",
-          minWidth: 36,
-        }}
-      >
+      <span style={{
+        fontSize: 14,
+        fontWeight: 800,
+        fontFamily: "Fredoka, sans-serif",
+        fontVariantNumeric: "tabular-nums",
+        color: isCritical ? "#dc2626" : isWarning ? "#b45309" : "#16a34a",
+        lineHeight: 1,
+      }}>
         {formatTime(timer.remainingSeconds)}
       </span>
     </motion.div>

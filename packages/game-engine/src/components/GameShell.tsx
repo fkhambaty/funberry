@@ -16,15 +16,7 @@ interface GameShellProps {
   streak?: number;
   onClose: () => void;
   onNextGame?: () => void;
-  timerSeconds?: number;
-  timerTotal?: number;
   children: React.ReactNode;
-}
-
-function formatTimer(s: number): string {
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
 export function GameShell({
@@ -36,17 +28,9 @@ export function GameShell({
   streak = 0,
   onClose,
   onNextGame,
-  timerSeconds,
-  timerTotal,
   children,
 }: GameShellProps) {
   const [muted, setMuted] = React.useState(isMuted());
-  const isTimerWarning = timerSeconds !== undefined && timerSeconds <= 60;
-  const timerPct =
-    timerTotal && timerTotal > 0 && timerSeconds !== undefined
-      ? (timerSeconds / timerTotal) * 100
-      : 0;
-  const circumference = 2 * Math.PI * 10;
 
   return (
     <div
@@ -83,7 +67,6 @@ export function GameShell({
           boxShadow: "0 3px 18px rgba(0,0,0,0.09)",
         }}
       >
-        {/* 🏠 BIG KID-FRIENDLY HOME BUTTON */}
         <motion.button
           whileHover={{ scale: 1.1, y: -2 }}
           whileTap={{ scale: 0.88 }}
@@ -120,7 +103,6 @@ export function GameShell({
           </span>
         </motion.button>
 
-        {/* Game title */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <p
             style={{
@@ -151,7 +133,6 @@ export function GameShell({
           )}
         </div>
 
-        {/* Right controls */}
         <div
           style={{
             display: "flex",
@@ -160,85 +141,6 @@ export function GameShell({
             flexShrink: 0,
           }}
         >
-          {/* ⏱ Prominent in-game timer */}
-          {timerSeconds !== undefined && (
-            <motion.div
-              animate={
-                isTimerWarning
-                  ? { scale: [1, 1.12, 1], boxShadow: ["0 0 0px rgba(239,68,68,0)", "0 0 18px rgba(239,68,68,0.5)", "0 0 0px rgba(239,68,68,0)"] }
-                  : {}
-              }
-              transition={
-                isTimerWarning ? { repeat: Infinity, duration: 0.75 } : {}
-              }
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "6px 12px",
-                borderRadius: 18,
-                background: isTimerWarning
-                  ? "linear-gradient(135deg, #fee2e2, #fecaca)"
-                  : "linear-gradient(135deg, #ecfdf5, #d1fae5)",
-                border: `2px solid ${isTimerWarning ? "#fca5a5" : "#86efac"}`,
-              }}
-            >
-              {/* Circular progress ring */}
-              <div style={{ position: "relative", width: 26, height: 26 }}>
-                <svg
-                  width="26"
-                  height="26"
-                  style={{ transform: "rotate(-90deg)" }}
-                >
-                  <circle
-                    cx="13"
-                    cy="13"
-                    r="10"
-                    fill="none"
-                    stroke={isTimerWarning ? "#fecaca" : "#bbf7d0"}
-                    strokeWidth="3"
-                  />
-                  <circle
-                    cx="13"
-                    cy="13"
-                    r="10"
-                    fill="none"
-                    stroke={isTimerWarning ? "#ef4444" : "#22c55e"}
-                    strokeWidth="3"
-                    strokeDasharray={`${circumference}`}
-                    strokeDashoffset={`${circumference * (1 - timerPct / 100)}`}
-                    strokeLinecap="round"
-                    style={{ transition: "stroke-dashoffset 1s linear" }}
-                  />
-                </svg>
-                <span
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 9,
-                  }}
-                >
-                  {isTimerWarning ? "⚠️" : "⏱"}
-                </span>
-              </div>
-              <span
-                style={{
-                  fontSize: 16,
-                  fontWeight: 900,
-                  fontFamily: "Fredoka, sans-serif",
-                  fontVariantNumeric: "tabular-nums",
-                  color: isTimerWarning ? "#dc2626" : "#16a34a",
-                  minWidth: 42,
-                }}
-              >
-                {formatTimer(timerSeconds)}
-              </span>
-            </motion.div>
-          )}
-
           {streak > 0 && <StreakCounter count={streak} />}
 
           {score !== undefined && (
@@ -263,7 +165,6 @@ export function GameShell({
             </motion.div>
           )}
 
-          {/* 🔊 Mute button */}
           <motion.button
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
@@ -291,7 +192,6 @@ export function GameShell({
         </div>
       </div>
 
-      {/* Progress Bar */}
       {progress > 0 && (
         <div style={{ position: "relative", zIndex: 10, padding: "0 16px" }}>
           <div
@@ -318,7 +218,6 @@ export function GameShell({
         </div>
       )}
 
-      {/* Game Content */}
       <div
         style={{
           position: "relative",
@@ -330,7 +229,6 @@ export function GameShell({
         {children}
       </div>
 
-      {/* 🔀 Floating SWITCH GAME button */}
       {onNextGame && (
         <motion.button
           whileHover={{ scale: 1.1, y: -4 }}

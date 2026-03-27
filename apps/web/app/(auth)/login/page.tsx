@@ -99,11 +99,6 @@ export default function LoginPage() {
           </p>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-xs text-gray-400">
-            Test account: fk_qrf@funberry.app / Funberry$11
-          </p>
-        </div>
       </div>
     </main>
   );

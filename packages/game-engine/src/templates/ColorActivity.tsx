@@ -12,6 +12,7 @@ export interface ColorActivityProps {
   data: ColorActivityData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 function normalizeColor(c: string): string {
@@ -56,7 +57,7 @@ function SparkleOverlay({ color }: { color: string }) {
   );
 }
 
-export function ColorActivity({ data, onComplete, accentColor = "#379df9" }: ColorActivityProps) {
+export function ColorActivity({ data, onComplete, accentColor = "#379df9", onNextGame }: ColorActivityProps) {
   const { instruction, palette, regions } = data;
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [filled, setFilled] = useState<Record<string, string>>({});
@@ -148,9 +149,8 @@ export function ColorActivity({ data, onComplete, accentColor = "#379df9" }: Col
       window.setTimeout(() => {
         if (correct) {
           answerQuestion(regionId, true);
-        } else {
-          answerQuestion(regionId, false);
         }
+        // wrong taps don't consume a question slot — player must paint every region correctly
         setShowFeedback(false);
         setFeedbackKind(null);
         setSelectedColor(null);
@@ -257,6 +257,7 @@ export function ColorActivity({ data, onComplete, accentColor = "#379df9" }: Col
           setStreak(0);
           setFilled({});
         }}
+        onNextGame={onNextGame}
       />
     );
   }

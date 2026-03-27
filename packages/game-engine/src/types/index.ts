@@ -4,6 +4,8 @@ export type GameType =
   | "picture_quiz"
   | "sequence_builder"
   | "spot_difference"
+  | "odd_one_out"
+  | "true_false"
   | "color_activity"
   | "word_picture_link"
   | "interactive_story"
@@ -19,7 +21,7 @@ export interface GameConfig {
   difficulty: 1 | 2 | 3;
   maxStars: number;
   timeLimit?: number;
-  data: DragSortData | MemoryMatchData | PictureQuizData | SequenceBuilderData | SpotDifferenceData | ColorActivityData | WordPictureLinkData | InteractiveStoryData | BubblePopData | StarCatcherData;
+  data: DragSortData | MemoryMatchData | PictureQuizData | SequenceBuilderData | SpotDifferenceData | OddOneOutData | TrueFalseData | ColorActivityData | WordPictureLinkData | InteractiveStoryData | BubblePopData | StarCatcherData;
 }
 
 /* ── Drag & Sort ── */
@@ -89,6 +91,34 @@ export interface SpotDifferenceData {
   imageA: string;
   imageB: string;
   differences: DifferencePoint[];
+}
+
+/* ── Odd One Out ── */
+export interface OddOneOutRound {
+  id: string;
+  items: { id: string; label: string; emoji: string }[];
+  oddId: string;
+  category: string;
+  explanation: string;
+}
+export interface OddOneOutData {
+  type: "odd_one_out";
+  instruction: string;
+  rounds: OddOneOutRound[];
+}
+
+/* ── True / False ── */
+export interface TrueFalseQuestion {
+  id: string;
+  statement: string;
+  emoji: string;
+  isTrue: boolean;
+  explanation: string;
+}
+export interface TrueFalseData {
+  type: "true_false";
+  instruction: string;
+  questions: TrueFalseQuestion[];
 }
 
 /* ── Color Activity ── */

@@ -112,4 +112,43 @@ export const foodGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "food-odd-out",
+    zoneId: "food",
+    type: "odd_one_out",
+    title: "Odd Food Out",
+    description: "Which food doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong with the others!",
+      rounds: [
+        { id: "r1", category: "fruits", items: [{ id: "apple", label: "Apple", emoji: "🍎" }, { id: "banana", label: "Banana", emoji: "🍌" }, { id: "grapes", label: "Grapes", emoji: "🍇" }, { id: "chair", label: "Chair", emoji: "🪑" }], oddId: "chair", explanation: "A chair isn't food — you sit on it!" },
+        { id: "r2", category: "vegetables", items: [{ id: "carrot", label: "Carrot", emoji: "🥕" }, { id: "broccoli", label: "Broccoli", emoji: "🥦" }, { id: "ball", label: "Ball", emoji: "⚽" }, { id: "corn", label: "Corn", emoji: "🌽" }], oddId: "ball", explanation: "A ball is a toy, not a vegetable!" },
+        { id: "r3", category: "drinks", items: [{ id: "milk", label: "Milk", emoji: "🥛" }, { id: "juice", label: "Juice", emoji: "🧃" }, { id: "water", label: "Water", emoji: "💧" }, { id: "shoe", label: "Shoe", emoji: "👟" }], oddId: "shoe", explanation: "You can't drink a shoe!" },
+        { id: "r4", category: "healthy foods", items: [{ id: "salad", label: "Salad", emoji: "🥗" }, { id: "apple2", label: "Apple", emoji: "🍎" }, { id: "candy", label: "Candy", emoji: "🍬" }, { id: "carrot2", label: "Carrot", emoji: "🥕" }], oddId: "candy", explanation: "Candy is a treat, not a healthy food!" },
+      ],
+    },
+  },
+  {
+    id: "food-true-false",
+    zoneId: "food",
+    type: "true_false",
+    title: "Food Facts: True or False?",
+    description: "Test your food knowledge!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this food fact true or false?",
+      questions: [
+        { id: "tf1", statement: "Carrots are orange", emoji: "🥕", isTrue: true, explanation: "Yes! Most carrots are bright orange." },
+        { id: "tf2", statement: "Ice cream is a vegetable", emoji: "🍦", isTrue: false, explanation: "No! Ice cream is a frozen dessert, not a veggie!" },
+        { id: "tf3", statement: "Milk comes from cows", emoji: "🐄", isTrue: true, explanation: "That's right! Cows give us milk." },
+        { id: "tf4", statement: "Bananas grow underground", emoji: "🍌", isTrue: false, explanation: "Nope! Bananas grow on tall plants above ground." },
+        { id: "tf5", statement: "Water is important for your body", emoji: "💧", isTrue: true, explanation: "Yes! Your body needs water every day to stay healthy." },
+      ],
+    },
+  },
 ];

@@ -111,4 +111,42 @@ export const airGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "air-odd-out",
+    zoneId: "air",
+    type: "odd_one_out",
+    title: "Odd Air Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "things that fly in air", items: [{ id: "bird", label: "Bird", emoji: "🐦" }, { id: "kite", label: "Kite", emoji: "🪁" }, { id: "plane", label: "Airplane", emoji: "✈️" }, { id: "fish", label: "Fish", emoji: "🐟" }], oddId: "fish", explanation: "Fish swim in water — they don't fly in the air!" },
+        { id: "r2", category: "things that cause air pollution", items: [{ id: "factory", label: "Factory", emoji: "🏭" }, { id: "car", label: "Car smoke", emoji: "🚗" }, { id: "fire", label: "Fire", emoji: "🔥" }, { id: "tree", label: "Tree", emoji: "🌳" }], oddId: "tree", explanation: "Trees clean the air — they don't pollute it!" },
+        { id: "r3", category: "things that need air", items: [{ id: "human", label: "Human", emoji: "👤" }, { id: "dog", label: "Dog", emoji: "🐕" }, { id: "flower", label: "Flower", emoji: "🌸" }, { id: "rock", label: "Rock", emoji: "🪨" }], oddId: "rock", explanation: "Rocks don't breathe — they don't need air!" },
+      ],
+    },
+  },
+  {
+    id: "air-true-false",
+    zoneId: "air",
+    type: "true_false",
+    title: "Air Facts: True or False?",
+    description: "How much do you know about air?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this air fact true or false?",
+      questions: [
+        { id: "tf1", statement: "We breathe air to stay alive", emoji: "🌬️", isTrue: true, explanation: "Yes! Air gives us oxygen which our body needs." },
+        { id: "tf2", statement: "Air is invisible — you can't see it", emoji: "👀", isTrue: true, explanation: "Correct! Air is all around us but we can't see it." },
+        { id: "tf3", statement: "Trees make the air dirty", emoji: "🌳", isTrue: false, explanation: "No! Trees clean the air and give us fresh oxygen." },
+        { id: "tf4", statement: "Wind is moving air", emoji: "💨", isTrue: true, explanation: "Yes! When air moves fast, we feel it as wind." },
+        { id: "tf5", statement: "Fish breathe air like humans", emoji: "🐟", isTrue: false, explanation: "No! Fish breathe oxygen from water through their gills." },
+      ],
+    },
+  },
 ];

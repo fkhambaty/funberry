@@ -112,4 +112,41 @@ export const clothingGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "clothing-odd-out",
+    zoneId: "clothing",
+    type: "odd_one_out",
+    title: "Odd Clothing Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "clothes", items: [{ id: "shirt", label: "Shirt", emoji: "👕" }, { id: "pants", label: "Pants", emoji: "👖" }, { id: "hat", label: "Hat", emoji: "🧢" }, { id: "pizza", label: "Pizza", emoji: "🍕" }], oddId: "pizza", explanation: "Pizza is food, not clothing!" },
+        { id: "r2", category: "winter clothes", items: [{ id: "scarf", label: "Scarf", emoji: "🧣" }, { id: "gloves", label: "Gloves", emoji: "🧤" }, { id: "jacket", label: "Jacket", emoji: "🧥" }, { id: "sandals", label: "Sandals", emoji: "🩴" }], oddId: "sandals", explanation: "Sandals are for summer, not winter!" },
+        { id: "r3", category: "things you wear on your feet", items: [{ id: "shoes", label: "Shoes", emoji: "👟" }, { id: "boots", label: "Boots", emoji: "🥾" }, { id: "socks", label: "Socks", emoji: "🧦" }, { id: "hat2", label: "Hat", emoji: "🎩" }], oddId: "hat2", explanation: "You wear a hat on your head, not your feet!" },
+      ],
+    },
+  },
+  {
+    id: "clothing-true-false",
+    zoneId: "clothing",
+    type: "true_false",
+    title: "Clothing Facts: True or False?",
+    description: "Test your clothing knowledge!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this clothing fact true or false?",
+      questions: [
+        { id: "tf1", statement: "We wear raincoats when it rains", emoji: "🌧️", isTrue: true, explanation: "Yes! Raincoats keep us dry in the rain." },
+        { id: "tf2", statement: "You wear a scarf in summer", emoji: "🧣", isTrue: false, explanation: "No! Scarves are for cold weather to keep your neck warm." },
+        { id: "tf3", statement: "Shoes protect your feet", emoji: "👟", isTrue: true, explanation: "Correct! Shoes keep your feet safe from sharp things." },
+        { id: "tf4", statement: "Sunglasses are worn at night", emoji: "🕶️", isTrue: false, explanation: "No! Sunglasses protect your eyes from bright sunlight during the day." },
+      ],
+    },
+  },
 ];

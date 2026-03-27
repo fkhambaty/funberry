@@ -106,4 +106,42 @@ export const shelterGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "shelter-odd-out",
+    zoneId: "shelter",
+    type: "odd_one_out",
+    title: "Odd Home Out",
+    description: "Which home doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "homes for people", items: [{ id: "house", label: "House", emoji: "🏠" }, { id: "apartment", label: "Apartment", emoji: "🏢" }, { id: "hut", label: "Hut", emoji: "🛖" }, { id: "tree", label: "Tree", emoji: "🌳" }], oddId: "tree", explanation: "A tree is a plant — people don't usually live in trees!" },
+        { id: "r2", category: "animal homes", items: [{ id: "nest", label: "Nest", emoji: "🪹" }, { id: "cave", label: "Cave", emoji: "🕳️" }, { id: "burrow", label: "Burrow", emoji: "🐰" }, { id: "car", label: "Car", emoji: "🚗" }], oddId: "car", explanation: "A car is for driving, not an animal home!" },
+        { id: "r3", category: "things inside a house", items: [{ id: "bed", label: "Bed", emoji: "🛏️" }, { id: "table", label: "Table", emoji: "🪑" }, { id: "lamp", label: "Lamp", emoji: "💡" }, { id: "whale", label: "Whale", emoji: "🐋" }], oddId: "whale", explanation: "A whale lives in the ocean, not inside a house!" },
+      ],
+    },
+  },
+  {
+    id: "shelter-true-false",
+    zoneId: "shelter",
+    type: "true_false",
+    title: "Shelter Facts: True or False?",
+    description: "Test what you know about homes!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this fact about homes true or false?",
+      questions: [
+        { id: "tf1", statement: "Birds live in nests", emoji: "🪹", isTrue: true, explanation: "Yes! Birds build nests to lay eggs and raise baby birds." },
+        { id: "tf2", statement: "Fish live in houses", emoji: "🐟", isTrue: false, explanation: "No! Fish live in water — rivers, lakes, and oceans." },
+        { id: "tf3", statement: "A roof keeps rain out of a house", emoji: "🏠", isTrue: true, explanation: "Correct! The roof protects us from rain and sun." },
+        { id: "tf4", statement: "Igloos are made of ice", emoji: "🧊", isTrue: true, explanation: "Yes! In very cold places, people built homes from snow and ice." },
+        { id: "tf5", statement: "Dogs live in aquariums", emoji: "🐕", isTrue: false, explanation: "No! Dogs live in houses or dog houses — aquariums are for fish!" },
+      ],
+    },
+  },
 ];

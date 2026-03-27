@@ -12,6 +12,7 @@ export interface SequenceBuilderProps {
   data: SequenceBuilderData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 const SHAKE_VARIANTS = {
@@ -26,6 +27,7 @@ export function SequenceBuilder({
   data,
   onComplete,
   accentColor = "#379df9",
+  onNextGame,
 }: SequenceBuilderProps) {
   const { steps, instruction } = data;
 
@@ -77,6 +79,7 @@ export function SequenceBuilder({
           const result = buildGameResult(steps.length, steps.length, elapsed);
           resultRef.current = result;
           setGameOver(true);
+          setTimeout(() => onComplete(result), 500);
         }
       } else {
         playWrong();
@@ -179,6 +182,7 @@ export function SequenceBuilder({
         maxScore={resultRef.current.maxScore}
         accentColor={accentColor}
         onPlayAgain={handleStart}
+        onNextGame={onNextGame}
       />
     );
   }
@@ -406,14 +410,14 @@ export function SequenceBuilder({
                   opacity: 1,
                   scale: 1,
                   y: 0,
-                  x: isWrong ? [0, -8, 8, -6, 6, -3, 3, 0] : 0,
+                  ...(isWrong ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : { x: 0 }),
                 }}
                 exit={{ opacity: 0, scale: 0.4, y: -40 }}
                 transition={{
-                  type: "spring",
-                  stiffness: 350,
-                  damping: 22,
-                  delay: i * 0.04,
+                  opacity: { duration: 0.25, delay: i * 0.04 },
+                  scale: { duration: 0.3, ease: "easeOut", delay: i * 0.04 },
+                  y: { duration: 0.3, ease: "easeOut", delay: i * 0.04 },
+                  x: isWrong ? { duration: 0.5, ease: "easeInOut" } : { duration: 0.2 },
                 }}
                 whileHover={{ scale: 1.06, y: -4 }}
                 whileTap={{ scale: 0.92 }}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { zones, getZoneById } from "@funberry/config";
 import {
@@ -11,6 +12,8 @@ import {
   MemoryMatch,
   SequenceBuilder,
   SpotDifference,
+  OddOneOut,
+  TrueFalse,
   ColorActivity,
   WordPictureLink,
   InteractiveStory,
@@ -18,11 +21,12 @@ import {
   StarCatcher,
   GameShell,
   playTap,
+  RankProvider,
 } from "@funberry/game-engine";
 import type { GameConfig, GameResult } from "@funberry/game-engine";
-import { getChildren, getChildBestProgress, saveProgress } from "@funberry/supabase";
+import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank } from "@funberry/supabase";
 import type { Child } from "@funberry/supabase";
-import { useTimer } from "../../components/TimerProvider";
+import { LeaderboardModal } from "../../components/Leaderboard";
 
 type ViewMode = "who" | "zones" | "games" | "playing";
 
@@ -32,6 +36,8 @@ const GAME_ICONS: Record<string, string> = {
   memory_match: "🃏",
   sequence_builder: "📋",
   spot_difference: "🔍",
+  odd_one_out: "🔍",
+  true_false: "🤔",
   color_activity: "🎨",
   word_picture_link: "🔗",
   interactive_story: "📖",
@@ -45,6 +51,8 @@ const GAME_LABELS: Record<string, string> = {
   memory_match: "Memory Match",
   sequence_builder: "Order It",
   spot_difference: "Spot Difference",
+  odd_one_out: "Odd One Out",
+  true_false: "True or False",
   color_activity: "Color Fun",
   word_picture_link: "Word Match",
   interactive_story: "Story Time",
@@ -122,7 +130,191 @@ function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) 
   );
 }
 
+function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel: () => void }) {
+  const [digits, setDigits] = useState(["", "", "", ""]);
+  const [error, setError] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const inputRefs = [
+    useCallback((el: HTMLInputElement | null) => { if (el) el.focus(); }, []),
+    useCallback(() => {}, []),
+    useCallback(() => {}, []),
+    useCallback(() => {}, []),
+  ];
+
+  async function checkPin(allDigits: string[]) {
+    const pin = allDigits.join("");
+    if (pin.length !== 4) return;
+    setChecking(true);
+    try {
+      const valid = await verifyParentPin(pin);
+      if (valid) {
+        onSuccess();
+      } else {
+        setError(true);
+        setDigits(["", "", "", ""]);
+        setTimeout(() => {
+          const firstInput = document.querySelector<HTMLInputElement>("[data-pin-idx='0']");
+          firstInput?.focus();
+        }, 100);
+      }
+    } catch {
+      setError(true);
+      setDigits(["", "", "", ""]);
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  function handleDigitChange(idx: number, value: string) {
+    const d = value.replace(/\D/g, "").slice(-1);
+    setError(false);
+    const next = [...digits];
+    next[idx] = d;
+    setDigits(next);
+
+    if (d && idx < 3) {
+      const nextInput = document.querySelector<HTMLInputElement>(`[data-pin-idx='${idx + 1}']`);
+      nextInput?.focus();
+    }
+    if (d && idx === 3) {
+      checkPin(next);
+    }
+  }
+
+  function handleKeyDown(idx: number, e: React.KeyboardEvent) {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      const prevInput = document.querySelector<HTMLInputElement>(`[data-pin-idx='${idx - 1}']`);
+      prevInput?.focus();
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.5)",
+        backdropFilter: "blur(6px)",
+      }}
+      onClick={onCancel}
+    >
+      <motion.div
+        initial={{ scale: 0.85, y: 30 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.85, y: 30 }}
+        transition={{ type: "spring", stiffness: 300, damping: 22 }}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "white",
+          borderRadius: 28,
+          padding: "32px 28px",
+          maxWidth: 360,
+          width: "90%",
+          textAlign: "center",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        }}
+      >
+        <div style={{ fontSize: 48, marginBottom: 8 }}>🔒</div>
+        <h3 style={{
+          fontSize: 22,
+          fontWeight: 900,
+          fontFamily: "Fredoka, sans-serif",
+          color: "#1c498c",
+          margin: "0 0 4px",
+        }}>
+          Enter Parent PIN
+        </h3>
+        <p style={{
+          fontSize: 14,
+          color: "#6b7280",
+          fontFamily: "Nunito, sans-serif",
+          fontWeight: 600,
+          margin: "0 0 24px",
+        }}>
+          Enter your 4-digit PIN to access the parent dashboard.
+        </p>
+
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 16 }}>
+          {digits.map((d, i) => (
+            <input
+              key={i}
+              ref={i === 0 ? inputRefs[0] : undefined}
+              data-pin-idx={i}
+              type="password"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => handleDigitChange(i, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              disabled={checking}
+              style={{
+                width: 56,
+                height: 64,
+                textAlign: "center",
+                fontSize: 28,
+                fontWeight: 900,
+                fontFamily: "Fredoka, sans-serif",
+                borderRadius: 16,
+                border: `3px solid ${error ? "#f43f5e" : d ? "#6366f1" : "#e5e7eb"}`,
+                background: error ? "#fff1f2" : "#f9fafb",
+                outline: "none",
+                transition: "border-color 0.2s, background 0.2s",
+                caretColor: "#6366f1",
+              }}
+            />
+          ))}
+        </div>
+
+        {error && (
+          <motion.p
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ fontSize: 14, color: "#ef4444", fontWeight: 700, margin: "0 0 12px" }}
+          >
+            Wrong PIN — try again
+          </motion.p>
+        )}
+
+        {checking && (
+          <p style={{ fontSize: 14, color: "#6366f1", fontWeight: 700, margin: "0 0 12px" }}>
+            Verifying...
+          </p>
+        )}
+
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onCancel}
+          style={{
+            padding: "12px 32px",
+            borderRadius: 20,
+            border: "none",
+            background: "#f3f4f6",
+            color: "#6b7280",
+            fontSize: 15,
+            fontWeight: 800,
+            fontFamily: "Fredoka, sans-serif",
+            cursor: "pointer",
+            marginTop: 8,
+          }}
+        >
+          Cancel
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function PlayContent() {
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>("who");
   const [children, setChildren] = useState<Child[]>([]);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
@@ -130,7 +322,9 @@ export default function PlayContent() {
   const [selectedGame, setSelectedGame] = useState<GameConfig | null>(null);
   const [completedGames, setCompletedGames] = useState<Record<string, number>>({});
   const [loadingProgress, setLoadingProgress] = useState(false);
-  const { timer } = useTimer();
+  const [showParentGate, setShowParentGate] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [childRank, setChildRank] = useState<{ rank: number; total: number } | null>(null);
 
   // Load children on mount
   useEffect(() => {
@@ -190,13 +384,11 @@ export default function PlayContent() {
 
   async function handleGameComplete(result: GameResult) {
     if (selectedGame) {
-      // Update local state immediately
       setCompletedGames((prev) => ({
         ...prev,
         [selectedGame.id]: Math.max(prev[selectedGame.id] ?? 0, result.starsEarned),
       }));
 
-      // Persist to DB if a child is selected
       if (selectedChild) {
         try {
           await saveProgress(
@@ -206,21 +398,18 @@ export default function PlayContent() {
             result.score,
             result.timeSpent
           );
-          // Refresh stars count on the selected child
           const updatedKids = await getChildren();
           setChildren(updatedKids);
           const refreshed = updatedKids.find((c) => c.id === selectedChild.id);
           if (refreshed) setSelectedChild(refreshed);
+
+          const rank = await getChildRank(selectedChild.id);
+          setChildRank(rank);
         } catch {
-          // Non-fatal — local state still updated
+          // Non-fatal
         }
       }
     }
-
-    setTimeout(() => {
-      setView("games");
-      setSelectedGame(null);
-    }, 3500);
   }
 
   function handleNextGame() {
@@ -236,25 +425,29 @@ export default function PlayContent() {
 
     switch (data.type) {
       case "picture_quiz":
-        return <PictureQuiz data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <PictureQuiz data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "drag_sort":
-        return <DragSort data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <DragSort data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "memory_match":
-        return <MemoryMatch data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <MemoryMatch data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "sequence_builder":
-        return <SequenceBuilder data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <SequenceBuilder data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "spot_difference":
-        return <SpotDifference data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <SpotDifference data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
+      case "odd_one_out":
+        return <OddOneOut data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
+      case "true_false":
+        return <TrueFalse data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "color_activity":
-        return <ColorActivity data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <ColorActivity data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "word_picture_link":
-        return <WordPictureLink data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <WordPictureLink data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "interactive_story":
-        return <InteractiveStory data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <InteractiveStory data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "bubble_pop":
-        return <BubblePopAdventure data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <BubblePopAdventure data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "star_catcher":
-        return <StarCatcher data={data} onComplete={handleGameComplete} accentColor={accent} />;
+        return <StarCatcher data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       default:
         return (
           <div style={{ textAlign: "center", padding: 40 }}>
@@ -270,7 +463,7 @@ export default function PlayContent() {
     return (
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-purple-50 to-white p-6">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center justify-between mb-8">
             <motion.a
               href="/dashboard"
               whileHover={{ scale: 1.06, x: -3 }}
@@ -279,7 +472,25 @@ export default function PlayContent() {
             >
               🏠 Dashboard
             </motion.a>
+            <motion.button
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => { playTap(); setShowLeaderboard(true); }}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
+                color: "#78350f",
+              }}
+            >
+              🏆 Star Champions
+            </motion.button>
           </div>
+
+          <LeaderboardModal
+            open={showLeaderboard}
+            onClose={() => setShowLeaderboard(false)}
+            highlightChildId={selectedChild?.id}
+          />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -287,8 +498,8 @@ export default function PlayContent() {
             className="text-center mb-10"
           >
             <motion.div
-              animate={{ y: [0, -12, 0], rotate: [0, -8, 8, 0] }}
-              transition={{ repeat: Infinity, duration: 2.5 }}
+              animate={{ y: [0, -12, 0], rotate: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
               className="text-6xl mb-4"
             >
               🎮
@@ -342,6 +553,16 @@ export default function PlayContent() {
   if (view === "zones") {
     return (
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 p-6">
+        {/* Parent Gate Modal */}
+        <AnimatePresence>
+          {showParentGate && (
+            <PinGateModal
+              onSuccess={() => { setShowParentGate(false); router.push("/dashboard"); }}
+              onCancel={() => setShowParentGate(false)}
+            />
+          )}
+        </AnimatePresence>
+
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -365,19 +586,42 @@ export default function PlayContent() {
               )}
             </div>
 
-            {/* Timer badge */}
-            {timer.isActive && !timer.isLocked && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold"
+            <div className="flex items-center gap-3">
+              {/* Leaderboard button */}
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setShowLeaderboard(true); }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
                 style={{
-                  background: timer.remainingSeconds <= 60 ? "#fee2e2" : "#ecfdf5",
-                  border: `2px solid ${timer.remainingSeconds <= 60 ? "#fca5a5" : "#86efac"}`,
-                  color: timer.remainingSeconds <= 60 ? "#dc2626" : "#16a34a",
+                  background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
+                  color: "#78350f",
                 }}
               >
-                ⏱ {Math.floor(timer.remainingSeconds / 60)}:{String(timer.remainingSeconds % 60).padStart(2, "0")}
-              </div>
-            )}
+                🏆 Stars
+              </motion.button>
+              {/* Parent Dashboard button */}
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setShowParentGate(true); }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
+                style={{
+                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                  color: "white",
+                }}
+              >
+                🔒 Parent
+              </motion.button>
+            </div>
           </div>
+
+          {/* Leaderboard Modal */}
+          <LeaderboardModal
+            open={showLeaderboard}
+            onClose={() => setShowLeaderboard(false)}
+            highlightChildId={selectedChild?.id}
+          />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -385,8 +629,8 @@ export default function PlayContent() {
             className="text-center mb-10"
           >
             <motion.div
-              animate={{ y: [0, -10, 0], rotate: [0, -5, 5, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
+              animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
               className="text-6xl mb-3"
             >
               🗺️
@@ -426,8 +670,8 @@ export default function PlayContent() {
                   >
                     <motion.span
                       className="text-4xl block mb-2"
-                      animate={{ rotate: [0, -6, 6, 0], scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 3.5, delay: i * 0.25 }}
+                      animate={{ rotate: [0, -6, 0], scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 3.5, delay: i * 0.25, ease: "easeInOut" }}
                     >
                       {zone.emoji}
                     </motion.span>
@@ -460,28 +704,74 @@ export default function PlayContent() {
 
     return (
       <main className="min-h-screen p-6" style={{ background: theme.bgGradient }}>
+        {/* Parent Gate Modal */}
+        <AnimatePresence>
+          {showParentGate && (
+            <PinGateModal
+              onSuccess={() => { setShowParentGate(false); router.push("/dashboard"); }}
+              onCancel={() => setShowParentGate(false)}
+            />
+          )}
+        </AnimatePresence>
+
         <div className="mx-auto max-w-2xl">
           {/* Back navigation */}
-          <div className="flex items-center gap-3 mb-5">
-            <motion.button
-              whileHover={{ scale: 1.06, x: -3 }}
-              whileTap={{ scale: 0.94 }}
-              onClick={() => { playTap(); setView("zones"); setSelectedZone(null); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-white text-sm shadow-md"
-              style={{ background: "linear-gradient(135deg, #ff6b9d, #e0456d)" }}
-            >
-              🗺️ All Zones
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.94 }}
-              onClick={() => { playTap(); setView("who"); }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-              style={{ background: "rgba(255,255,255,0.8)", color: "#6b7280" }}
-            >
-              👥 Switch Player
-            </motion.button>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.06, x: -3 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setView("zones"); setSelectedZone(null); }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-white text-sm shadow-md"
+                style={{ background: "linear-gradient(135deg, #ff6b9d, #e0456d)" }}
+              >
+                🗺️ All Zones
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setView("who"); }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
+                style={{ background: "rgba(255,255,255,0.8)", color: "#6b7280" }}
+              >
+                👥 Switch Player
+              </motion.button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setShowLeaderboard(true); }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
+                style={{
+                  background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
+                  color: "#78350f",
+                }}
+              >
+                🏆 Stars
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => { playTap(); setShowParentGate(true); }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
+                style={{
+                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                  color: "white",
+                }}
+              >
+                🔒 Parent
+              </motion.button>
+            </div>
           </div>
+
+          {/* Leaderboard Modal */}
+          <LeaderboardModal
+            open={showLeaderboard}
+            onClose={() => setShowLeaderboard(false)}
+            highlightChildId={selectedChild?.id}
+          />
 
           {/* Zone header */}
           <motion.div
@@ -491,8 +781,8 @@ export default function PlayContent() {
           >
             <motion.span
               className="text-6xl block mb-3"
-              animate={{ y: [0, -10, 0], rotate: [0, -4, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
+              animate={{ y: [0, -10, 0], rotate: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
             >
               {zone?.emoji}
             </motion.span>
@@ -537,8 +827,8 @@ export default function PlayContent() {
                     >
                       <motion.span
                         className="text-4xl"
-                        animate={{ scale: [1, 1.2, 1], rotate: [0, -8, 8, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, delay: i * 0.3 }}
+                        animate={{ scale: [1, 1.2, 1], rotate: [0, -8, 0] }}
+                        transition={{ repeat: Infinity, duration: 2, delay: i * 0.3, ease: "easeInOut" }}
                       >
                         {GAME_ICONS[game.type] ?? "🎮"}
                       </motion.span>
@@ -614,26 +904,26 @@ export default function PlayContent() {
 
   /* ── Playing a Game ── */
   return (
-    <GameShell
-      theme={theme}
-      title={selectedGame?.title ?? ""}
-      subtitle={selectedGame ? GAME_LABELS[selectedGame.type] : undefined}
-      onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
-      onNextGame={handleNextGame}
-      timerSeconds={timer.isActive && !timer.isLocked ? timer.remainingSeconds : undefined}
-      timerTotal={timer.isActive && !timer.isLocked ? timer.totalSeconds : undefined}
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={selectedGame?.id}
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.94 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        >
-          {renderGame()}
-        </motion.div>
-      </AnimatePresence>
-    </GameShell>
+    <RankProvider rankInfo={childRank}>
+      <GameShell
+        theme={theme}
+        title={selectedGame?.title ?? ""}
+        subtitle={selectedGame ? GAME_LABELS[selectedGame.type] : undefined}
+        onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
+        onNextGame={handleNextGame}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedGame?.id}
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.94 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          >
+            {renderGame()}
+          </motion.div>
+        </AnimatePresence>
+      </GameShell>
+    </RankProvider>
   );
 }

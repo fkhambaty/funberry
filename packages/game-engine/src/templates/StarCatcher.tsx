@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * ⭐ STAR CATCHER
- * Items fall from the sky. Move your character LEFT / RIGHT using
- * big on-screen arrow buttons (like a joystick). Catch the correct items!
- * Educational: kids learn to categorize while enjoying physical movement.
- */
-
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { StarCatcherData, CatchItem, GameResult } from "../types";
@@ -19,6 +12,7 @@ export interface StarCatcherProps {
   data: StarCatcherData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 interface FallingItem extends CatchItem {
@@ -31,181 +25,221 @@ interface FallingItem extends CatchItem {
   missed: boolean;
 }
 
-const ARENA_WIDTH = 100; // percentage
-const CHAR_WIDTH = 14; // %
-const ITEM_SIZE = 52;
-const MOVE_STEP = 12;
+const CHAR_W = 15;
+const CATCH_RADIUS = 12;
+const FALL_SPEED_MIN = 1.8;
+const FALL_SPEED_MAX = 3.4;
+const MOVE_SPEED = 1.4;
 
-function spawnItem(items: CatchItem[], index: number): FallingItem {
-  const item = items[index % items.length];
+function spawnItem(items: CatchItem[], idx: number): FallingItem {
+  const item = items[idx % items.length];
   return {
     ...item,
-    uid: `${item.id}-${Date.now()}-${index}`,
-    x: 5 + Math.random() * 80,
-    speed: 4 + Math.random() * 4,
-    y: -10,
+    uid: `${item.id}-${Date.now()}-${idx}`,
+    x: 8 + Math.random() * 76,
+    speed: FALL_SPEED_MIN + Math.random() * (FALL_SPEED_MAX - FALL_SPEED_MIN),
+    y: -8,
     active: true,
     caught: false,
     missed: false,
   };
 }
 
-export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarCatcherProps) {
+export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextGame }: StarCatcherProps) {
   const { instruction, question, character, targetCategory, items, lives: initLives } = data;
 
-  const [charX, setCharX] = useState(45); // % from left
+  const charXRef = useRef(43);
+  const [charXDisplay, setCharXDisplay] = useState(43);
   const [lives, setLives] = useState(initLives);
-  const [fallingItems, setFallingItems] = useState<FallingItem[]>([]);
-  const [feedback, setFeedback] = useState<{ text: string; good: boolean } | null>(null);
-  const [isMovingLeft, setIsMovingLeft] = useState(false);
-  const [isMovingRight, setIsMovingRight] = useState(false);
-  const [charBounce, setCharBounce] = useState(false);
   const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState<{ text: string; good: boolean; id: number } | null>(null);
+  const [catchFlash, setCatchFlash] = useState(false);
 
-  const itemCounterRef = useRef(0);
-  const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const moveLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const keysRef = useRef<{ left: boolean; right: boolean }>({ left: false, right: false });
+  const fallingRef = useRef<FallingItem[]>([]);
+  const [displayItems, setDisplayItems] = useState<FallingItem[]>([]);
+  const spawnIdxRef = useRef(0);
+  const spawnCooldownRef = useRef(0);
   const arenaRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef(0);
+  const livesRef = useRef(initLives);
+  const feedbackIdRef = useRef(0);
 
   const targetItems = items.filter((i) => i.isTarget);
-  const totalTargets = targetItems.length * 2; // catch each target twice
+  const totalTargets = targetItems.length * 2;
 
-  const { state, start, answerQuestion, reset, isPlaying, isCompleted } = useGameState({
+  const { state, start, answerQuestion, completeGame, reset, isPlaying, isCompleted } = useGameState({
     totalQuestions: totalTargets,
     onComplete,
   });
 
-  const spawnNext = useCallback(() => {
-    if (!isPlaying) return;
-    const newItem = spawnItem(items, itemCounterRef.current++);
-    setFallingItems((prev) => [...prev.slice(-12), newItem]); // keep last 12
-    const delay = 1500 + Math.random() * 1500;
-    spawnTimerRef.current = setTimeout(spawnNext, delay);
-  }, [isPlaying, items]);
+  const scoreRef = useRef(0);
+  scoreRef.current = score;
+
+  const showFeedback = useCallback((text: string, good: boolean) => {
+    const id = ++feedbackIdRef.current;
+    setFeedback({ text, good, id });
+    setTimeout(() => {
+      setFeedback((f) => (f && f.id === id ? null : f));
+    }, 1000);
+  }, []);
 
   const handleStart = useCallback(() => {
     playTap();
-    setCharX(45);
+    charXRef.current = 43;
+    setCharXDisplay(43);
     setLives(initLives);
-    setFallingItems([]);
+    livesRef.current = initLives;
     setScore(0);
+    scoreRef.current = 0;
     setFeedback(null);
-    itemCounterRef.current = 0;
+    fallingRef.current = [];
+    setDisplayItems([]);
+    spawnIdxRef.current = 0;
+    spawnCooldownRef.current = 0;
     start();
   }, [initLives, start]);
 
   const handlePlayAgain = useCallback(() => {
     playTap();
-    setCharX(45);
+    charXRef.current = 43;
+    setCharXDisplay(43);
     setLives(initLives);
-    setFallingItems([]);
+    livesRef.current = initLives;
     setScore(0);
+    scoreRef.current = 0;
     setFeedback(null);
-    itemCounterRef.current = 0;
+    fallingRef.current = [];
+    setDisplayItems([]);
+    spawnIdxRef.current = 0;
+    spawnCooldownRef.current = 0;
     reset();
   }, [initLives, reset]);
 
-  // Start spawning when playing
-  useEffect(() => {
-    if (isPlaying) {
-      spawnTimerRef.current = setTimeout(spawnNext, 600);
-    }
-    return () => {
-      if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
-    };
-  }, [isPlaying, spawnNext]);
-
-  // Movement loop
+  // Keyboard
   useEffect(() => {
     if (!isPlaying) return;
-    moveLoopRef.current = setInterval(() => {
-      setCharX((x) => {
-        if (isMovingLeft) return Math.max(1, x - MOVE_STEP * 0.5);
-        if (isMovingRight) return Math.min(ARENA_WIDTH - CHAR_WIDTH - 1, x + MOVE_STEP * 0.5);
-        return x;
-      });
-    }, 60);
-    return () => {
-      if (moveLoopRef.current) clearInterval(moveLoopRef.current);
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a") keysRef.current.left = true;
+      if (e.key === "ArrowRight" || e.key === "d") keysRef.current.right = true;
     };
-  }, [isPlaying, isMovingLeft, isMovingRight]);
+    const up = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft" || e.key === "a") keysRef.current.left = false;
+      if (e.key === "ArrowRight" || e.key === "d") keysRef.current.right = false;
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      keysRef.current = { left: false, right: false };
+    };
+  }, [isPlaying]);
 
-  // Game physics loop — move items down + collision detection
+  // Main game loop — single requestAnimationFrame for everything
   useEffect(() => {
     if (!isPlaying) return;
-    gameLoopRef.current = setInterval(() => {
-      setFallingItems((prev) =>
-        prev.map((item) => {
-          if (!item.active || item.caught || item.missed) return item;
+    let lastTime = 0;
+    let alive = true;
 
-          const newY = item.y + item.speed * 0.5;
+    const loop = (time: number) => {
+      if (!alive) return;
+      const dt = lastTime ? Math.min(time - lastTime, 40) : 16;
+      lastTime = time;
 
-          // Check catch zone (bottom of arena ≈ 80-90%)
-          if (newY >= 78) {
-            // Check if character is under this item
-            const itemCenterX = item.x;
-            const charCenter = charX + CHAR_WIDTH / 2;
-            const dist = Math.abs(itemCenterX - charCenter);
-
-            if (dist < CHAR_WIDTH + 4) {
-              // CAUGHT!
-              const isCorrTarget = item.isTarget;
-              if (isCorrTarget) {
-                playCollect();
-                setScore((s) => s + 15);
-                setCharBounce(true);
-                setTimeout(() => setCharBounce(false), 600);
-                setFeedback({ text: `✅ ${item.label}!`, good: true });
-                answerQuestion(item.uid, true);
-                if (arenaRef.current) {
-                  const rect = arenaRef.current.getBoundingClientRect();
-                  fireSparkleAt(rect.left + (itemCenterX / 100) * rect.width, rect.top + (80 / 100) * rect.height);
-                  fireMiniBurst();
-                }
-              } else {
-                playMiss();
-                setFeedback({ text: `❌ Not ${targetCategory}!`, good: false });
-                setLives((l) => Math.max(0, l - 1));
-                answerQuestion(item.uid, false);
-              }
-              setTimeout(() => setFeedback(null), 1200);
-              return { ...item, y: newY, caught: true, active: false };
-            } else {
-              // MISSED target
-              if (item.isTarget) {
-                setLives((l) => Math.max(0, l - 1));
-                playMiss();
-                setFeedback({ text: `Missed a ${item.label}!`, good: false });
-                setTimeout(() => setFeedback(null), 1200);
-                answerQuestion(item.uid, false);
-              }
-              return { ...item, y: newY, missed: true, active: false };
-            }
-          }
-
-          // Off-screen at bottom
-          if (newY > 110) return { ...item, active: false };
-
-          return { ...item, y: newY };
-        })
-      );
-    }, 80);
-
-    return () => {
-      if (gameLoopRef.current) clearInterval(gameLoopRef.current);
-    };
-  }, [isPlaying, charX, targetCategory, answerQuestion]);
-
-  // Game over on 0 lives
-  useEffect(() => {
-    if (isPlaying && lives <= 0) {
-      // Force complete
-      for (let i = state.currentQuestion; i < totalTargets; i++) {
-        answerQuestion(`force-end-${i}`, false);
+      // Movement
+      const keys = keysRef.current;
+      if (keys.left) {
+        charXRef.current = Math.max(0, charXRef.current - MOVE_SPEED * (dt / 16));
       }
-    }
-  }, [lives, isPlaying, state.currentQuestion, totalTargets, answerQuestion]);
+      if (keys.right) {
+        charXRef.current = Math.min(100 - CHAR_W, charXRef.current + MOVE_SPEED * (dt / 16));
+      }
+      setCharXDisplay(charXRef.current);
+
+      // Spawning
+      spawnCooldownRef.current -= dt;
+      if (spawnCooldownRef.current <= 0) {
+        fallingRef.current.push(spawnItem(items, spawnIdxRef.current++));
+        spawnCooldownRef.current = 1200 + Math.random() * 1200;
+      }
+
+      // Physics + collision
+      const charCenter = charXRef.current + CHAR_W / 2;
+      let changed = false;
+      const next: FallingItem[] = [];
+
+      for (const item of fallingRef.current) {
+        if (!item.active) { next.push(item); continue; }
+
+        const newY = item.y + item.speed * (dt / 16);
+
+        if (newY >= 80 && !item.caught && !item.missed) {
+          const dist = Math.abs(item.x - charCenter);
+          if (dist < CATCH_RADIUS) {
+            changed = true;
+            if (item.isTarget) {
+              playCollect();
+              setScore((s) => s + 15);
+              setCatchFlash(true);
+              setTimeout(() => setCatchFlash(false), 300);
+              showFeedback(`${item.emoji} ${item.label}!`, true);
+              answerQuestion(item.uid, true);
+              if (arenaRef.current) {
+                const rect = arenaRef.current.getBoundingClientRect();
+                fireSparkleAt(rect.left + (item.x / 100) * rect.width, rect.top + rect.height * 0.78);
+                fireMiniBurst();
+              }
+            } else {
+              playMiss();
+              showFeedback(`Not ${targetCategory}!`, false);
+              setScore((s) => Math.max(0, s - 5));
+              livesRef.current = Math.max(0, livesRef.current - 1);
+              setLives(livesRef.current);
+            }
+            next.push({ ...item, y: newY, caught: true, active: false });
+            continue;
+          }
+        }
+
+        if (newY >= 95 && !item.caught && !item.missed) {
+          changed = true;
+          if (item.isTarget) {
+            playMiss();
+            showFeedback(`Missed ${item.label}!`, false);
+            livesRef.current = Math.max(0, livesRef.current - 1);
+            setLives(livesRef.current);
+          }
+          next.push({ ...item, y: newY, missed: true, active: false });
+          continue;
+        }
+
+        if (newY > 110) { changed = true; continue; }
+
+        if (Math.abs(newY - item.y) > 0.01) changed = true;
+        next.push({ ...item, y: newY });
+      }
+
+      if (changed || next.length !== fallingRef.current.length) {
+        fallingRef.current = next;
+        setDisplayItems([...next.filter((i) => i.y < 105)]);
+      }
+
+      if (livesRef.current <= 0) {
+        alive = false;
+        completeGame(scoreRef.current);
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      alive = false;
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [isPlaying, items, targetCategory, answerQuestion, completeGame, showFeedback]);
 
   /* ── Start Screen ── */
   if (!isPlaying && !isCompleted) {
@@ -216,14 +250,13 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarC
         style={{ textAlign: "center", padding: "40px 24px", display: "flex", flexDirection: "column", alignItems: "center" }}
       >
         <motion.div
-          animate={{ y: [0, -18, 0], rotate: [0, 10, -10, 0] }}
+          animate={{ y: [0, -18, 0], rotate: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
           style={{ fontSize: 80, marginBottom: 12 }}
         >
           {character}
         </motion.div>
 
-        {/* Falling preview items */}
         <div style={{ position: "relative", height: 70, width: 280, marginBottom: 16 }}>
           {items.slice(0, 5).map((item, i) => (
             <motion.div
@@ -237,19 +270,13 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarC
           ))}
         </div>
 
-        <motion.h2
-          style={{ fontSize: 28, fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", marginBottom: 8 }}
-        >
-          ⭐ Star Catcher!
+        <motion.h2 style={{ fontSize: 28, fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", marginBottom: 8 }}>
+          Star Catcher!
         </motion.h2>
 
         <div style={{
           background: "linear-gradient(135deg, #fef3c7, #fde68a)",
-          borderRadius: 20,
-          padding: "14px 24px",
-          marginBottom: 10,
-          maxWidth: 340,
-          border: "2px solid #fcd34d",
+          borderRadius: 20, padding: "14px 24px", marginBottom: 10, maxWidth: 340, border: "2px solid #fcd34d",
         }}>
           <p style={{ fontSize: 20, fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#92400e", margin: "0 0 4px" }}>
             {question}
@@ -260,7 +287,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarC
         </div>
 
         <p style={{ color: "#6b7280", marginBottom: 6, fontSize: 14, fontFamily: "Nunito, sans-serif", fontWeight: 700 }}>
-          ❤️ {initLives} lives &nbsp;|&nbsp; Use ◀ ▶ buttons to move!
+          {initLives} lives &bull; Use arrow keys or buttons to move!
         </p>
 
         <motion.button
@@ -269,25 +296,18 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarC
           onClick={handleStart}
           style={{
             background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
-            color: "white",
-            border: "none",
-            padding: "18px 56px",
-            borderRadius: 28,
-            fontSize: 22,
-            fontWeight: 900,
-            fontFamily: "Fredoka, sans-serif",
-            cursor: "pointer",
-            boxShadow: "0 8px 28px rgba(245,158,11,0.45)",
-            marginTop: 8,
+            color: "white", border: "none", padding: "18px 56px", borderRadius: 28,
+            fontSize: 22, fontWeight: 900, fontFamily: "Fredoka, sans-serif",
+            cursor: "pointer", boxShadow: "0 8px 28px rgba(245,158,11,0.45)", marginTop: 8,
           }}
         >
-          ⭐ START CATCHING!
+          START CATCHING!
         </motion.button>
       </motion.div>
     );
   }
 
-  /* ── Completion Screen ── */
+  /* ── Completion ── */
   if (isCompleted) {
     return (
       <StarReveal
@@ -297,240 +317,227 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9" }: StarC
         accentColor={accentColor}
         characterEmoji={character}
         onPlayAgain={handlePlayAgain}
+        onNextGame={onNextGame}
       />
     );
   }
 
-  /* ── Playing Screen ── */
+  /* ── Playing ── */
   return (
-    <div style={{ padding: "0 12px 20px" }}>
+    <div style={{ padding: "0 8px 12px", position: "relative" }}>
       {/* HUD */}
       <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "8px 12px",
-        background: "rgba(255,255,255,0.7)",
-        borderRadius: 16,
-        marginBottom: 8,
-        backdropFilter: "blur(8px)",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "6px 14px", background: "rgba(255,255,255,0.75)", borderRadius: 16,
+        marginBottom: 6, backdropFilter: "blur(8px)",
       }}>
-        <div style={{ fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", fontSize: 15 }}>
+        <div style={{ fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", fontSize: 14, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {question}
         </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <span style={{ fontSize: 14, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#f59e0b" }}>⭐ {score}</span>
-          <span style={{ fontSize: 14 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexShrink: 0 }}>
+          <span style={{ fontSize: 14, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#f59e0b" }}>
+            {score}
+          </span>
+          <span style={{ fontSize: 14, letterSpacing: -2 }}>
             {Array.from({ length: initLives }, (_, i) => (
-              <motion.span
-                key={i}
-                animate={i >= lives ? { scale: [1, 0], opacity: [1, 0] } : {}}
-                style={{ fontSize: 18 }}
-              >
+              <span key={i} style={{ opacity: i < lives ? 1 : 0.2 }}>
                 {i < lives ? "❤️" : "🖤"}
-              </motion.span>
+              </span>
             ))}
           </span>
         </div>
       </div>
+
+      {/* Feedback — FIXED overlay at top of arena */}
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            key={feedback.id}
+            initial={{ opacity: 0, y: -20, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.85 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+              position: "absolute",
+              top: 56,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 50,
+              padding: "8px 22px",
+              borderRadius: 16,
+              background: feedback.good
+                ? "linear-gradient(135deg, #ecfdf5, #d1fae5)"
+                : "linear-gradient(135deg, #fff1f2, #fecdd3)",
+              border: `2px solid ${feedback.good ? "#86efac" : "#fecdd3"}`,
+              fontWeight: 900,
+              fontSize: 15,
+              fontFamily: "Fredoka, sans-serif",
+              color: feedback.good ? "#065f46" : "#9f1239",
+              boxShadow: feedback.good
+                ? "0 4px 16px rgba(34,197,94,0.3)"
+                : "0 4px 16px rgba(239,68,68,0.2)",
+              whiteSpace: "nowrap",
+              pointerEvents: "none",
+            }}
+          >
+            {feedback.good ? "✅" : "❌"} {feedback.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Arena */}
       <div
         ref={arenaRef}
         style={{
           position: "relative",
-          height: 380,
-          background: "linear-gradient(180deg, rgba(219,234,254,0.4) 0%, rgba(254,252,232,0.4) 100%)",
+          height: 420,
+          background: "linear-gradient(180deg, rgba(219,234,254,0.3) 0%, rgba(254,252,232,0.3) 60%, rgba(254,243,199,0.4) 100%)",
           borderRadius: 24,
-          border: "2px solid rgba(255,255,255,0.6)",
+          border: "2px solid rgba(255,255,255,0.5)",
           overflow: "hidden",
-          marginBottom: 10,
+          marginBottom: 6,
         }}
       >
         {/* Falling items */}
-        {fallingItems.map((item) => {
-          if (!item.active || item.caught || item.missed) return null;
+        {displayItems.map((item) => {
+          if (!item.active) return null;
           return (
-            <motion.div
+            <div
               key={item.uid}
               style={{
                 position: "absolute",
                 left: `${item.x}%`,
                 top: `${item.y}%`,
                 transform: "translateX(-50%)",
-                textAlign: "center",
+                willChange: "transform, top",
                 pointerEvents: "none",
               }}
             >
-              <motion.div
-                animate={{ rotate: [0, 15, -15, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              <div
+                style={{
+                  width: 52, height: 52, borderRadius: "50%",
+                  background: item.isTarget
+                    ? "radial-gradient(circle at 35% 35%, #fffbeb, rgba(251,191,36,0.5))"
+                    : "radial-gradient(circle at 35% 35%, #f9fafb, rgba(209,213,219,0.4))",
+                  border: item.isTarget ? "3px solid #fbbf24" : "2px solid #d1d5db",
+                  boxShadow: item.isTarget
+                    ? "0 4px 14px rgba(251,191,36,0.45)"
+                    : "0 2px 6px rgba(0,0,0,0.06)",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                }}
               >
-                <div
-                  style={{
-                    width: ITEM_SIZE,
-                    height: ITEM_SIZE,
-                    borderRadius: "50%",
-                    background: item.isTarget
-                      ? "radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(255,215,0,0.6))"
-                      : "radial-gradient(circle at 35% 35%, rgba(255,255,255,0.8), rgba(200,200,220,0.5))",
-                    border: item.isTarget ? "3px solid #fbbf24" : "2px solid #d1d5db",
-                    boxShadow: item.isTarget
-                      ? "0 4px 16px rgba(251,191,36,0.5)"
-                      : "0 2px 8px rgba(0,0,0,0.1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 1,
-                  }}
-                >
-                  <span style={{ fontSize: 24 }}>{item.emoji}</span>
-                  <span style={{ fontSize: 10, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151" }}>
-                    {item.label}
-                  </span>
-                </div>
-              </motion.div>
-            </motion.div>
+                <span style={{ fontSize: 22, lineHeight: 1 }}>{item.emoji}</span>
+                <span style={{ fontSize: 9, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151", lineHeight: 1 }}>
+                  {item.label}
+                </span>
+              </div>
+            </div>
           );
         })}
 
         {/* Character */}
-        <motion.div
+        <div
           style={{
             position: "absolute",
-            bottom: "6%",
-            left: `${charX}%`,
-            width: `${CHAR_WIDTH}%`,
+            bottom: "5%",
+            left: `${charXDisplay}%`,
+            width: `${CHAR_W}%`,
+            willChange: "left",
             textAlign: "center",
-            transition: "left 0.08s linear",
           }}
-          animate={charBounce ? { y: [0, -22, 0] } : { y: [0, -4, 0] }}
-          transition={charBounce ? { duration: 0.5 } : { repeat: Infinity, duration: 1.8 }}
         >
-          <div style={{ fontSize: 44, lineHeight: 1 }}>{character}</div>
-          {/* Catch basket below character */}
           <div style={{
-            width: "110%",
-            height: 14,
-            background: "linear-gradient(135deg, #fbbf24, #f97316)",
-            borderRadius: "0 0 30px 30px",
+            fontSize: 42, lineHeight: 1,
+            filter: catchFlash ? "drop-shadow(0 0 12px rgba(251,191,36,0.8))" : "none",
+            transition: "filter 0.15s",
+          }}>
+            {character}
+          </div>
+          <div style={{
+            width: "110%", height: 10, marginLeft: "-5%",
+            background: catchFlash
+              ? "linear-gradient(135deg, #fde047, #fbbf24)"
+              : "linear-gradient(135deg, #fbbf24, #f97316)",
+            borderRadius: "0 0 20px 20px",
             marginTop: -2,
-            boxShadow: "0 4px 10px rgba(249,115,22,0.4)",
+            boxShadow: catchFlash
+              ? "0 2px 16px rgba(253,224,71,0.7)"
+              : "0 3px 8px rgba(249,115,22,0.35)",
+            transition: "background 0.15s, box-shadow 0.15s",
           }} />
-        </motion.div>
+        </div>
 
-        {/* Ground line */}
+        {/* Ground */}
         <div style={{
-          position: "absolute",
-          bottom: "4%",
-          left: 0,
-          right: 0,
-          height: 3,
-          background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.08), transparent)",
+          position: "absolute", bottom: "3%", left: "5%", right: "5%",
+          height: 2, background: "rgba(0,0,0,0.06)", borderRadius: 1,
         }} />
       </div>
 
-      {/* Feedback popup */}
-      <AnimatePresence>
-        {feedback && (
-          <motion.div
-            initial={{ opacity: 0, y: -15, scale: 0.85 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.85 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
-            style={{
-              textAlign: "center",
-              padding: "10px 20px",
-              borderRadius: 20,
-              marginBottom: 8,
-              background: feedback.good
-                ? "linear-gradient(135deg, #ecfdf5, #d1fae5)"
-                : "linear-gradient(135deg, #fff1f2, #fecdd3)",
-              border: `2px solid ${feedback.good ? "#a7f3d0" : "#fecdd3"}`,
-              fontWeight: 900,
-              fontSize: 16,
-              fontFamily: "Fredoka, sans-serif",
-              color: feedback.good ? "#065f46" : "#9f1239",
-            }}
-          >
-            {feedback.text}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Controls */}
+      <div style={{
+        display: "flex", justifyContent: "center", gap: 20, padding: "4px 0 0",
+      }}>
+        <ControlButton
+          direction="left"
+          active={keysRef.current.left}
+          onDown={() => { keysRef.current.left = true; playJump(); }}
+          onUp={() => { keysRef.current.left = false; }}
+        />
 
-      {/* D-PAD Controls */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 24, paddingTop: 8 }}>
-        {/* LEFT button */}
-        <motion.button
-          onPointerDown={() => { setIsMovingLeft(true); playJump(); }}
-          onPointerUp={() => setIsMovingLeft(false)}
-          onPointerLeave={() => setIsMovingLeft(false)}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            width: 90,
-            height: 90,
-            borderRadius: 24,
-            border: "none",
-            background: isMovingLeft
-              ? "linear-gradient(135deg, #2563eb, #1d4ed8)"
-              : "linear-gradient(135deg, #3b82f6, #2563eb)",
-            color: "white",
-            fontSize: 40,
-            fontWeight: 900,
-            cursor: "pointer",
-            boxShadow: isMovingLeft
-              ? "0 2px 8px rgba(37,99,235,0.5), inset 0 3px 0 rgba(0,0,0,0.2)"
-              : "0 8px 20px rgba(59,130,246,0.5), inset 0 -3px 0 rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            userSelect: "none",
-            touchAction: "none",
-          }}
-        >
-          ◀
-        </motion.button>
-
-        {/* Center info */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
-          <span style={{ fontSize: 28 }}>{character}</span>
-          <span style={{ fontSize: 11, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#6b7280" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, minWidth: 50 }}>
+          <span style={{ fontSize: 26 }}>{character}</span>
+          <span style={{ fontSize: 10, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#9ca3af" }}>
             MOVE
           </span>
         </div>
 
-        {/* RIGHT button */}
-        <motion.button
-          onPointerDown={() => { setIsMovingRight(true); playJump(); }}
-          onPointerUp={() => setIsMovingRight(false)}
-          onPointerLeave={() => setIsMovingRight(false)}
-          whileTap={{ scale: 0.9 }}
-          style={{
-            width: 90,
-            height: 90,
-            borderRadius: 24,
-            border: "none",
-            background: isMovingRight
-              ? "linear-gradient(135deg, #7c3aed, #6d28d9)"
-              : "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-            color: "white",
-            fontSize: 40,
-            fontWeight: 900,
-            cursor: "pointer",
-            boxShadow: isMovingRight
-              ? "0 2px 8px rgba(124,58,237,0.5), inset 0 3px 0 rgba(0,0,0,0.2)"
-              : "0 8px 20px rgba(139,92,246,0.5), inset 0 -3px 0 rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            userSelect: "none",
-            touchAction: "none",
-          }}
-        >
-          ▶
-        </motion.button>
+        <ControlButton
+          direction="right"
+          active={keysRef.current.right}
+          onDown={() => { keysRef.current.right = true; playJump(); }}
+          onUp={() => { keysRef.current.right = false; }}
+        />
       </div>
     </div>
+  );
+}
+
+function ControlButton({ direction, active, onDown, onUp }: {
+  direction: "left" | "right";
+  active: boolean;
+  onDown: () => void;
+  onUp: () => void;
+}) {
+  const isLeft = direction === "left";
+  const bg = isLeft
+    ? active ? "linear-gradient(135deg, #2563eb, #1d4ed8)" : "linear-gradient(135deg, #3b82f6, #2563eb)"
+    : active ? "linear-gradient(135deg, #7c3aed, #6d28d9)" : "linear-gradient(135deg, #8b5cf6, #7c3aed)";
+  const shadow = isLeft
+    ? active ? "0 2px 6px rgba(37,99,235,0.5), inset 0 2px 0 rgba(0,0,0,0.15)" : "0 6px 18px rgba(59,130,246,0.45), inset 0 -2px 0 rgba(0,0,0,0.15)"
+    : active ? "0 2px 6px rgba(124,58,237,0.5), inset 0 2px 0 rgba(0,0,0,0.15)" : "0 6px 18px rgba(139,92,246,0.45), inset 0 -2px 0 rgba(0,0,0,0.15)";
+
+  return (
+    <button
+      onTouchStart={(e) => { e.preventDefault(); onDown(); }}
+      onTouchEnd={onUp}
+      onTouchCancel={onUp}
+      onMouseDown={onDown}
+      onMouseUp={onUp}
+      onMouseLeave={onUp}
+      style={{
+        width: 84, height: 84, borderRadius: 22, border: "none",
+        background: bg, color: "white", fontSize: 36, fontWeight: 900,
+        cursor: "pointer",
+        boxShadow: shadow,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        userSelect: "none", touchAction: "manipulation",
+        WebkitUserSelect: "none",
+        transform: active ? "scale(0.92) translateY(2px)" : "scale(1) translateY(0)",
+        transition: "transform 0.08s, box-shadow 0.08s, background 0.08s",
+      }}
+    >
+      {isLeft ? "◀" : "▶"}
+    </button>
   );
 }

@@ -111,4 +111,41 @@ export const sunMoonStarsGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "sms-odd-out",
+    zoneId: "sun-moon-stars",
+    type: "odd_one_out",
+    title: "Odd Sky Object Out",
+    description: "Which one doesn't belong in the sky?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "things in the sky", items: [{ id: "sun", label: "Sun", emoji: "☀️" }, { id: "moon", label: "Moon", emoji: "🌙" }, { id: "star", label: "Star", emoji: "⭐" }, { id: "table", label: "Table", emoji: "🪑" }], oddId: "table", explanation: "A table stays on the ground — it doesn't belong in the sky!" },
+        { id: "r2", category: "things you see at night", items: [{ id: "moon2", label: "Moon", emoji: "🌕" }, { id: "stars2", label: "Stars", emoji: "✨" }, { id: "owl", label: "Owl", emoji: "🦉" }, { id: "sunflower", label: "Sunflower", emoji: "🌻" }], oddId: "sunflower", explanation: "Sunflowers bloom during the day, not at night!" },
+        { id: "r3", category: "sources of light", items: [{ id: "sun3", label: "Sun", emoji: "☀️" }, { id: "lamp", label: "Lamp", emoji: "💡" }, { id: "candle", label: "Candle", emoji: "🕯️" }, { id: "cloud", label: "Cloud", emoji: "☁️" }], oddId: "cloud", explanation: "Clouds block light — they don't give off light!" },
+      ],
+    },
+  },
+  {
+    id: "sms-true-false",
+    zoneId: "sun-moon-stars",
+    type: "true_false",
+    title: "Sky Facts: True or False?",
+    description: "Test your sky knowledge!",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this fact about the sky true or false?",
+      questions: [
+        { id: "tf1", statement: "The sun gives us light and warmth", emoji: "☀️", isTrue: true, explanation: "Yes! The sun is a giant ball of fire that lights up our world." },
+        { id: "tf2", statement: "Stars only come out during the day", emoji: "⭐", isTrue: false, explanation: "No! We see stars at night when the sky is dark." },
+        { id: "tf3", statement: "The moon shines with its own light", emoji: "🌙", isTrue: false, explanation: "The moon reflects sunlight — it doesn't make its own light!" },
+        { id: "tf4", statement: "The sun rises in the morning", emoji: "🌅", isTrue: true, explanation: "Correct! The sun comes up in the east every morning." },
+      ],
+    },
+  },
 ];

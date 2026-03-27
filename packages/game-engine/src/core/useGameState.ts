@@ -16,6 +16,10 @@ export function useGameState({
   onComplete,
 }: UseGameStateOptions) {
   const maxScore = totalQuestions * maxScorePerQuestion;
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  const pendingResultRef = useRef<GameResult | null>(null);
 
   const [state, setState] = useState<GameState>({
     status: "idle",
@@ -31,6 +35,14 @@ export function useGameState({
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  useEffect(() => {
+    if (state.status === "completed" && pendingResultRef.current) {
+      const result = pendingResultRef.current;
+      pendingResultRef.current = null;
+      onCompleteRef.current?.(result);
+    }
+  }, [state.status]);
+
   function startTimer() {
     timerRef.current = setInterval(() => {
       setState((prev) => {
@@ -38,7 +50,7 @@ export function useGameState({
         if (prev.timeLimit && newTime >= prev.timeLimit) {
           clearInterval(timerRef.current!);
           const result = buildGameResult(prev.score, prev.maxScore, newTime);
-          onComplete?.(result);
+          pendingResultRef.current = result;
           return { ...prev, timeElapsed: newTime, status: "completed", starsEarned: result.starsEarned };
         }
         return { ...prev, timeElapsed: newTime };
@@ -75,7 +87,7 @@ export function useGameState({
         if (isLast) {
           stopTimer();
           const result = buildGameResult(newScore, prev.maxScore, prev.timeElapsed);
-          onComplete?.(result);
+          pendingResultRef.current = result;
           return {
             ...prev,
             score: newScore,
@@ -94,26 +106,27 @@ export function useGameState({
         };
       });
     },
-    [maxScorePerQuestion, onComplete]
+    [maxScorePerQuestion]
   );
 
   const completeGame = useCallback(
     (finalScore: number) => {
       stopTimer();
       const result = buildGameResult(finalScore, maxScore, state.timeElapsed);
+      pendingResultRef.current = result;
       setState((prev) => ({
         ...prev,
         score: finalScore,
         status: "completed",
         starsEarned: result.starsEarned,
       }));
-      onComplete?.(result);
     },
-    [maxScore, state.timeElapsed, onComplete]
+    [maxScore, state.timeElapsed]
   );
 
   const reset = useCallback(() => {
     stopTimer();
+    pendingResultRef.current = null;
     setState({
       status: "idle",
       score: 0,

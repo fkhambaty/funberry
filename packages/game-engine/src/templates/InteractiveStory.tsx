@@ -48,6 +48,7 @@ export interface InteractiveStoryProps {
   data: InteractiveStoryData;
   onComplete: (result: GameResult) => void;
   accentColor?: string;
+  onNextGame?: () => void;
 }
 
 /* ── Component ── */
@@ -56,6 +57,7 @@ export function InteractiveStory({
   data,
   onComplete,
   accentColor = "#ec4899",
+  onNextGame,
 }: InteractiveStoryProps) {
   const { instruction, pages } = data;
 
@@ -264,6 +266,7 @@ export function InteractiveStory({
         maxScore={result.maxScore}
         accentColor={accentColor}
         onPlayAgain={handlePlayAgain}
+        onNextGame={onNextGame}
       />
     );
   }

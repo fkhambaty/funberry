@@ -106,4 +106,41 @@ export const neighbourhoodGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "neigh-odd-out",
+    zoneId: "neighbourhood",
+    type: "odd_one_out",
+    title: "Odd Place Out",
+    description: "Which place doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "places in a neighbourhood", items: [{ id: "school", label: "School", emoji: "🏫" }, { id: "park", label: "Park", emoji: "🏞️" }, { id: "hospital", label: "Hospital", emoji: "🏥" }, { id: "moon", label: "Moon", emoji: "🌙" }], oddId: "moon", explanation: "The moon is in space — it's not in your neighbourhood!" },
+        { id: "r2", category: "people who help us", items: [{ id: "police", label: "Police", emoji: "👮" }, { id: "postman", label: "Postman", emoji: "📮" }, { id: "teacher", label: "Teacher", emoji: "👩‍🏫" }, { id: "cloud", label: "Cloud", emoji: "☁️" }], oddId: "cloud", explanation: "A cloud isn't a person — it's in the sky!" },
+        { id: "r3", category: "things in a park", items: [{ id: "swing", label: "Swing", emoji: "🎠" }, { id: "bench", label: "Bench", emoji: "🪑" }, { id: "tree", label: "Tree", emoji: "🌳" }, { id: "fridge", label: "Fridge", emoji: "🧊" }], oddId: "fridge", explanation: "A fridge belongs in a kitchen, not in a park!" },
+      ],
+    },
+  },
+  {
+    id: "neigh-true-false",
+    zoneId: "neighbourhood",
+    type: "true_false",
+    title: "Neighbourhood Facts",
+    description: "True or false?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this fact true or false?",
+      questions: [
+        { id: "tf1", statement: "A post office helps send letters", emoji: "📮", isTrue: true, explanation: "Yes! You go to the post office to mail letters and packages." },
+        { id: "tf2", statement: "We can swim in the library", emoji: "📚", isTrue: false, explanation: "No! Libraries are for reading books, not swimming!" },
+        { id: "tf3", statement: "Parks have trees and playgrounds", emoji: "🏞️", isTrue: true, explanation: "Correct! Parks are fun places with nature and play areas." },
+        { id: "tf4", statement: "Hospitals help sick people", emoji: "🏥", isTrue: true, explanation: "Yes! Doctors and nurses work in hospitals to help people feel better." },
+      ],
+    },
+  },
 ];

@@ -112,4 +112,41 @@ export const othersGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "others-odd-out",
+    zoneId: "others-in-my-world",
+    type: "odd_one_out",
+    title: "Odd Helper Out",
+    description: "Which one doesn't belong?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "odd_one_out",
+      instruction: "Find the one that doesn't belong!",
+      rounds: [
+        { id: "r1", category: "community helpers", items: [{ id: "doctor", label: "Doctor", emoji: "👨‍⚕️" }, { id: "teacher", label: "Teacher", emoji: "👩‍🏫" }, { id: "firefighter", label: "Firefighter", emoji: "👨‍🚒" }, { id: "ice-cream", label: "Ice Cream", emoji: "🍦" }], oddId: "ice-cream", explanation: "Ice cream is a treat, not a community helper!" },
+        { id: "r2", category: "family members", items: [{ id: "mom", label: "Mom", emoji: "👩" }, { id: "dad", label: "Dad", emoji: "👨" }, { id: "sister", label: "Sister", emoji: "👧" }, { id: "car", label: "Car", emoji: "🚗" }], oddId: "car", explanation: "A car is a vehicle — it's not a family member!" },
+        { id: "r3", category: "pets", items: [{ id: "dog", label: "Dog", emoji: "🐕" }, { id: "cat", label: "Cat", emoji: "🐈" }, { id: "fish", label: "Fish", emoji: "🐟" }, { id: "chair", label: "Chair", emoji: "🪑" }], oddId: "chair", explanation: "A chair is furniture — it's not a pet!" },
+      ],
+    },
+  },
+  {
+    id: "others-true-false",
+    zoneId: "others-in-my-world",
+    type: "true_false",
+    title: "People Around Us: Facts",
+    description: "True or false?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Is this fact true or false?",
+      questions: [
+        { id: "tf1", statement: "A doctor helps sick people get better", emoji: "👨‍⚕️", isTrue: true, explanation: "Yes! Doctors take care of us when we're not feeling well." },
+        { id: "tf2", statement: "Teachers fly airplanes", emoji: "👩‍🏫", isTrue: false, explanation: "No! Teachers teach us in school — pilots fly airplanes." },
+        { id: "tf3", statement: "Friends share and play together", emoji: "🤝", isTrue: true, explanation: "That's right! Good friends share and have fun together." },
+        { id: "tf4", statement: "A pet rock needs to eat food", emoji: "🪨", isTrue: false, explanation: "No! Rocks don't eat — only living things need food." },
+      ],
+    },
+  },
 ];
