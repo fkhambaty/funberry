@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { brand } from "@funberry/config";
 import { motion } from "framer-motion";
 
@@ -47,13 +48,13 @@ export default function HomeContent() {
             transition={{ type: "spring", stiffness: 200, damping: 12 }}
             className="mb-6"
           >
-            <motion.span
-              className="text-8xl inline-block"
+            <motion.div
+              className="inline-block"
               animate={{ y: [0, -12, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
             >
-              🍓
-            </motion.span>
+              <Image src="/logo.png" alt="FunBerry Kids" width={200} height={120} className="drop-shadow-lg" priority />
+            </motion.div>
           </motion.div>
 
           <motion.h1
@@ -250,13 +251,12 @@ export default function HomeContent() {
 
       <footer className="border-t bg-sky-900 px-6 py-12 text-sky-200">
         <div className="mx-auto max-w-4xl text-center">
-          <motion.p
+          <motion.div
             animate={{ y: [0, -5, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="text-3xl"
           >
-            🍓
-          </motion.p>
+            <Image src="/logo.png" alt="FunBerry Kids" width={80} height={48} className="mx-auto brightness-0 invert" />
+          </motion.div>
           <p className="mt-2 font-display text-lg font-bold text-white">{brand.name}</p>
           <p className="mt-1 text-sm text-sky-300">{brand.tagline}</p>
           <div className="mt-4 flex justify-center gap-6 text-sm">

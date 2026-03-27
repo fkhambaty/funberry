@@ -6,7 +6,7 @@ import type { Child, Parent, Progress, Unlock, Reward } from "./types";
 export async function signUp(email: string, password: string, name: string, pin?: string) {
   const siteUrl =
     (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
-    "https://funberry-web.vercel.app";
+    "https://funberrykids-web.vercel.app";
   const { data, error } = await supabase.auth.signUp({
     email,
     password,

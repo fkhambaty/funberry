@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { brand, zones } from "@funberry/config";
 import { getCurrentUser, getChildren, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
@@ -454,9 +455,8 @@ export default function DashboardPage() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-          className="text-5xl"
         >
-          🍓
+          <Image src="/logo.png" alt="Loading" width={80} height={48} />
         </motion.div>
       </main>
     );
@@ -473,13 +473,12 @@ export default function DashboardPage() {
       <div className="glass-card sticky top-0 z-20 px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-3">
-            <motion.span
+            <motion.div
               animate={{ y: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="text-3xl"
             >
-              🍓
-            </motion.span>
+              <Image src="/logo.png" alt="FunBerry Kids" width={48} height={28} />
+            </motion.div>
             <div>
               <h1 className="font-display text-xl font-bold text-sky-900">
                 {brand.name}

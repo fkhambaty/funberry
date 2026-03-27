@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { brand } from "@funberry/config";
 import { pricing } from "@funberry/config/src/pricing";
 
@@ -8,7 +9,7 @@ export default function PricingPage() {
     <main className="min-h-screen bg-gradient-to-b from-sky-50 to-white px-6 py-16">
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <span className="text-5xl">🍓</span>
+          <Image src="/logo.png" alt="FunBerry Kids" width={120} height={72} className="mx-auto" />
           <h1 className="font-display text-4xl font-bold text-sky-900 mt-4">
             {brand.name} Pricing
           </h1>

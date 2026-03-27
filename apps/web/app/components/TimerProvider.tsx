@@ -22,7 +22,7 @@ interface TimerContextType {
   setParentPin: (pin: string) => void;
 }
 
-const STORAGE_KEY = "funberry_timer";
+const STORAGE_KEY = "funberrykids_timer";
 
 const defaultTimer: TimerState = {
   isActive: false,

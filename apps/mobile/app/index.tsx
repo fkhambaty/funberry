@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { useRouter } from "expo-router";
 
 export default function WelcomeScreen() {
@@ -7,8 +7,8 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.logoSection}>
-        <Text style={styles.logoEmoji}>🍓</Text>
-        <Text style={styles.title}>FunBerry</Text>
+        <Image source={require("../assets/icon.png")} style={styles.logoImage} resizeMode="contain" />
+        <Text style={styles.title}>FunBerry Kids</Text>
         <Text style={styles.tagline}>Learn through play — fun games for curious little minds!</Text>
       </View>
 
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eff8ff",
   },
   logoSection: { alignItems: "center", marginBottom: 64 },
-  logoEmoji: { fontSize: 80, marginBottom: 16 },
+  logoImage: { width: 120, height: 120, marginBottom: 16 },
   title: { fontSize: 42, fontWeight: "800", color: "#1c498c", letterSpacing: -1 },
   tagline: { fontSize: 16, color: "#6b7280", marginTop: 8, textAlign: "center", lineHeight: 24 },
   buttonSection: { width: "100%", gap: 16 },

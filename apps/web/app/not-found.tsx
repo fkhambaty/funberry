@@ -1,8 +1,10 @@
+import Image from "next/image";
+
 export default function NotFound() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <p className="text-6xl mb-4">🍓</p>
+        <div className="mb-4"><Image src="/logo.png" alt="FunBerry Kids" width={120} height={72} className="mx-auto" /></div>
         <h1 className="font-display text-3xl font-bold text-sky-900 mb-2">
           Page Not Found
         </h1>

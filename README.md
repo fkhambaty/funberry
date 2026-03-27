@@ -1,4 +1,4 @@
-# FunBerry 🍓
+# FunBerry Kids 🍓
 
 **Fun learning games for curious little minds!**
 
@@ -69,10 +69,13 @@ npm run dev:mobile   # Expo mobile app
 | MemoryMatch | Flip cards to find matching pairs |
 | PictureQuiz | Choose the correct picture answer |
 | SequenceBuilder | Arrange steps in the right order |
-| SpotDifference | Find differences between two scenes |
+| OddOneOut | Find the item that doesn't belong |
+| TrueFalse | Answer true or false statements |
 | ColorActivity | Color regions with the right colors |
 | WordPictureLink | Connect words to matching pictures |
 | InteractiveStory | Story with choice-based progression |
+| BubblePop | Pop the correct bubbles before time runs out |
+| StarCatcher | Catch falling items with left/right controls |
 
 ## EVS Zones (15 total)
 

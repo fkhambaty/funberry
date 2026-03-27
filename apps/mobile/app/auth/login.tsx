@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { supabase } from "../../lib/supabase";
 
 const BERRY = "#ff2d6a";
-const APP_NAME = "FunBerry";
+const APP_NAME = "FunBerry Kids";
 
 export default function LoginScreen() {
   const router = useRouter();

@@ -72,7 +72,7 @@ export default function ProfileTab() {
           <Text style={styles.signOutText}>Sign Out</Text>
         </Pressable>
 
-        <Text style={styles.version}>FunBerry v1.0.0</Text>
+        <Text style={styles.version}>FunBerry Kids v1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

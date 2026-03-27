@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { zones } from "@funberry/config";
 import { getChildren, getChildProgress } from "@funberry/supabase";
@@ -65,9 +66,8 @@ export default function ProgressPage() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-          className="text-5xl"
         >
-          🍓
+          <Image src="/logo.png" alt="Loading" width={64} height={38} />
         </motion.div>
       </div>
     );
@@ -162,7 +162,7 @@ export default function ProgressPage() {
 
         {progressLoading ? (
           <div className="text-center py-8">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="text-4xl inline-block">🍓</motion.div>
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="inline-block"><Image src="/logo.png" alt="Loading" width={48} height={28} /></motion.div>
           </div>
         ) : (
           <div className="space-y-3">

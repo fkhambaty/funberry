@@ -94,7 +94,7 @@ let _muted = false;
 
 export function isMuted(): boolean {
   if (typeof window !== "undefined") {
-    const stored = localStorage.getItem("funberry_muted");
+    const stored = localStorage.getItem("funberrykids_muted");
     if (stored !== null) _muted = stored === "true";
   }
   return _muted;
@@ -103,7 +103,7 @@ export function isMuted(): boolean {
 export function setMuted(m: boolean): void {
   _muted = m;
   if (typeof window !== "undefined") {
-    localStorage.setItem("funberry_muted", String(m));
+    localStorage.setItem("funberrykids_muted", String(m));
   }
 }
 

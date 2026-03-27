@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { brand } from "@funberry/config";
 import { signIn } from "@funberry/supabase";
 
@@ -38,7 +39,7 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-sky-50 to-white">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <span className="text-5xl">🍓</span>
+          <Image src="/logo.png" alt="FunBerry Kids" width={160} height={96} className="mx-auto" />
           <h1 className="font-display text-3xl font-bold text-sky-900 mt-2">
             Welcome back to {brand.name}
           </h1>

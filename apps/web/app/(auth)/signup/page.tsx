@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { brand } from "@funberry/config";
 import { signUp } from "@funberry/supabase";
@@ -99,13 +100,13 @@ export default function SignupPage() {
     <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-sky-50 to-white">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <motion.span
+          <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="text-5xl inline-block"
+            className="inline-block"
           >
-            🍓
-          </motion.span>
+            <Image src="/logo.png" alt="FunBerry Kids" width={160} height={96} className="mx-auto" />
+          </motion.div>
           <h1 className="font-display text-3xl font-bold text-sky-900 mt-2">
             Join {brand.name}
           </h1>

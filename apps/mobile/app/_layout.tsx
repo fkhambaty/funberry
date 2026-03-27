@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Image, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import type { Session } from "@supabase/supabase-js";
@@ -56,7 +56,7 @@ export default function RootLayout() {
   if (!ready) {
     return (
       <View style={styles.loading}>
-        <Text style={styles.logo}>🍓</Text>
+        <Image source={require("../assets/icon.png")} style={styles.logo} resizeMode="contain" />
         <ActivityIndicator size="large" color="#379df9" style={{ marginTop: 16 }} />
       </View>
     );
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   logo: {
-    fontSize: 72,
+    width: 100,
+    height: 100,
   },
 });
