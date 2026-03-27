@@ -7,10 +7,8 @@ import { LockScreen } from "./components/LockScreen";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
   const [pin, setPin] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     import("@funberry/supabase")
       .then(({ getParent }) => getParent())
       .then((p) => {
@@ -18,10 +16,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
       })
       .catch(() => {});
   }, []);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <TimerProvider pin={pin}>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { brand, zones } from "@funberry/config";
-import { getCurrentUser, getChildren, signOut, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
+import { getCurrentUser, getChildren, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
 import { Leaderboard } from "../../components/Leaderboard";
 import { getZoneTheme } from "@funberry/game-engine";
@@ -36,8 +36,12 @@ function ChildAvatar({ child }: { child: Child }) {
   );
 }
 
-function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPinUpdated: (pin: string) => void }) {
+function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent | null; userEmail: string | null; onPinUpdated: (pin: string) => void }) {
   const [showSettings, setShowSettings] = useState(false);
+  const [verified, setVerified] = useState(false);
+  const [verifyPw, setVerifyPw] = useState("");
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -46,6 +50,22 @@ function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPi
   const [pwMsg, setPwMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [savingPin, setSavingPin] = useState(false);
   const [savingPw, setSavingPw] = useState(false);
+
+  async function handleVerifyPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!userEmail || !verifyPw) return;
+    setVerifying(true);
+    setVerifyError(null);
+    try {
+      await signIn(userEmail, verifyPw);
+      setVerified(true);
+      setVerifyPw("");
+    } catch {
+      setVerifyError("Incorrect password. Please try again.");
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   async function handlePinUpdate(e: React.FormEvent) {
     e.preventDefault();
@@ -102,7 +122,7 @@ function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPi
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => { playTap(); setShowSettings(true); }}
+          onClick={() => { playTap(); setShowSettings(true); setVerified(false); setVerifyPw(""); setVerifyError(null); }}
           style={{
             display: "flex",
             alignItems: "center",
@@ -125,6 +145,76 @@ function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPi
           </span>
         </motion.button>
       </div>
+    );
+  }
+
+  if (!verified) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{ padding: "0 24px 32px", maxWidth: 800, margin: "0 auto" }}
+      >
+        <div style={{
+          background: "white", borderRadius: 24, padding: "32px 24px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.06)", border: "2px solid #f3f4f6",
+          textAlign: "center",
+        }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🔐</div>
+          <h3 style={{ fontSize: 20, fontWeight: 900, fontFamily: "Fredoka, sans-serif", color: "#1c498c", margin: "0 0 8px" }}>
+            Verify Your Identity
+          </h3>
+          <p style={{ fontSize: 14, color: "#6b7280", margin: "0 0 20px", fontFamily: "Nunito, sans-serif", fontWeight: 600 }}>
+            Enter your account password to access settings.
+          </p>
+          <form onSubmit={handleVerifyPassword} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <input
+              type="password"
+              value={verifyPw}
+              onChange={(e) => { setVerifyPw(e.target.value); setVerifyError(null); }}
+              placeholder="Enter your password"
+              autoFocus
+              style={{
+                width: "100%", maxWidth: 280, padding: "12px 16px",
+                borderRadius: 14, border: verifyError ? "2px solid #ef4444" : "2px solid #e5e7eb",
+                fontSize: 15, outline: "none", textAlign: "center",
+              }}
+            />
+            {verifyError && (
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#ef4444", margin: 0 }}>{verifyError}</p>
+            )}
+            <div style={{ display: "flex", gap: 10 }}>
+              <motion.button
+                type="submit"
+                disabled={verifying || !verifyPw}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                style={{
+                  padding: "10px 28px", borderRadius: 14, border: "none",
+                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                  color: "white", fontSize: 14, fontWeight: 800,
+                  cursor: verifying || !verifyPw ? "default" : "pointer",
+                  opacity: verifying || !verifyPw ? 0.5 : 1,
+                }}
+              >
+                {verifying ? "Verifying..." : "Verify"}
+              </motion.button>
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => { setShowSettings(false); setVerifyPw(""); setVerifyError(null); }}
+                style={{
+                  padding: "10px 20px", borderRadius: 14, border: "none",
+                  background: "#f3f4f6", color: "#6b7280", fontSize: 14, fontWeight: 800, cursor: "pointer",
+                }}
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </form>
+        </div>
+      </motion.div>
     );
   }
 
@@ -152,7 +242,7 @@ function AccountSettings({ parent, onPinUpdated }: { parent: Parent | null; onPi
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setShowSettings(false)}
+            onClick={() => { setShowSettings(false); setVerified(false); }}
             style={{
               padding: "8px 16px",
               borderRadius: 14,
@@ -322,6 +412,7 @@ export default function DashboardPage() {
   const [parent, setParent] = useState<Parent | null>(null);
   const [children, setChildrenState] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showTip, setShowTip] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
@@ -334,6 +425,7 @@ export default function DashboardPage() {
           router.push("/login");
           return;
         }
+        setUserEmail(user.email ?? null);
         const p = await getParent();
         if (p) {
           setParent(p);
@@ -760,7 +852,7 @@ export default function DashboardPage() {
     </main>
 
     {/* Account Settings Section */}
-    <AccountSettings parent={parent} onPinUpdated={(newPin) => {
+    <AccountSettings parent={parent} userEmail={userEmail} onPinUpdated={(newPin) => {
       setParentPin(newPin);
       setParent(parent ? { ...parent, pin: newPin } : null);
     }} />

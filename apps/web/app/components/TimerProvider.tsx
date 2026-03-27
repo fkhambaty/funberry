@@ -8,7 +8,6 @@ interface TimerState {
   remainingSeconds: number;
   isLocked: boolean;
   isPaused: boolean;
-  /** After PIN is verified, show the extend/stop decision screen */
   awaitingDecision: boolean;
 }
 
@@ -16,23 +15,28 @@ interface TimerContextType {
   timer: TimerState;
   startTimer: (minutes: number) => void;
   stopTimer: () => void;
-  /** Verify PIN — if correct, move to decision screen (extend or stop) */
   verifyPin: (pin: string) => boolean;
-  /** Parent chose to extend: start a fresh timer, game resumes */
   extendTimer: (minutes: number) => void;
-  /** Parent chose to stop: end session entirely */
   endSession: () => void;
   parentPin: string | null;
   setParentPin: (pin: string) => void;
 }
 
+const STORAGE_KEY = "funberry_timer";
+
+const defaultTimer: TimerState = {
+  isActive: false,
+  totalSeconds: 0,
+  remainingSeconds: 0,
+  isLocked: false,
+  isPaused: false,
+  awaitingDecision: false,
+};
+
 const TimerContext = createContext<TimerContextType | null>(null);
 
 const defaultTimerContext: TimerContextType = {
-  timer: {
-    isActive: false, totalSeconds: 0, remainingSeconds: 0,
-    isLocked: false, isPaused: false, awaitingDecision: false,
-  },
+  timer: defaultTimer,
   startTimer: () => {},
   stopTimer: () => {},
   verifyPin: () => false,
@@ -45,6 +49,47 @@ const defaultTimerContext: TimerContextType = {
 export function useTimer() {
   const ctx = useContext(TimerContext);
   return ctx ?? defaultTimerContext;
+}
+
+function saveToStorage(state: TimerState) {
+  try {
+    const payload = { ...state, savedAt: Date.now() };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch { /* SSR or private browsing */ }
+}
+
+function loadFromStorage(): TimerState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed.isActive && !parsed.isLocked && !parsed.awaitingDecision) return null;
+
+    const elapsed = Math.floor((Date.now() - (parsed.savedAt ?? Date.now())) / 1000);
+
+    if (parsed.isActive && !parsed.isLocked && !parsed.isPaused) {
+      const adjusted = parsed.remainingSeconds - elapsed;
+      if (adjusted <= 0) {
+        return {
+          ...parsed,
+          remainingSeconds: 0,
+          isActive: false,
+          isLocked: true,
+          isPaused: true,
+          awaitingDecision: false,
+        };
+      }
+      return { ...parsed, remainingSeconds: adjusted };
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function clearStorage() {
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* noop */ }
 }
 
 export function TimerProvider({
@@ -60,19 +105,14 @@ export function TimerProvider({
     if (initialPin !== null) setParentPin(initialPin);
   }, [initialPin]);
 
-  const [timer, setTimer] = useState<TimerState>({
-    isActive: false,
-    totalSeconds: 0,
-    remainingSeconds: 0,
-    isLocked: false,
-    isPaused: false,
-    awaitingDecision: false,
+  const [timer, setTimer] = useState<TimerState>(() => {
+    if (typeof window === "undefined") return defaultTimer;
+    return loadFromStorage() ?? defaultTimer;
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const activeRef = useRef(false);
-
-  activeRef.current = timer.isActive && !timer.isLocked && !timer.isPaused;
+  const timerRef = useRef(timer);
+  timerRef.current = timer;
 
   const clearTick = useCallback(() => {
     if (intervalRef.current) {
@@ -80,6 +120,10 @@ export function TimerProvider({
       intervalRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    saveToStorage(timer);
+  }, [timer]);
 
   const startTimer = useCallback(
     (minutes: number) => {
@@ -99,10 +143,8 @@ export function TimerProvider({
 
   const stopTimer = useCallback(() => {
     clearTick();
-    setTimer({
-      isActive: false, totalSeconds: 0, remainingSeconds: 0,
-      isLocked: false, isPaused: false, awaitingDecision: false,
-    });
+    clearStorage();
+    setTimer(defaultTimer);
   }, [clearTick]);
 
   const verifyPin = useCallback(
@@ -139,10 +181,8 @@ export function TimerProvider({
 
   const endSession = useCallback(() => {
     clearTick();
-    setTimer({
-      isActive: false, totalSeconds: 0, remainingSeconds: 0,
-      isLocked: false, isPaused: false, awaitingDecision: false,
-    });
+    clearStorage();
+    setTimer(defaultTimer);
   }, [clearTick]);
 
   useEffect(() => {
@@ -152,16 +192,16 @@ export function TimerProvider({
     }
 
     intervalRef.current = setInterval(() => {
-      if (!activeRef.current) return;
-
       setTimer((prev) => {
+        if (!prev.isActive || prev.isLocked || prev.isPaused) return prev;
         if (prev.remainingSeconds <= 1) {
           return {
             ...prev,
             remainingSeconds: 0,
-            isLocked: true,
             isActive: false,
+            isLocked: true,
             isPaused: true,
+            awaitingDecision: false,
           };
         }
         return { ...prev, remainingSeconds: prev.remainingSeconds - 1 };

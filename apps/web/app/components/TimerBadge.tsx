@@ -12,7 +12,8 @@ function formatTime(seconds: number): string {
 export function TimerBadge() {
   const { timer } = useTimer();
 
-  if (!timer.isActive || timer.isLocked || timer.isPaused) return null;
+  if (!timer.isActive && !timer.isLocked) return null;
+  if (timer.isLocked || timer.awaitingDecision) return null;
 
   const pct = timer.totalSeconds > 0 ? (timer.remainingSeconds / timer.totalSeconds) * 100 : 0;
   const isWarning = timer.remainingSeconds <= 120;
