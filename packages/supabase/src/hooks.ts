@@ -210,10 +210,27 @@ export async function getChildBestProgress(childId: string): Promise<Record<stri
   );
 }
 
+async function incrementChildStars(childId: string, delta: number): Promise<void> {
+  if (delta <= 0) return;
+  const { error: rpcError } = await supabase.rpc("increment_stars" as never, {
+    p_child_id: childId,
+    p_stars: delta,
+  } as never);
+  if (!rpcError) return;
+  const { data: row, error: selErr } = await supabase
+    .from("children")
+    .select("total_stars")
+    .eq("id", childId)
+    .single();
+  if (selErr || row == null) return;
+  const cur = (row as { total_stars: number | null }).total_stars ?? 0;
+  await supabase.from("children").update({ total_stars: cur + delta } as never).eq("id", childId);
+}
+
 /**
  * Save (or update) game progress for a child.
  * Uses upsert logic: keeps the best stars_earned, increments attempt count.
- * Only increments total_stars in `children` by the net improvement.
+ * Only increments total_stars in `children` by the net improvement (new personal best on that game).
  */
 export async function saveProgress(
   childId: string,
@@ -258,10 +275,10 @@ export async function saveProgress(
     if (error) throw error;
 
     if (starDelta > 0) {
-      await supabase.rpc("increment_stars" as never, {
-        p_child_id: childId,
-        p_stars: starDelta,
-      } as never);
+      await incrementChildStars(childId, starDelta);
+    } else if (starsEarned > 0) {
+      // Same best as before — still award 1 ⭐ so the header counter moves and play feels rewarded.
+      await incrementChildStars(childId, 1);
     }
 
     return data as Progress;
@@ -286,10 +303,7 @@ export async function saveProgress(
   if (error) throw error;
 
   if (starsEarned > 0) {
-    await supabase.rpc("increment_stars" as never, {
-      p_child_id: childId,
-      p_stars: starsEarned,
-    } as never);
+    await incrementChildStars(childId, starsEarned);
   }
 
   return data as Progress;

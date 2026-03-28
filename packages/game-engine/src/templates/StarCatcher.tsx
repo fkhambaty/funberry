@@ -75,6 +75,8 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
 
   const scoreRef = useRef(0);
   scoreRef.current = score;
+  /** Correct target catches — same scale as useGameState maxScore (not HUD point total). */
+  const targetCatchesRef = useRef(0);
 
   const showFeedback = useCallback((text: string, good: boolean) => {
     const id = ++feedbackIdRef.current;
@@ -92,6 +94,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
     livesRef.current = initLives;
     setScore(0);
     scoreRef.current = 0;
+    targetCatchesRef.current = 0;
     setFeedback(null);
     fallingRef.current = [];
     setDisplayItems([]);
@@ -108,6 +111,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
     livesRef.current = initLives;
     setScore(0);
     scoreRef.current = 0;
+    targetCatchesRef.current = 0;
     setFeedback(null);
     fallingRef.current = [];
     setDisplayItems([]);
@@ -176,7 +180,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
 
         if (newY >= 80 && !item.caught && !item.missed) {
           const dist = Math.abs(item.x - charCenter);
-          if (dist < CATCH_RADIUS) {
+            if (dist < CATCH_RADIUS) {
             changed = true;
             if (item.isTarget) {
               playCollect();
@@ -184,6 +188,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
               setCatchFlash(true);
               setTimeout(() => setCatchFlash(false), 300);
               showFeedback(`${item.emoji} ${item.label}!`, true);
+              targetCatchesRef.current += 1;
               answerQuestion(item.uid, true);
               if (arenaRef.current) {
                 const rect = arenaRef.current.getBoundingClientRect();
@@ -227,7 +232,7 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
 
       if (livesRef.current <= 0) {
         alive = false;
-        completeGame(scoreRef.current);
+        completeGame(targetCatchesRef.current);
         return;
       }
 

@@ -9,19 +9,12 @@ import {
 } from "@funberry/supabase";
 import type { Child } from "@funberry/supabase";
 import { useRouter } from "next/navigation";
-
-function statusStyles(status: string) {
-  switch (status) {
-    case "strong":
-      return { bar: "bg-emerald-500", badge: "bg-emerald-100 text-emerald-800", label: "On track" };
-    case "developing":
-      return { bar: "bg-sky-500", badge: "bg-sky-100 text-sky-800", label: "Building" };
-    case "needs_attention":
-      return { bar: "bg-amber-500", badge: "bg-amber-100 text-amber-900", label: "Coach more" };
-    default:
-      return { bar: "bg-slate-300", badge: "bg-slate-100 text-slate-600", label: "Not started" };
-  }
-}
+import {
+  BehaviorMeters,
+  CapabilityBars,
+  SkillsBarGrid,
+  StrandMasteryChart,
+} from "./ProgressReportVisuals";
 
 export default function ProgressPage() {
   const router = useRouter();
@@ -78,7 +71,7 @@ export default function ProgressPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50/30 p-4 sm:p-6">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
           <motion.a
             href="/dashboard"
@@ -103,9 +96,8 @@ export default function ProgressPage() {
           <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">
             Growth, smarts &amp; your game plan
           </h1>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Play stays playful for kids; here you get the berry-powered view — themes, skills, habits, and a simple
-            game plan for what to focus on next. Fun first, facts for grown-ups (not a doctor&apos;s report).
+          <p className="mt-1 max-w-xl text-sm text-slate-600">
+            Charts first — scroll for your game plan and next steps.
           </p>
         </header>
 
@@ -139,29 +131,56 @@ export default function ProgressPage() {
 
         {report && selected && (
           <>
-            <section className="mb-6 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm sm:p-5">
-              <h2 className="font-display text-sm font-bold uppercase tracking-wide text-slate-500">
-                Learner snapshot
-              </h2>
-              <p className="mt-1 font-display text-xl font-bold text-slate-900">{selected.name}</p>
-              <p className="text-sm text-slate-600">
-                Age {selected.age} · {report.syllabusTrack}
-              </p>
-              <p className="mt-2 text-xs text-slate-400">
-                Report generated {new Date(report.generatedAt).toLocaleString()} · {report.gamesSampleSize} play
-                records analysed
-              </p>
+            <section className="mb-6 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm sm:col-span-2 sm:p-5">
+                <h2 className="font-display text-sm font-bold uppercase tracking-wide text-slate-500">
+                  Learner snapshot
+                </h2>
+                <p className="mt-1 font-display text-xl font-bold text-slate-900">{selected.name}</p>
+                <p className="text-sm text-slate-600">
+                  Age {selected.age} · {report.syllabusTrack}
+                </p>
+                <p className="mt-2 text-xs text-slate-400">
+                  Updated {new Date(report.generatedAt).toLocaleString()} · {report.gamesSampleSize} play rows
+                </p>
+              </div>
+              <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 sm:p-5">
+                <p className="text-xs font-bold uppercase tracking-wide text-amber-900">Total ⭐ (profile)</p>
+                <p className="mt-2 font-display text-4xl font-black tabular-nums text-amber-700">
+                  {selected.total_stars ?? 0}
+                </p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-amber-100">
+                  <div
+                    className="h-2 rounded-full bg-amber-500"
+                    style={{
+                      width: `${Math.min(100, ((selected.total_stars ?? 0) / Math.max(1, report.gamesSampleSize * 3)) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="mt-2 text-[10px] font-semibold text-amber-900/80">
+                  Updates when games finish (best stars + a bonus ⭐ when you replay a favourite).
+                </p>
+              </div>
             </section>
 
-            <section className="mb-6 rounded-2xl border border-indigo-200/80 bg-indigo-50/50 p-4 sm:p-5">
-              <h2 className="font-display text-lg font-bold text-indigo-950">How to read this HQ screen</h2>
-              <p className="mt-2 text-sm leading-relaxed text-indigo-950/85">
-                Start with <strong>Your game plan</strong> (below) for the biggest priority. Peek at{" "}
-                <strong>Core capabilities</strong> for words you can share with a tutor or teacher.
-                Use <strong>Learning habits</strong> to tell &quot;needs practice&quot; from &quot;hasn&apos;t tried enough
-                game types yet.&quot; Syllabus strands map to school EVS themes.
+            <details className="mb-6 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3 text-sm text-indigo-950">
+              <summary className="cursor-pointer font-display font-bold text-indigo-950">
+                How to read this screen
+              </summary>
+              <p className="mt-2 leading-relaxed">
+                Use <strong>Your game plan</strong> for priorities. <strong>Habit meters</strong> show practice shape;
+                <strong> theme grid</strong> maps ICSE-style EVS. Expand capability rows for at-home ideas.
               </p>
-            </section>
+            </details>
+
+            <div className="mb-6 space-y-6">
+              <StrandMasteryChart report={report} />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <SkillsBarGrid report={report} />
+                <BehaviorMeters report={report} />
+              </div>
+              <CapabilityBars report={report} />
+            </div>
 
             {report.decisionFramework && (
               <section className="mb-6 rounded-2xl border-2 border-slate-800/10 bg-slate-900 text-white p-4 shadow-lg sm:p-6">
@@ -197,196 +216,6 @@ export default function ProgressPage() {
               </section>
             )}
 
-            {report.learningBehaviors && report.learningBehaviors.length > 0 && (
-              <section className="mb-6">
-                <h2 className="mb-1 font-display text-lg font-bold text-slate-800">Learning habits (from behaviour)</h2>
-                <p className="mb-3 text-sm text-slate-600">
-                  Inferred from session variety, retries, recency, and time — how your child practices, not just scores.
-                </p>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {report.learningBehaviors.map((b, i) => (
-                    <motion.div
-                      key={`${b.label}-${i}`}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="rounded-xl border border-slate-200/90 bg-white/95 p-3 sm:p-4"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-bold text-slate-800">{b.label}</p>
-                        <span
-                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                            b.signalStrength === "high"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : b.signalStrength === "moderate"
-                                ? "bg-sky-100 text-sky-800"
-                                : b.signalStrength === "low"
-                                  ? "bg-amber-100 text-amber-900"
-                                  : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {b.signalStrength === "unknown" ? "n/a" : b.signalStrength}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-xs leading-relaxed text-slate-600 sm:text-sm">{b.detail}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {report.coreCapabilityInsights && report.coreCapabilityInsights.length > 0 && (
-              <section className="mb-6">
-                <h2 className="mb-1 font-display text-lg font-bold text-slate-800">Core capabilities</h2>
-                <p className="mb-3 text-sm text-slate-600">
-                  Higher-level developmental lenses — grouped from game mechanics and practice patterns. Use them to
-                  discuss strengths and gaps without turning dinner into a test.
-                </p>
-                <div className="space-y-4">
-                  {report.coreCapabilityInsights.map((cap, i) => (
-                    <motion.div
-                      key={cap.capabilityId}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="rounded-2xl border border-violet-200/90 bg-gradient-to-br from-violet-50/90 to-white p-4 sm:p-5"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <h3 className="font-display text-base font-bold text-violet-950 sm:text-lg">{cap.title}</h3>
-                        {cap.score !== null ? (
-                          <span className="font-display text-xl font-black tabular-nums text-violet-700">{cap.score}%</span>
-                        ) : (
-                          <span className="text-xs font-semibold text-violet-400">Building sample</span>
-                        )}
-                      </div>
-                      <p className="mt-2 text-sm leading-relaxed text-violet-950/90">{cap.lensSummary}</p>
-                      <p className="mt-2 text-xs font-bold uppercase tracking-wide text-violet-800/70">Model read</p>
-                      <p className="mt-1 text-sm text-violet-950/85">{cap.interpretation}</p>
-                      <div className="mt-3 grid gap-2 border-t border-violet-200/60 pt-3 sm:grid-cols-2">
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-emerald-800">When things are going well</p>
-                          <p className="mt-1 text-xs leading-relaxed text-slate-700">{cap.whatStrongSignals}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-amber-900">What to watch</p>
-                          <p className="mt-1 text-xs leading-relaxed text-slate-700">{cap.whatToWatch}</p>
-                        </div>
-                      </div>
-                      <div className="mt-3 rounded-xl bg-white/80 p-3">
-                        <p className="text-[10px] font-bold uppercase text-slate-500">Concrete parent moves</p>
-                        <p className="mt-1 text-sm font-medium leading-relaxed text-slate-800">{cap.parentInterventions}</p>
-                      </div>
-                      {cap.score !== null && (
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-violet-100">
-                          <div
-                            className="h-1.5 rounded-full bg-violet-600"
-                            style={{ width: `${Math.min(100, cap.score)}%` }}
-                          />
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section className="mb-6">
-              <h2 className="mb-3 font-display text-lg font-bold text-slate-800">Syllabus strands (EVS themes)</h2>
-              <p className="mb-3 text-sm text-slate-600">
-                School-aligned themes. Bars reflect stars earned in that theme relative to games touched — a curriculum
-                map, not a personality label.
-              </p>
-              <div className="space-y-2">
-                {report.strandInsights.map((s, i) => {
-                  const st = statusStyles(s.status);
-                  const pct = s.masteryPercent ?? 0;
-                  return (
-                    <motion.div
-                      key={s.zoneId}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.02 }}
-                      className="rounded-xl border border-slate-200/90 bg-white/95 p-3 sm:p-4"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <span className="text-2xl" aria-hidden>
-                            {s.emoji}
-                          </span>
-                          <div>
-                            <p className="font-bold text-slate-800">{s.strandTitle}</p>
-                            <p className="text-xs text-slate-500">{s.zoneName}</p>
-                          </div>
-                        </div>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${st.badge}`}>
-                          {st.label}
-                        </span>
-                      </div>
-                      {s.gamesPlayed > 0 && (
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className={`h-2 rounded-full transition-all ${st.bar}`}
-                            style={{ width: `${Math.min(100, pct)}%` }}
-                          />
-                        </div>
-                      )}
-                      <p className="mt-2 text-xs leading-relaxed text-slate-600">{s.summary}</p>
-                      <p className="mt-1 text-[10px] text-slate-400">
-                        {s.gamesPlayed}/{s.gamesInZone} games played · ⭐ {s.starsEarned} stars in strand
-                      </p>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </section>
-
-            <section className="mb-6">
-              <h2 className="mb-3 font-display text-lg font-bold text-slate-800">Fine-grained skills (behind each game type)</h2>
-              <p className="mb-3 text-sm text-slate-600">
-                Technical decomposition: memory, attention, language, logic. Parents rarely need this daily — use it when
-                you want to match a specific weakness to a game mechanic.
-              </p>
-              <div className="space-y-3">
-                {report.skillInsights.map((sk, i) => (
-                  <motion.div
-                    key={sk.axisId}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="rounded-xl border border-slate-200/90 bg-white/95 p-3 sm:p-4"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-slate-800">{sk.title}</p>
-                      {sk.score !== null ? (
-                        <span className="font-display text-lg font-black text-violet-700 tabular-nums">
-                          {sk.score}%
-                        </span>
-                      ) : (
-                        <span className="text-xs font-semibold text-slate-400">—</span>
-                      )}
-                    </div>
-                    {sk.parentDescription ? (
-                      <p className="mt-1 text-xs text-slate-600">{sk.parentDescription}</p>
-                    ) : null}
-                    {sk.score !== null && (
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                        <div
-                          className="h-2 rounded-full bg-violet-500"
-                          style={{ width: `${sk.score}%` }}
-                        />
-                      </div>
-                    )}
-                    <p className="mt-2 text-sm text-slate-700">{sk.interpretation}</p>
-                    {sk.supportTip ? (
-                      <p className="mt-2 border-t border-slate-100 pt-2 text-xs font-medium text-emerald-800">
-                        <span className="font-bold">At home:</span> {sk.supportTip}
-                      </p>
-                    ) : null}
-                  </motion.div>
-                ))}
-              </div>
-            </section>
-
             <section className="mb-6 grid gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
                 <h3 className="text-xs font-bold uppercase tracking-wide text-emerald-800">Strengths</h3>
@@ -406,10 +235,12 @@ export default function ProgressPage() {
               </div>
             </section>
 
-            <section className="mb-6 rounded-2xl border border-violet-200/80 bg-violet-50/40 p-4 sm:p-5">
-              <h2 className="font-display text-lg font-bold text-violet-950">The big-picture scoop</h2>
-              <p className="mt-2 text-sm leading-relaxed text-violet-950/90">{report.coachingNarrative}</p>
-            </section>
+            <details className="mb-6 rounded-2xl border border-violet-200/80 bg-violet-50/40 p-4 sm:p-5">
+              <summary className="cursor-pointer font-display text-lg font-bold text-violet-950">
+                The big-picture scoop (text)
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-violet-950/90">{report.coachingNarrative}</p>
+            </details>
 
             <section className="mb-10 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
               <h2 className="font-display text-lg font-bold text-slate-800">Suggested next steps</h2>
