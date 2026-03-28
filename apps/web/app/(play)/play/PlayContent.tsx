@@ -31,6 +31,16 @@ import { FunBerryLogo } from "../../components/FunBerryLogo";
 
 type ViewMode = "who" | "zones" | "games" | "playing";
 
+/** Kid-facing copy: web records each completed round to Supabase for stars + parent coaching reports. */
+const KID_SAVED_PROGRESS_WHO =
+  "Your stars save when you play. Grown-ups have their own screen to cheer you on!";
+const KID_SAVED_PROGRESS_ZONES =
+  "Finishing games saves your stars and scores for next time — parents see friendly summaries on their dashboard.";
+const KID_SAVED_PROGRESS_GAMES =
+  "Each game saves your stars and score when you finish a round — keep playing to level up!";
+const KID_SAVED_PROGRESS_INGAME =
+  "Finish a round to save your stars & score to your player profile.";
+
 const GAME_ICONS: Record<string, string> = {
   picture_quiz: "❓",
   drag_sort: "🎯",
@@ -372,6 +382,10 @@ export default function PlayContent() {
     setView("playing");
   }
 
+  /**
+   * Every game template calls this when a round ends. We persist to `progress` (stars, score, time, attempts)
+   * so parent dashboards and coaching reports stay in sync. Mobile app placeholder does not call this yet.
+   */
   async function handleGameComplete(result: GameResult) {
     if (selectedGame) {
       setCompletedGames((prev) => ({
@@ -386,7 +400,7 @@ export default function PlayContent() {
             selectedGame.id,
             result.starsEarned,
             result.score,
-            result.timeSpent
+            result.timeSpent,
           );
           const updatedKids = await getChildren();
           setChildren(updatedKids);
@@ -495,6 +509,11 @@ export default function PlayContent() {
             <p className="text-gray-500 text-lg">
               Tap your name to start! ⬇️
             </p>
+            {children.length > 0 && (
+              <p className="mx-auto mt-3 max-w-md rounded-2xl bg-white/70 px-3 py-2 text-center text-xs font-semibold leading-snug text-sky-800/90 shadow-sm">
+                {KID_SAVED_PROGRESS_WHO}
+              </p>
+            )}
           </motion.div>
 
           {children.length === 0 ? (
@@ -670,6 +689,9 @@ export default function PlayContent() {
               })}
             </div>
           )}
+          <p className="mx-auto mt-4 max-w-lg px-2 text-center text-[10px] font-semibold leading-snug text-slate-500 sm:text-xs">
+            {KID_SAVED_PROGRESS_ZONES}
+          </p>
         </div>
       </main>
     );
@@ -764,6 +786,9 @@ export default function PlayContent() {
               {zone?.name}
             </h2>
             <p className="mt-1 text-xs text-gray-500 sm:text-sm">{zone?.description}</p>
+            <p className="mx-auto mt-2 max-w-md text-center text-[10px] font-semibold leading-snug text-slate-500 sm:text-xs">
+              {KID_SAVED_PROGRESS_GAMES}
+            </p>
           </motion.div>
 
           {/* Adventure Games */}
@@ -885,6 +910,7 @@ export default function PlayContent() {
         title={selectedGame?.title ?? ""}
         subtitle={selectedGame ? GAME_LABELS[selectedGame.type] : undefined}
         lifetimeStars={selectedChild ? (selectedChild.total_stars ?? 0) : undefined}
+        progressSavesHint={KID_SAVED_PROGRESS_INGAME}
         onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
         onNextGame={handleNextGame}
       >

@@ -16,6 +16,8 @@ interface GameShellProps {
   streak?: number;
   /** Cumulative stars for the active child (from DB `children.total_stars`). */
   lifetimeStars?: number;
+  /** Kid-friendly line that play is saved (e.g. for parent dashboard) — keep short; optional. */
+  progressSavesHint?: string;
   onClose: () => void;
   onNextGame?: () => void;
   children: React.ReactNode;
@@ -29,6 +31,7 @@ export function GameShell({
   score,
   streak = 0,
   lifetimeStars,
+  progressSavesHint,
   onClose,
   onNextGame,
   children,
@@ -62,11 +65,18 @@ export function GameShell({
           top: 0,
           zIndex: 30,
           display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "3px 10px",
+          flexDirection: "column",
+          gap: 0,
+          padding: "3px 10px 6px",
         }}
       >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
         <motion.button
           className="kid-glass-btn kid-glass-berry"
           whileHover={{ scale: 1.1, y: -2 }}
@@ -212,6 +222,23 @@ export function GameShell({
             {muted ? "🔇" : "🔊"}
           </motion.button>
         </div>
+        </div>
+        {progressSavesHint ? (
+          <p
+            style={{
+              margin: "4px 0 0",
+              padding: "0 4px",
+              textAlign: "center",
+              fontSize: 10,
+              fontWeight: 600,
+              color: "#64748b",
+              lineHeight: 1.35,
+              fontFamily: "Nunito, system-ui, sans-serif",
+            }}
+          >
+            {progressSavesHint}
+          </p>
+        ) : null}
       </div>
 
       {progress > 0 && (

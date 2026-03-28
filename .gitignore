@@ -10,4 +10,7 @@ dist/
 .DS_Store
 ios/
 android/
-.cursor/
+# Cursor — track shared rules; ignore other local .cursor files
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**

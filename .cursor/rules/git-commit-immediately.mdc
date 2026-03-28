@@ -1,0 +1,33 @@
+---
+description: Commit changes to git as soon as work is complete; never leave the repo dirty without reason
+alwaysApply: true
+---
+
+# Git — commit immediately (stud / FunBerry)
+
+## Requirement
+
+After you finish a **coherent unit of work** (feature, fix, rule, migration, or doc change), **commit it to git right away** in the repository that owns the files. Do not end a session with uncommitted changes unless the user explicitly asked to stop or the work is intentionally split across turns.
+
+## Where to commit
+
+- This repo’s root is **`funberry/`** (current directory when you are inside the cloned project).
+- Run git from the repo root: `git status`, `git add`, `git commit`, `git push`.
+
+## How to commit
+
+1. `git status` — review what changed.
+2. **Do not** stage or commit `.env`, `.env.local`, keys, or credentials (respect `.gitignore`).
+3. `git add` the intended paths; use a **clear, complete-sentence** commit message (what changed and why).
+4. After committing, **`git push`** to the tracked remote when the user expects GitHub/Vercel to stay current (when network and auth allow).
+
+## Exceptions
+
+- **User says not to commit** or wants to review first — wait.
+- **Pre-commit hooks fail** — fix or report; do not force a broken commit.
+- **Merge/rebase in progress** — resolve before committing new work.
+
+## Anti-patterns
+
+- Leaving large finished diffs uncommitted “for later”.
+- Vague messages like “updates” or “fix” with no scope.
