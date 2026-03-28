@@ -509,7 +509,7 @@ export default function DashboardPage() {
           className="mb-4"
         >
           <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
-            Grown-up Headquarter 🫐
+            Grown-up Headquarters 🫐
           </h2>
           <div className="mt-1 w-full max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <p className="whitespace-nowrap text-sm text-slate-600 sm:text-base">
@@ -518,7 +518,7 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        {/* At-a-glance stats for Grown-up Headquarter */}
+        {/* At-a-glance stats for Grown-up Headquarters */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -737,7 +737,7 @@ export default function DashboardPage() {
           </motion.a>
         </motion.section>
 
-        {/* Grown-up Headquarter — growth & smarts report */}
+        {/* Grown-up Headquarters — growth & smarts report */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

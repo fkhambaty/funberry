@@ -163,7 +163,7 @@ export async function getChildProgress(childId: string) {
   return data as (Progress & { games: Record<string, unknown> })[];
 }
 
-/** Aggregate play telemetry across all children on the account (Grown-up Headquarter dashboard). */
+/** Aggregate play telemetry across all children on the account (Grown-up Headquarters dashboard). */
 export async function getFamilyPlayStats(): Promise<{
   totalSessions: number;
   uniqueGamesTouched: number;

@@ -279,7 +279,7 @@ export function GameShell({
               fontFamily: "Nunito, system-ui, sans-serif",
             }}
           >
-            From your textbook page
+            From your textbook
           </p>
         </div>
       ) : null}
