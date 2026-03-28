@@ -274,4 +274,16 @@ export interface PixiLabRockTapData {
   rounds: { id: string; emoji: string; label: string; answer: "H" | "S" }[];
 }
 
-export type PixiLabData = PixiLabAnimalProductData | PixiLabWindGlideData | PixiLabRockTapData;
+/** MI “Word Smart” style: drag letter tiles into slots to spell the animal name. */
+export interface PixiLabWordUnscrambleData {
+  type: "pixi_lab";
+  mode: "word_unscramble";
+  instruction: string;
+  rounds: { id: string; emoji: string; /** Answer word (any case); shown scrambled in the bank */ word: string }[];
+}
+
+export type PixiLabData =
+  | PixiLabAnimalProductData
+  | PixiLabWindGlideData
+  | PixiLabRockTapData
+  | PixiLabWordUnscrambleData;

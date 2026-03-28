@@ -103,6 +103,30 @@ export const animalsGames: GameConfig[] = [
     },
   },
   {
+    id: "animals-pixi-word-smart",
+    zoneId: "animals",
+    type: "pixi_lab",
+    title: "Word Smart — unscramble",
+    description: "WebGL drag letters — like MI Word Smart on Animals that Help Us.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: "/syllabus-photos/20260328_104740.jpg",
+    data: {
+      type: "pixi_lab",
+      mode: "word_unscramble",
+      instruction:
+        "Drag each letter into the boxes to spell the animal’s name. Wrong spellings bounce back — try again!",
+      rounds: [
+        { id: "w1", emoji: "🐔", word: "HEN" },
+        { id: "w2", emoji: "🐄", word: "COW" },
+        { id: "w3", emoji: "🐕", word: "DOG" },
+        { id: "w4", emoji: "🫏", word: "DONKEY" },
+        { id: "w5", emoji: "🐴", word: "HORSE" },
+        { id: "w6", emoji: "🐑", word: "SHEEP" },
+      ],
+    },
+  },
+  {
     id: "animals-book-ch3-true-false",
     zoneId: "animals",
     type: "true_false",

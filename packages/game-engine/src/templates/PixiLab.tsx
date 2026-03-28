@@ -2,7 +2,7 @@
 
 /**
  * PixiJS WebGL labs — higher interaction than DOM quizzes.
- * Modes align with syllabus photos: animals→products, air/wind glide, rocks hard/soft.
+ * Modes align with syllabus photos: animals→products, word unscramble, air/wind glide, rocks hard/soft.
  *
  * Engagement hooks: streak combo, particle “juice”, short rounds, variable spawns (wind),
  * immediate audio + confetti from existing engine utilities.
@@ -312,6 +312,233 @@ function runWindGlide(
   };
 }
 
+function shufflePairs<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
+
+/** ── Word Smart: drag letters into slots (textbook unscramble) ── */
+function runWordUnscramble(
+  app: Application,
+  data: Extract<PixiLabData, { mode: "word_unscramble" }>,
+  onScore: (score: number, max: number, done: boolean) => void,
+  accent: number,
+  getCombo: () => number,
+  bumpCombo: (ok: boolean) => void
+) {
+  const maxScore = data.rounds.length * 100 + 100;
+  let score = 0;
+  let roundIdx = 0;
+  const root = new Container();
+  app.stage.addChild(root);
+
+  type LT = {
+    c: Container;
+    ch: string;
+    homeX: number;
+    homeY: number;
+    slotIndex: number | null;
+  };
+  type Slot = { cx: number; cy: number; tile: LT | null };
+  let slots: Slot[] = [];
+  let tiles: LT[] = [];
+  let dragTile: LT | null = null;
+  let dragDx = 0;
+  let dragDy = 0;
+
+  function dist(ax: number, ay: number, bx: number, by: number) {
+    return Math.hypot(ax - bx, ay - by);
+  }
+
+  function tryCheckWord() {
+    const r = data.rounds[roundIdx];
+    if (!r) return;
+    const word = r.word.toUpperCase().replace(/[^A-Z]/g, "");
+    if (slots.some((s) => s.tile === null)) return;
+    const built = slots.map((s) => s.tile!.ch).join("");
+    if (built === word) {
+      bumpCombo(true);
+      const mult = 1 + Math.min(4, getCombo()) * 0.07;
+      score += Math.round(100 * mult);
+      playCorrect();
+      burstParticles(app, W / 2, 300, true);
+      fireMiniBurst();
+      if (getCombo() >= 3) playStreak(getCombo());
+      roundIdx += 1;
+      if (roundIdx >= data.rounds.length) {
+        onScore(Math.min(maxScore, score + 100), maxScore, true);
+      } else {
+        buildRound();
+      }
+    } else {
+      bumpCombo(false);
+      playWrong();
+      burstParticles(app, W / 2, 300, false);
+      for (const lt of tiles) {
+        if (lt.slotIndex !== null) {
+          const s = slots[lt.slotIndex];
+          if (s) s.tile = null;
+          lt.slotIndex = null;
+        }
+        lt.c.x = lt.homeX;
+        lt.c.y = lt.homeY;
+      }
+    }
+  }
+
+  function buildRound() {
+    root.removeChildren();
+    slots = [];
+    tiles = [];
+    dragTile = null;
+
+    const r = data.rounds[roundIdx];
+    if (!r) {
+      onScore(Math.min(maxScore, score + 80), maxScore, true);
+      return;
+    }
+    const word = r.word.toUpperCase().replace(/[^A-Z]/g, "");
+    const chars = word.split("");
+
+    const header = new Text({
+      text: `${r.emoji}  Spell the name`,
+      style: { fontSize: 16, fill: 0xffffff, fontWeight: "800" as const, align: "center" },
+    });
+    header.anchor.set(0.5, 0);
+    header.x = W / 2;
+    header.y = 48;
+    root.addChild(header);
+
+    const slotW = 40;
+    const slotH = 48;
+    const gGap = 7;
+    const rowW = chars.length * (slotW + gGap) - gGap;
+    const sx0 = W / 2 - rowW / 2;
+    const slotY = 308;
+    slots = chars.map((_, i) => {
+      const cx = sx0 + i * (slotW + gGap) + slotW / 2;
+      const cy = slotY + slotH / 2;
+      const g = new Graphics();
+      g.roundRect(-slotW / 2, -slotH / 2, slotW, slotH, 10).fill({ color: 0xffffff, alpha: 0.2 });
+      g.stroke({ width: 2, color: accent });
+      g.x = cx;
+      g.y = cy;
+      root.addChild(g);
+      return { cx, cy, tile: null as LT | null };
+    });
+
+    const bankY = 168;
+    const pairs = chars.map((ch) => ({ ch }));
+    const shuffled = shufflePairs(pairs);
+    const step = Math.min(46, Math.floor((W - 40) / Math.max(1, shuffled.length)));
+    const bankRowW = shuffled.length * step;
+    const bx0 = W / 2 - bankRowW / 2 + step / 2;
+
+    tiles = shuffled.map(({ ch }, j) => {
+      const wrap = new Container();
+      const bg = new Graphics();
+      bg.roundRect(-22, -26, 44, 52, 12).fill({ color: 0xffffff, alpha: 0.95 });
+      bg.stroke({ width: 2, color: 0xa78bfa });
+      const t = new Text({
+        text: ch,
+        style: { fontSize: 26, fill: 0x1e3a5f, fontWeight: "900" as const },
+      });
+      t.anchor.set(0.5, 0.5);
+      wrap.addChild(bg, t);
+      const homeX = bx0 + j * step;
+      const homeY = bankY;
+      wrap.x = homeX;
+      wrap.y = homeY;
+      wrap.eventMode = "static";
+      wrap.cursor = "grab";
+      const lt: LT = { c: wrap, ch, homeX, homeY, slotIndex: null };
+
+      wrap.on("pointerdown", (e: FederatedPointerEvent) => {
+        e.stopPropagation();
+        if (lt.slotIndex !== null) {
+          const s = slots[lt.slotIndex];
+          if (s) s.tile = null;
+          lt.slotIndex = null;
+        }
+        const lp = e.getLocalPosition(root);
+        dragTile = lt;
+        dragDx = lt.c.x - lp.x;
+        dragDy = lt.c.y - lp.y;
+        lt.c.cursor = "grabbing";
+      });
+      root.addChild(wrap);
+      return lt;
+    });
+  }
+
+  const onMove = (e: FederatedPointerEvent) => {
+    if (!dragTile) return;
+    const lp = e.getLocalPosition(root);
+    dragTile.c.x = lp.x + dragDx;
+    dragTile.c.y = lp.y + dragDy;
+  };
+
+  const onUp = () => {
+    if (!dragTile) return;
+    const lt = dragTile;
+    dragTile = null;
+    lt.c.cursor = "grab";
+    const cx = lt.c.x;
+    const cy = lt.c.y;
+    let bestSi = -1;
+    let bestD = 9999;
+    slots.forEach((s, si) => {
+      const d = dist(cx, cy, s.cx, s.cy);
+      if (d < 44 && d < bestD) {
+        bestD = d;
+        bestSi = si;
+      }
+    });
+    if (bestSi >= 0) {
+      const s = slots[bestSi]!;
+      if (s.tile) {
+        const old = s.tile;
+        old.slotIndex = null;
+        old.c.x = old.homeX;
+        old.c.y = old.homeY;
+      }
+      s.tile = lt;
+      lt.slotIndex = bestSi;
+      lt.c.x = s.cx;
+      lt.c.y = s.cy;
+      playTap();
+      tryCheckWord();
+    } else {
+      if (lt.slotIndex !== null) {
+        const s = slots[lt.slotIndex];
+        if (s) s.tile = null;
+        lt.slotIndex = null;
+      }
+      lt.c.x = lt.homeX;
+      lt.c.y = lt.homeY;
+    }
+  };
+
+  app.stage.eventMode = "static";
+  app.stage.hitArea = app.screen;
+  app.stage.on("pointermove", onMove);
+  app.stage.on("pointerup", onUp);
+  app.stage.on("pointerupoutside", onUp);
+
+  buildRound();
+
+  return () => {
+    app.stage.off("pointermove", onMove);
+    app.stage.off("pointerup", onUp);
+    app.stage.off("pointerupoutside", onUp);
+    root.destroy({ children: true });
+  };
+}
+
 /** ── Rock hard / soft tap ── */
 function runRockTap(
   app: Application,
@@ -489,6 +716,8 @@ export function PixiLab({ data, onComplete, accentColor = "#6366f1", onNextGame 
         cleanupRef.current = runAnimalProduct(app, data, onScoreUpdate, accentNum, getCombo, bumpCombo);
       } else if (data.mode === "wind_glide") {
         cleanupRef.current = runWindGlide(app, data, onScoreUpdate);
+      } else if (data.mode === "word_unscramble") {
+        cleanupRef.current = runWordUnscramble(app, data, onScoreUpdate, accentNum, getCombo, bumpCombo);
       } else {
         cleanupRef.current = runRockTap(app, data, onScoreUpdate, accentNum);
       }

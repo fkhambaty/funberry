@@ -60,7 +60,13 @@ export {
 export { allEvsGames, getGamesForZone } from "./games/evs";
 export { BOOK_PAGE_FILES, bookPageUrl } from "./data/bookPages";
 export type { BookPageFile } from "./data/bookPages";
-export { SYLLABUS_PHOTO_FILES, syllabusPhotoUrl } from "./data/syllabusManifest";
+export {
+  SYLLABUS_PHOTO_FILES,
+  SYLLABUS_PHOTO_LINKS,
+  syllabusPhotoUrl,
+  getSyllabusPhotoRouting,
+} from "./data/syllabusManifest";
+export type { SyllabusPhotoFile, SyllabusZoneId } from "./data/syllabusManifest";
 
 // Types
 export type * from "./types";

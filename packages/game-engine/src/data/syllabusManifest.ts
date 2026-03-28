@@ -1,3 +1,5 @@
+import { zones } from "@funberry/config";
+
 /**
  * Index of syllabus photos (NEP / ICSE-style science Grade I–II) from Photos-3-001.
  * Run `node scripts/sync-syllabus-photos.mjs` to copy JPGs into `apps/web/public/syllabus-photos/`.
@@ -72,6 +74,54 @@ export const SYLLABUS_PHOTO_FILES = [
 
 export type SyllabusPhotoFile = (typeof SYLLABUS_PHOTO_FILES)[number];
 
+export type SyllabusZoneId = (typeof zones)[number]["id"];
+
 export function syllabusPhotoUrl(name: SyllabusPhotoFile): string {
   return `/syllabus-photos/${name}`;
 }
+
+/** Strong matches from sampled textbook spreads; extend as you tag more pages. */
+const SYLLABUS_PHOTO_OVERRIDES: Partial<
+  Record<SyllabusPhotoFile, { zoneId: SyllabusZoneId; note: string }>
+> = {
+  "20260328_104630.jpg": {
+    zoneId: "plants",
+    note: "NEP Foundational Stage / learning-by-doing overview",
+  },
+  "20260328_104740.jpg": {
+    zoneId: "animals",
+    note: "Chapter 3 — Animals that help us (incl. Word Smart)",
+  },
+  "20260328_104900.jpg": {
+    zoneId: "air",
+    note: "Air, wind, directions, pollution notes",
+  },
+  "20260328_104940.jpg": {
+    zoneId: "others-in-my-world",
+    note: "SAFAL / rocks & minerals worksheet",
+  },
+};
+
+/**
+ * Suggested play zone + note for each photo. Unknown files rotate across EVS zones
+ * so every image has a default home for future `bookPageSrc` wiring.
+ */
+export function getSyllabusPhotoRouting(file: SyllabusPhotoFile): {
+  zoneId: SyllabusZoneId;
+  note: string;
+} {
+  const o = SYLLABUS_PHOTO_OVERRIDES[file];
+  if (o) return o;
+  const idx = SYLLABUS_PHOTO_FILES.indexOf(file);
+  const z = zones[idx % zones.length]!;
+  return {
+    zoneId: z.id,
+    note: `Science Grade I–II syllabus photo ${idx + 1}/${SYLLABUS_PHOTO_FILES.length} — set bookPageSrc on a game in “${z.evsTheme}”`,
+  };
+}
+
+/** Full table for tooling / dashboards (64 rows). */
+export const SYLLABUS_PHOTO_LINKS = SYLLABUS_PHOTO_FILES.map((file) => ({
+  file,
+  ...getSyllabusPhotoRouting(file),
+}));
