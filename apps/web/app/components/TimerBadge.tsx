@@ -41,7 +41,8 @@ export function TimerBadge() {
         zIndex: 9990,
         display: "flex",
         alignItems: "center",
-        gap: 7,
+        gap: 8,
+        maxWidth: "min(100vw - 32px, 520px)",
         padding: "5px 12px 5px 6px",
         borderRadius: 30,
         pointerEvents: "none",
@@ -90,8 +91,27 @@ export function TimerBadge() {
         fontVariantNumeric: "tabular-nums",
         color: isCritical ? "#dc2626" : isWarning ? "#b45309" : "#16a34a",
         lineHeight: 1,
+        flexShrink: 0,
       }}>
         {formatTime(timer.remainingSeconds)}
+      </span>
+
+      <span
+        title="When the timer ends, play locks until a parent enters the PIN from their profile."
+        style={{
+          flex: 1,
+          minWidth: 0,
+          fontSize: 11,
+          fontWeight: 800,
+          fontFamily: "Nunito, system-ui, sans-serif",
+          color: isCritical ? "#991b1b" : isWarning ? "#92400e" : "#166534",
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        💡 PIN unlocks when time is up
       </span>
     </motion.div>
   );

@@ -57,6 +57,8 @@ export {
 
 // Game data
 export { allEvsGames, getGamesForZone } from "./games/evs";
+export { BOOK_PAGE_FILES, bookPageUrl } from "./data/bookPages";
+export type { BookPageFile } from "./data/bookPages";
 
 // Types
 export type * from "./types";

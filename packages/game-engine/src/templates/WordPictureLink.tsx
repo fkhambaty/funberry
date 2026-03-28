@@ -60,7 +60,7 @@ function SvgConnector({ line, delay }: { line: ConnectorLine; delay: number }) {
 }
 
 export function WordPictureLink({ data, onComplete, accentColor = "#379df9", onNextGame }: WordPictureLinkProps) {
-  const { instruction, pairs } = data;
+  const { instruction, pairs, matchHint } = data;
   const [orderRight, setOrderRight] = useState<WordPicturePair[]>([]);
   const [selectedWordId, setSelectedWordId] = useState<string | null>(null);
   const [matchedIds, setMatchedIds] = useState<string[]>([]);
@@ -342,7 +342,7 @@ export function WordPictureLink({ data, onComplete, accentColor = "#379df9", onN
           fontSize: 16,
         }}
       >
-        Tap a word, then tap the matching picture!
+        {matchHint ?? "Tap a word, then tap the matching picture!"}
       </motion.p>
 
       {/* Main game area */}
@@ -455,7 +455,7 @@ export function WordPictureLink({ data, onComplete, accentColor = "#379df9", onN
                     ✅
                   </motion.span>
                 )}
-                {p.word}
+                {done ? p.word : (p.wordDisplay ?? p.word)}
               </motion.button>
             );
           })}

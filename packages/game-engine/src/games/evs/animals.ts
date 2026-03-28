@@ -1,12 +1,223 @@
 import type { GameConfig } from "../../types";
+import { bookPageUrl } from "../../data/bookPages";
+
+/** Textbook photo: Chapter 3 — Animals that Help Us */
+const CH3_PAGE = bookPageUrl("20260328_104740.jpg");
 
 export const animalsGames: GameConfig[] = [
+  {
+    id: "animals-book-ch3-read",
+    zoneId: "animals",
+    type: "interactive_story",
+    title: "Animals that Help Us",
+    description: "Chapter 3 from your book — read what domestic animals do for us.",
+    difficulty: 1,
+    maxStars: 3,
+    bookPageSrc: CH3_PAGE,
+    data: {
+      type: "interactive_story",
+      instruction:
+        "Listen to the lines from Chapter 3: Animals that Help Us. Tap Next on each page.",
+      pages: [
+        {
+          id: "p1",
+          text:
+            "Domestic animals are tamed by people. They help in doing various tasks. People provide food, water and shelter to such animals. Let us learn more about them.",
+          emoji: "🏠",
+        },
+        {
+          id: "p2",
+          text: "We all give milk. — Camel, Buffalo, Goat, Cow.",
+          emoji: "🥛",
+        },
+        {
+          id: "p3",
+          text: "We all give eggs. — Duck, Hen, Goose.",
+          emoji: "🥚",
+        },
+        {
+          id: "p4",
+          text: "We give silk. — Silkworms.",
+          emoji: "🐛",
+        },
+        {
+          id: "p5",
+          text:
+            "We provide food to the soil and help the plants to grow. — Earthworms.",
+          emoji: "🪱",
+        },
+        {
+          id: "p6",
+          text: "Some people eat our flesh. — Fish, Hen, Goat.",
+          emoji: "🐟",
+        },
+        {
+          id: "p7",
+          text: "We give honey. — Honey bee.",
+          emoji: "🍯",
+        },
+        {
+          id: "p8",
+          text: "We give wool. — Sheep.",
+          emoji: "🐑",
+        },
+        {
+          id: "p9",
+          text: "We carry load. — Horse, Camel, Donkey, Bull, Elephant.",
+          emoji: "🐴",
+        },
+        {
+          id: "p10",
+          text: "We help in agriculture. — Bull (with the plough).",
+          emoji: "🌾",
+        },
+      ],
+    },
+  },
+  {
+    id: "animals-book-ch3-true-false",
+    zoneId: "animals",
+    type: "true_false",
+    title: "Chapter 3 — True or False",
+    description: "Check ideas from Animals that Help Us.",
+    difficulty: 1,
+    maxStars: 3,
+    bookPageSrc: CH3_PAGE,
+    data: {
+      type: "true_false",
+      instruction: "These ideas come from your textbook. Are they true or false?",
+      questions: [
+        {
+          id: "tf1",
+          statement: "Domestic animals are tamed by people.",
+          emoji: "🐄",
+          isTrue: true,
+          explanation: "Your book says domestic animals are tamed by people.",
+        },
+        {
+          id: "tf2",
+          statement: "People provide food, water and shelter to domestic animals.",
+          emoji: "🏡",
+          isTrue: true,
+          explanation: "That is what Chapter 3 explains.",
+        },
+        {
+          id: "tf3",
+          statement: "Sheep give us honey.",
+          emoji: "🐑",
+          isTrue: false,
+          explanation: "Sheep give wool. Honey comes from the honey bee.",
+        },
+        {
+          id: "tf4",
+          statement: "Earthworms help plants grow.",
+          emoji: "🪱",
+          isTrue: true,
+          explanation: "They provide food to the soil and help plants grow.",
+        },
+        {
+          id: "tf5",
+          statement: "Silkworms give us wool.",
+          emoji: "🐛",
+          isTrue: false,
+          explanation: "Silkworms give silk. Sheep give wool.",
+        },
+      ],
+    },
+  },
+  {
+    id: "animals-book-how-they-help",
+    zoneId: "animals",
+    type: "drag_sort",
+    title: "How animals help us",
+    description: "Sort animals into the same groups as Chapter 3.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: CH3_PAGE,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Pick an animal, then tap the box that matches what your book says they give or do.",
+      categories: [
+        { id: "milk", label: "We all give milk", emoji: "🥛" },
+        { id: "eggs", label: "We all give eggs", emoji: "🥚" },
+        { id: "silk", label: "We give silk", emoji: "🐛" },
+        { id: "soil", label: "Soil & plant helpers", emoji: "🪱" },
+        { id: "honey", label: "We give honey", emoji: "🍯" },
+        { id: "wool", label: "We give wool", emoji: "🐑" },
+      ],
+      items: [
+        { id: "camel", label: "Camel", emoji: "🐪", category: "milk" },
+        { id: "buffalo", label: "Buffalo", emoji: "🐃", category: "milk" },
+        { id: "goat", label: "Goat", emoji: "🐐", category: "milk" },
+        { id: "cow", label: "Cow", emoji: "🐄", category: "milk" },
+        { id: "duck", label: "Duck", emoji: "🦆", category: "eggs" },
+        { id: "hen", label: "Hen", emoji: "🐔", category: "eggs" },
+        { id: "goose", label: "Goose", emoji: "🪿", category: "eggs" },
+        { id: "silkworm", label: "Silkworms", emoji: "🐛", category: "silk" },
+        { id: "earthworm", label: "Earthworms", emoji: "🪱", category: "soil" },
+        { id: "bee", label: "Honey bee", emoji: "🐝", category: "honey" },
+        { id: "sheep", label: "Sheep", emoji: "🐑", category: "wool" },
+      ],
+    },
+  },
+  {
+    id: "animals-book-load-and-farm",
+    zoneId: "animals",
+    type: "drag_sort",
+    title: "Load and farming",
+    description: "Match animals that carry load or help in agriculture.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: CH3_PAGE,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Your book says some animals carry load and some help in agriculture. Sort each one.",
+      categories: [
+        { id: "load", label: "We carry load", emoji: "📦" },
+        { id: "farm", label: "We help in agriculture", emoji: "🌾" },
+      ],
+      items: [
+        { id: "horse", label: "Horse", emoji: "🐴", category: "load" },
+        { id: "camel2", label: "Camel", emoji: "🐪", category: "load" },
+        { id: "donkey", label: "Donkey", emoji: "🫏", category: "load" },
+        { id: "elephant", label: "Elephant", emoji: "🐘", category: "load" },
+        { id: "bull_load", label: "Bull", emoji: "🐂", category: "load" },
+        { id: "bull_plough", label: "Bulls ploughing", emoji: "🐂", category: "farm" },
+      ],
+    },
+  },
+  {
+    id: "animals-book-word-smart",
+    zoneId: "animals",
+    type: "word_picture_link",
+    title: "WORD SMART — Unscramble",
+    description: "Same activity as the book: unscramble useful animal names.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: CH3_PAGE,
+    data: {
+      type: "word_picture_link",
+      instruction:
+        "WORD SMART — Unscramble the names of these useful animals (from your textbook).",
+      matchHint: "Tap a scrambled name, then tap the matching animal picture!",
+      pairs: [
+        { id: "hen", word: "Hen", wordDisplay: "hne", emoji: "🐔" },
+        { id: "cow", word: "Cow", wordDisplay: "ocw", emoji: "🐄" },
+        { id: "dog", word: "Dog", wordDisplay: "ogd", emoji: "🐕" },
+        { id: "donkey", word: "Donkey", wordDisplay: "kdoeyn", emoji: "🫏" },
+        { id: "horse", word: "Horse", wordDisplay: "ohser", emoji: "🐴" },
+        { id: "sheep", word: "Sheep", wordDisplay: "hesep", emoji: "🐑" },
+      ],
+    },
+  },
   {
     id: "animals-wild-pet-sort",
     zoneId: "animals",
     type: "drag_sort",
     title: "Wild or Pet?",
-    description: "Sort the animals into wild animals and pets!",
+    description: "Sort animals into wild animals and pets — extra practice.",
     difficulty: 1,
     maxStars: 3,
     data: {
@@ -38,7 +249,7 @@ export const animalsGames: GameConfig[] = [
     maxStars: 3,
     data: {
       type: "picture_quiz",
-      instruction: "Listen to the sound and pick the right animal!",
+      instruction: "Listen to the clue and pick the right animal!",
       questions: [
         {
           id: "q1",
@@ -50,7 +261,7 @@ export const animalsGames: GameConfig[] = [
             { id: "duck", label: "Duck", emoji: "🦆" },
           ],
           correctId: "cow",
-          explanation: "Cows say 'Moo'! They live on farms and give us milk.",
+          explanation: "Cows say 'Moo'! They give milk like in Chapter 3.",
         },
         {
           id: "q2",
@@ -62,7 +273,7 @@ export const animalsGames: GameConfig[] = [
             { id: "pig", label: "Pig", emoji: "🐷" },
           ],
           correctId: "duck",
-          explanation: "Ducks say 'Quack'! They love swimming in ponds.",
+          explanation: "Ducks say 'Quack'! Your book lists duck under egg layers.",
         },
         {
           id: "q3",
@@ -74,7 +285,7 @@ export const animalsGames: GameConfig[] = [
             { id: "butterfly", label: "Butterfly", emoji: "🦋" },
           ],
           correctId: "lion",
-          explanation: "Lions are the king of the jungle — their roar can be heard from far away!",
+          explanation: "Lions roar loudly — they are wild animals.",
         },
         {
           id: "q4",
@@ -86,7 +297,7 @@ export const animalsGames: GameConfig[] = [
             { id: "snake", label: "Snake", emoji: "🐍" },
           ],
           correctId: "sheep",
-          explanation: "Sheep say 'Baa'! Their woolly coats keep them warm.",
+          explanation: "Sheep say 'Baa'! Chapter 3 says sheep give wool.",
         },
       ],
     },
@@ -136,7 +347,7 @@ export const animalsGames: GameConfig[] = [
     zoneId: "animals",
     type: "word_picture_link",
     title: "Animal Names",
-    description: "Match each animal name to its picture!",
+    description: "Match each word to its picture — quick review.",
     difficulty: 1,
     maxStars: 3,
     data: {

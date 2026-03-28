@@ -92,7 +92,7 @@ export default function ProgressPage() {
         </div>
 
         <header className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-violet-600">FunBerry · Grown-up zone</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-violet-600">FunBerry · Grown-up Headquarter</p>
           <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">
             Growth, smarts &amp; your game plan
           </h1>

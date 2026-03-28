@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { zones } from "@funberry/config";
 import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
@@ -385,7 +385,6 @@ export default function DashboardPage() {
   const [children, setChildrenState] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [showTip, setShowTip] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [familyStats, setFamilyStats] = useState<{
@@ -510,14 +509,16 @@ export default function DashboardPage() {
           className="mb-4"
         >
           <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
-            Grown-up HQ 🫐
+            Grown-up Headquarter 🫐
           </h2>
-          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            Kids chase stars and worlds; you get the behind-the-scenes scoop — syllabus, skills, and where to cheer (or nudge) next.
-          </p>
+          <div className="mt-1 w-full max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <p className="whitespace-nowrap text-sm text-slate-600 sm:text-base">
+              Kids chase stars and worlds; you get the behind-the-scenes scoop — syllabus, skills, and where to cheer (or nudge) next
+            </p>
+          </div>
         </motion.section>
 
-        {/* At-a-glance stats for Grown-up HQ */}
+        {/* At-a-glance stats for Grown-up Headquarter */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -620,48 +621,27 @@ export default function DashboardPage() {
           </motion.a>
         </motion.section>
 
-        {/* Timer Setup */}
+        {/* Timer + parent tip (single line, beside controls) */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mb-3"
         >
-          <TimerSetup />
-        </motion.section>
-
-        {/* Quick Tip */}
-        <AnimatePresence>
-          {showTip && (
-            <motion.section
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              className="mb-4"
+          <div className="flex min-w-0 flex-nowrap items-center gap-2 sm:gap-3">
+            <div className="min-w-0 shrink-0">
+              <TimerSetup />
+            </div>
+            <div
+              className="kid-glass-panel min-h-[44px] min-w-0 flex-1 rounded-2xl border border-emerald-200/90 bg-gradient-to-r from-emerald-50/95 to-teal-50/90 px-3 py-2"
+              title="Set a play timer before handing the device to your child. When time is up, the app locks until you enter your 4-digit PIN."
             >
-              <div
-                className="kid-glass-panel relative rounded-kid p-3 sm:p-4"
-                style={{
-                  background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)",
-                  borderColor: "#a7f3d0",
-                }}
-              >
-                <button
-                  onClick={() => setShowTip(false)}
-                  className="absolute right-3 top-2 text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-                <p className="font-display font-bold text-leaf-700">💡 Parent Tip</p>
-                <p className="mt-1 text-sm leading-snug text-gray-600">
-                  Set a play timer before handing the device to your child. The app will automatically
-                  lock when time is up, and only your 4-digit PIN can unlock it.
-                </p>
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
+              <p className="truncate whitespace-nowrap text-[11px] font-extrabold leading-none text-emerald-950 sm:text-xs">
+                💡 Tip: set the timer first — when time ends, only your PIN unlocks play.
+              </p>
+            </div>
+          </div>
+        </motion.section>
 
         {/* Children profiles section */}
         <motion.section
@@ -757,7 +737,7 @@ export default function DashboardPage() {
           </motion.a>
         </motion.section>
 
-        {/* Grown-up HQ — growth & smarts report */}
+        {/* Grown-up Headquarter — growth & smarts report */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

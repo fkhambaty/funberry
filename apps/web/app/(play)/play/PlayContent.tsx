@@ -911,6 +911,7 @@ export default function PlayContent() {
         subtitle={selectedGame ? GAME_LABELS[selectedGame.type] : undefined}
         lifetimeStars={selectedChild ? (selectedChild.total_stars ?? 0) : undefined}
         progressSavesHint={KID_SAVED_PROGRESS_INGAME}
+        bookPageSrc={selectedGame?.bookPageSrc}
         onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
         onNextGame={handleNextGame}
       >

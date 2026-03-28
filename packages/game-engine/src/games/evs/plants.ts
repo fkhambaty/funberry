@@ -1,6 +1,49 @@
 import type { GameConfig } from "../../types";
+import { bookPageUrl } from "../../data/bookPages";
+
+const NEP_INTRO_PAGE = bookPageUrl("20260328_104630.jpg");
 
 export const plantsGames: GameConfig[] = [
+  {
+    id: "plants-book-nep-how-we-learn",
+    zoneId: "plants",
+    type: "true_false",
+    title: "How we learn science",
+    description: "Ideas from the start of your New Learning Science book (NEP).",
+    difficulty: 1,
+    maxStars: 3,
+    bookPageSrc: NEP_INTRO_PAGE,
+    data: {
+      type: "true_false",
+      instruction:
+        "Your book says Foundational Stage (Grades I and II) should use play, puzzles, and doing things with your hands. Is each line true?",
+      questions: [
+        {
+          id: "n1",
+          statement:
+            "Exploring and learning-by-doing, play-way method, observation, puzzles, logical thinking and problem-solving should be the methods involved in learning.",
+          emoji: "🧩",
+          isTrue: true,
+          explanation: "That is what the Foundational Stage section says in your textbook.",
+        },
+        {
+          id: "n2",
+          statement: "Science class should only be about memorising long answers for exams.",
+          emoji: "📚",
+          isTrue: false,
+          explanation:
+            "NEP asks for conceptual understanding rather than only rote learning and exams.",
+        },
+        {
+          id: "n3",
+          statement: "Hands-on activity means actually doing an activity, not only watching a demo.",
+          emoji: "✋",
+          isTrue: true,
+          explanation: "Learning-by-doing is doing the activity yourself.",
+        },
+      ],
+    },
+  },
   {
     id: "plants-parts-quiz",
     zoneId: "plants",

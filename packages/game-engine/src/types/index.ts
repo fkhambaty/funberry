@@ -21,6 +21,8 @@ export interface GameConfig {
   difficulty: 1 | 2 | 3;
   maxStars: number;
   timeLimit?: number;
+  /** Textbook page image under web `public/book-pages/` (e.g. `/book-pages/20260328_104740.jpg`). */
+  bookPageSrc?: string;
   data: DragSortData | MemoryMatchData | PictureQuizData | SequenceBuilderData | SpotDifferenceData | OddOneOutData | TrueFalseData | ColorActivityData | WordPictureLinkData | InteractiveStoryData | BubblePopData | StarCatcherData;
 }
 
@@ -140,11 +142,15 @@ export interface WordPicturePair {
   id: string;
   word: string;
   emoji: string;
+  /** If set, show this on the word side until matched (e.g. scrambled letters from the textbook). */
+  wordDisplay?: string;
 }
 export interface WordPictureLinkData {
   type: "word_picture_link";
   instruction: string;
   pairs: WordPicturePair[];
+  /** Replaces the default “Tap a word…” playing hint when set. */
+  matchHint?: string;
 }
 
 /* ── Interactive Story ── */

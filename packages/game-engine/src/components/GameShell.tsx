@@ -18,6 +18,8 @@ interface GameShellProps {
   lifetimeStars?: number;
   /** Kid-friendly line that play is saved (e.g. for parent dashboard) — keep short; optional. */
   progressSavesHint?: string;
+  /** Optional textbook page photo (`/book-pages/…`). */
+  bookPageSrc?: string;
   onClose: () => void;
   onNextGame?: () => void;
   children: React.ReactNode;
@@ -32,6 +34,7 @@ export function GameShell({
   streak = 0,
   lifetimeStars,
   progressSavesHint,
+  bookPageSrc,
   onClose,
   onNextGame,
   children,
@@ -234,12 +237,52 @@ export function GameShell({
               color: "#64748b",
               lineHeight: 1.35,
               fontFamily: "Nunito, system-ui, sans-serif",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {progressSavesHint}
           </p>
         ) : null}
       </div>
+
+      {bookPageSrc ? (
+        <div
+          style={{
+            position: "relative",
+            zIndex: 8,
+            padding: "0 12px 8px",
+            maxWidth: 720,
+            margin: "0 auto",
+          }}
+        >
+          <img
+            src={bookPageSrc}
+            alt=""
+            style={{
+              width: "100%",
+              maxHeight: 120,
+              objectFit: "contain",
+              borderRadius: 12,
+              border: "2px solid rgba(255,255,255,0.85)",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+            }}
+          />
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: 9,
+              fontWeight: 700,
+              color: "#64748b",
+              textAlign: "center",
+              fontFamily: "Nunito, system-ui, sans-serif",
+            }}
+          >
+            From your textbook page
+          </p>
+        </div>
+      ) : null}
 
       {progress > 0 && (
         <div style={{ position: "relative", zIndex: 10, padding: "0 16px" }}>
