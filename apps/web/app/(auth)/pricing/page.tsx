@@ -1,15 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import { brand } from "@funberry/config";
 import { pricing } from "@funberry/config/src/pricing";
+import { FunBerryLogo } from "../../components/FunBerryLogo";
 
 export default function PricingPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-sky-50 to-white px-6 py-16">
       <div className="mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <Image src="/logo.png" alt="FunBerry Kids" width={120} height={72} className="mx-auto" />
+          <div className="flex justify-center">
+            <FunBerryLogo size="xl" />
+          </div>
           <h1 className="font-display text-4xl font-bold text-sky-900 mt-4">
             {brand.name} Pricing
           </h1>
@@ -20,7 +22,7 @@ export default function PricingPage() {
 
         <div className="grid gap-8 sm:grid-cols-3">
           {/* Free */}
-          <div className="rounded-kid border-2 border-gray-200 bg-white p-8">
+          <div className="kid-glass-panel rounded-kid border-2 border-gray-200/80 bg-white/90 p-8">
             <h3 className="font-display text-2xl font-bold text-gray-900">
               {pricing.free.name}
             </h3>
@@ -35,14 +37,14 @@ export default function PricingPage() {
             </ul>
             <a
               href="/signup"
-              className="mt-6 block w-full text-center rounded-kid bg-gray-100 py-3 font-bold text-gray-700 hover:bg-gray-200 transition"
+              className="kid-glass-btn kid-glass-muted mt-6 block w-full rounded-kid py-3 text-center"
             >
               Get Started
             </a>
           </div>
 
           {/* Monthly */}
-          <div className="rounded-kid border-2 border-berry-300 bg-berry-50 p-8 relative">
+          <div className="kid-glass-panel relative rounded-kid border-2 border-berry-300 bg-berry-50/95 p-8">
             <span className="absolute -top-3 right-6 rounded-full bg-berry-500 px-4 py-1 text-xs font-bold text-white">
               POPULAR
             </span>
@@ -59,13 +61,13 @@ export default function PricingPage() {
                 <li key={f}>&#10003; {f}</li>
               ))}
             </ul>
-            <button className="mt-6 block w-full text-center rounded-kid bg-berry-500 py-3 font-bold text-white hover:bg-berry-600 transition">
+            <button type="button" className="kid-glass-btn kid-glass-berry mt-6 block w-full rounded-kid py-3 text-center">
               Subscribe Monthly
             </button>
           </div>
 
           {/* Yearly */}
-          <div className="rounded-kid border-2 border-leaf-300 bg-leaf-50 p-8 relative">
+          <div className="kid-glass-panel relative rounded-kid border-2 border-leaf-300 bg-leaf-50/95 p-8">
             <span className="absolute -top-3 right-6 rounded-full bg-leaf-500 px-4 py-1 text-xs font-bold text-white">
               BEST VALUE
             </span>
@@ -84,7 +86,7 @@ export default function PricingPage() {
                 <li key={f}>&#10003; {f}</li>
               ))}
             </ul>
-            <button className="mt-6 block w-full text-center rounded-kid bg-leaf-500 py-3 font-bold text-white hover:bg-leaf-600 transition">
+            <button type="button" className="kid-glass-btn kid-glass-leaf mt-6 block w-full rounded-kid py-3 text-center">
               Subscribe Yearly
             </button>
           </div>

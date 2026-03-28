@@ -278,12 +278,7 @@ export function Leaderboard({ highlightChildId, compact = false, onClose }: Lead
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             onClick={onClose}
-            style={{
-              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-              color: "white", border: "none", padding: "10px 32px", borderRadius: 16,
-              fontSize: 14, fontWeight: 800, fontFamily: "Fredoka, sans-serif",
-              cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.35)",
-            }}
+            className="kid-glass-btn kid-glass-violet rounded-kid px-8 py-2.5 text-sm"
           >
             Back to Games
           </motion.button>
@@ -324,10 +319,11 @@ export function LeaderboardModal({
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             onClick={(e) => e.stopPropagation()}
+            className="kid-glass-panel"
             style={{
-              background: "white", borderRadius: 28, padding: "24px 20px",
+              borderRadius: 28, padding: "24px 20px",
               maxWidth: 460, width: "100%", maxHeight: "85vh",
-              overflowY: "auto", boxShadow: "0 24px 60px rgba(0,0,0,0.2)",
+              overflowY: "auto", background: "rgba(255,255,255,0.92)",
             }}
           >
             <Leaderboard highlightChildId={highlightChildId} onClose={onClose} />

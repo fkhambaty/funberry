@@ -1,10 +1,12 @@
-import Image from "next/image";
+import { FunBerryLogo } from "./components/FunBerryLogo";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-50 via-white to-purple-50/40">
       <div className="text-center">
-        <div className="mb-4"><Image src="/logo.png" alt="FunBerry Kids" width={120} height={72} className="mx-auto" /></div>
+        <div className="mb-4 flex justify-center">
+          <FunBerryLogo size="xl" />
+        </div>
         <h1 className="font-display text-3xl font-bold text-sky-900 mb-2">
           Page Not Found
         </h1>
@@ -13,7 +15,7 @@ export default function NotFound() {
         </p>
         <a
           href="/"
-          className="rounded-kid bg-sky-500 px-6 py-3 text-white font-bold hover:bg-sky-600 transition inline-block"
+          className="kid-glass-btn kid-glass-sky inline-block rounded-kid px-6 py-3"
         >
           Go Home
         </a>

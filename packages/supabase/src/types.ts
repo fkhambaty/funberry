@@ -156,6 +156,83 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["rewards"]["Insert"]>;
       };
+      coaching_skill_axes: {
+        Row: {
+          id: string;
+          title: string;
+          parent_description: string;
+          support_tip: string;
+          sort_order: number;
+        };
+        Insert: {
+          id: string;
+          title: string;
+          parent_description: string;
+          support_tip?: string;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["coaching_skill_axes"]["Insert"]>;
+      };
+      game_type_skill_contribution: {
+        Row: {
+          game_type: string;
+          skill_axis_id: string;
+          weight: number;
+        };
+        Insert: {
+          game_type: string;
+          skill_axis_id: string;
+          weight?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["game_type_skill_contribution"]["Insert"]>;
+      };
+      parent_coaching_reports: {
+        Row: {
+          child_id: string;
+          updated_at: string;
+          report: Record<string, unknown>;
+        };
+        Insert: {
+          child_id: string;
+          report: Record<string, unknown>;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["parent_coaching_reports"]["Insert"]>;
+      };
+      coaching_core_capabilities: {
+        Row: {
+          id: string;
+          title: string;
+          lens_summary: string;
+          what_strong_signals: string;
+          what_to_watch: string;
+          parent_interventions: string;
+          sort_order: number;
+        };
+        Insert: {
+          id: string;
+          title: string;
+          lens_summary: string;
+          what_strong_signals: string;
+          what_to_watch: string;
+          parent_interventions: string;
+          sort_order?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["coaching_core_capabilities"]["Insert"]>;
+      };
+      skill_axis_capability_map: {
+        Row: {
+          skill_axis_id: string;
+          capability_id: string;
+          weight: number;
+        };
+        Insert: {
+          skill_axis_id: string;
+          capability_id: string;
+          weight?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["skill_axis_capability_map"]["Insert"]>;
+      };
     };
   };
 }
@@ -166,9 +243,13 @@ export type GameType =
   | "picture_quiz"
   | "sequence_builder"
   | "spot_difference"
+  | "odd_one_out"
+  | "true_false"
   | "color_activity"
   | "word_picture_link"
-  | "interactive_story";
+  | "interactive_story"
+  | "bubble_pop"
+  | "star_catcher";
 
 export interface AvatarConfig {
   body: string;

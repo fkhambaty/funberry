@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { brand } from "@funberry/config";
+import { FunBerryLogo } from "../../components/FunBerryLogo";
 import { signUp } from "@funberry/supabase";
 
 export default function SignupPage() {
@@ -39,7 +38,7 @@ export default function SignupPage() {
 
   if (emailSent) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-sky-50 to-white">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-emerald-50/40 p-6">
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
@@ -47,7 +46,7 @@ export default function SignupPage() {
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
             className="w-full max-w-md text-center"
           >
-            <div className="bg-white rounded-kid p-10 shadow-lg">
+            <div className="glass-card rounded-kid p-10">
               <motion.div
                 animate={{ y: [0, -14, 0], rotate: [0, -8, 8, 0] }}
                 transition={{ repeat: Infinity, duration: 2.5 }}
@@ -81,8 +80,7 @@ export default function SignupPage() {
                 href="/login"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-block px-8 py-4 rounded-kid text-white font-bold text-lg shadow-lg"
-                style={{ background: "linear-gradient(135deg, #379df9, #2180ee)" }}
+                className="kid-glass-btn kid-glass-sky inline-block rounded-kid px-8 py-4 text-lg"
               >
                 Already confirmed? Sign In →
               </motion.a>
@@ -97,18 +95,18 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-sky-50 to-white">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-emerald-50/40 p-6">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        <div className="mb-6 text-center">
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="inline-block"
+            className="mx-auto flex justify-center drop-shadow-[0_8px_24px_rgba(24,176,90,0.2)]"
           >
-            <Image src="/logo.png" alt="FunBerry Kids" width={160} height={96} className="mx-auto" />
+            <FunBerryLogo size="xl" />
           </motion.div>
-          <h1 className="font-display text-3xl font-bold text-sky-900 mt-2">
-            Join {brand.name}
+          <h1 className="font-display mt-2 text-2xl font-bold text-sky-900 sm:text-3xl">
+            Create your account
           </h1>
           <p className="text-gray-500 mt-1">
             Create a free account to start your child&apos;s learning adventure
@@ -117,7 +115,7 @@ export default function SignupPage() {
 
         <form
           onSubmit={handleSignup}
-          className="bg-white rounded-kid p-8 shadow-lg space-y-5"
+          className="glass-card space-y-5 rounded-kid p-8"
         >
           {error && (
             <motion.div
@@ -186,8 +184,7 @@ export default function SignupPage() {
             disabled={loading}
             whileHover={!loading ? { scale: 1.03, y: -2 } : {}}
             whileTap={!loading ? { scale: 0.97 } : {}}
-            className="w-full py-4 rounded-kid text-white font-bold text-lg shadow-lg transition disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)" }}
+            className="kid-glass-btn kid-glass-leaf w-full rounded-kid py-4 text-lg transition disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? "Creating account..." : "🎉 Create Free Account"}
           </motion.button>

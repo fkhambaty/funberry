@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { brand } from "@funberry/config";
+import { FunBerryLogo } from "../../components/FunBerryLogo";
 import { signIn } from "@funberry/supabase";
 
 export default function LoginPage() {
@@ -36,19 +35,21 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-b from-sky-50 to-white">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-fuchsia-50/40 p-6">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Image src="/logo.png" alt="FunBerry Kids" width={160} height={96} className="mx-auto" />
-          <h1 className="font-display text-3xl font-bold text-sky-900 mt-2">
-            Welcome back to {brand.name}
+        <div className="mb-6 text-center">
+          <div className="mx-auto flex justify-center drop-shadow-[0_8px_24px_rgba(255,45,106,0.25)]">
+            <FunBerryLogo size="xl" />
+          </div>
+          <h1 className="font-display mt-2 text-2xl font-bold text-sky-900 sm:text-3xl">
+            Welcome back
           </h1>
           <p className="text-gray-500 mt-1">Sign in to manage your kids&apos; learning</p>
         </div>
 
         <form
           onSubmit={handleLogin}
-          className="bg-white rounded-kid p-8 shadow-lg space-y-5"
+          className="glass-card space-y-5 rounded-kid p-8"
         >
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
@@ -87,7 +88,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-kid bg-berry-500 hover:bg-berry-600 text-white font-bold text-lg shadow-lg transition disabled:opacity-50"
+            className="kid-glass-btn kid-glass-berry w-full rounded-kid py-4 text-lg disabled:pointer-events-none disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>

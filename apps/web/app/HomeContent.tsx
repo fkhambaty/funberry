@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { brand } from "@funberry/config";
 import { motion } from "framer-motion";
+import { FunBerryLogo } from "./components/FunBerryLogo";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -46,55 +46,31 @@ export default function HomeContent() {
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: "spring", stiffness: 200, damping: 12 }}
-            className="mb-6"
+            className="mb-4 flex justify-center drop-shadow-[0_12px_32px_rgba(255,45,106,0.35)]"
           >
-            <motion.div
-              className="inline-block"
-              animate={{ y: [0, -12, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <Image src="/logo.png" alt="FunBerry Kids" width={200} height={120} className="drop-shadow-lg" priority />
-            </motion.div>
+            <FunBerryLogo size="hero" animate />
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="font-display text-6xl font-bold tracking-tight sm:text-8xl"
-            style={{
-              background: "linear-gradient(135deg, #1c498c, #379df9, #ff2d6a)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            {brand.name}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mx-auto mt-4 max-w-2xl text-xl text-gray-600 font-body"
+            className="font-body mx-auto mt-3 max-w-2xl text-lg leading-relaxed text-gray-600 sm:text-xl"
           >
             {brand.tagline}
-          </motion.p>
+          </motion.h1>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.4 }}
             className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
           >
             <motion.a
               href="/signup"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-kid px-10 py-5 text-lg font-bold text-white shadow-kid-lg"
-              style={{
-                background: "linear-gradient(135deg, #ff2d6a, #f20d55)",
-                boxShadow: "0 8px 30px rgba(255,45,106,0.3)",
-              }}
+              className="kid-glass-btn kid-glass-berry rounded-kid px-10 py-5 text-lg"
             >
               Get Started Free
             </motion.a>
@@ -102,7 +78,7 @@ export default function HomeContent() {
               href="/login"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-kid border-2 border-sky-300 bg-white px-10 py-5 text-lg font-bold text-sky-700 shadow-kid"
+              className="kid-glass-btn rounded-kid px-10 py-5 text-lg text-sky-800"
             >
               Parent Login
             </motion.a>
@@ -138,7 +114,7 @@ export default function HomeContent() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 18 }}
                 whileHover={{ scale: 1.08, y: -5 }}
-                className={`flex flex-col items-center rounded-kid p-6 bg-gradient-to-br ${zone.color} shadow-kid cursor-default`}
+                className={`kid-glass-panel flex cursor-default flex-col items-center rounded-kid bg-gradient-to-br p-6 ${zone.color}`}
               >
                 <motion.span
                   className="text-4xl"
@@ -177,7 +153,7 @@ export default function HomeContent() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06, type: "spring", stiffness: 200, damping: 18 }}
                 whileHover={{ scale: 1.04, y: -4 }}
-                className="rounded-kid bg-white p-6 shadow-kid"
+                className="kid-glass-panel rounded-kid bg-white/90 p-6"
                 style={{ borderTop: `4px solid ${game.color}` }}
               >
                 <motion.span
@@ -206,7 +182,7 @@ export default function HomeContent() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
-              className="rounded-kid border-2 border-gray-200 p-8 shadow-kid"
+              className="kid-glass-panel rounded-kid border-gray-200/80 p-8"
             >
               <h3 className="font-display text-2xl font-bold text-gray-900">Free</h3>
               <p className="mt-2 text-4xl font-bold text-gray-900">$0</p>
@@ -222,10 +198,10 @@ export default function HomeContent() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               whileHover={{ y: -4 }}
-              className="rounded-kid p-8 relative shadow-kid-lg"
+              className="kid-glass-panel relative rounded-kid p-8"
               style={{
                 background: "linear-gradient(135deg, #fff0f3, #ffe0e8)",
-                border: "2px solid #ffc6d6",
+                borderColor: "#ffc6d6",
               }}
             >
               <span className="absolute -top-3 right-6 rounded-full bg-berry-500 px-4 py-1 text-xs font-bold text-white shadow-kid-glow-berry">
@@ -254,11 +230,11 @@ export default function HomeContent() {
           <motion.div
             animate={{ y: [0, -5, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
+            className="mx-auto flex justify-center drop-shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
           >
-            <Image src="/logo.png" alt="FunBerry Kids" width={80} height={48} className="mx-auto brightness-0 invert" />
+            <FunBerryLogo size="lg" />
           </motion.div>
-          <p className="mt-2 font-display text-lg font-bold text-white">{brand.name}</p>
-          <p className="mt-1 text-sm text-sky-300">{brand.tagline}</p>
+          <p className="mt-2 font-display text-sm font-semibold text-sky-200">{brand.tagline}</p>
           <div className="mt-4 flex justify-center gap-6 text-sm">
             <a href="/privacy" className="text-sky-300 hover:text-white transition">Privacy</a>
             <a href="/terms" className="text-sky-300 hover:text-white transition">Terms</a>

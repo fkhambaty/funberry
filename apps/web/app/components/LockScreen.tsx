@@ -171,26 +171,10 @@ export function LockScreen() {
                   key={key}
                   type="button"
                   onClick={() => key === "←" ? handleBackspace() : handleDigit(key)}
-                  style={{
-                    width: 60,
-                    height: 60,
-                    borderRadius: 16,
-                    border: "none",
-                    fontSize: key === "←" ? 20 : 22,
-                    fontWeight: 800,
-                    color: "white",
-                    background: key === "←"
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(255,255,255,0.12)",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
-                    transition: "background 0.15s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.22)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = key === "←" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)"; }}
+                  className={`kid-glass-btn mx-auto flex h-[60px] w-[60px] items-center justify-center rounded-2xl border-0 ${
+                    key === "←" ? "kid-glass-muted !text-slate-600" : "kid-glass-sky"
+                  }`}
+                  style={{ fontSize: key === "←" ? 20 : 22 }}
                 >
                   {key}
                 </button>
@@ -254,32 +238,13 @@ export function LockScreen() {
                     whileHover={{ scale: 1.06, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleExtend(p.minutes)}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "14px 8px",
-                      borderRadius: 18,
-                      border: "2.5px solid rgba(134, 239, 172, 0.4)",
-                      background: "rgba(34, 197, 94, 0.12)",
-                      cursor: "pointer",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(134, 239, 172, 0.7)";
-                      e.currentTarget.style.background = "rgba(34, 197, 94, 0.22)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(134, 239, 172, 0.4)";
-                      e.currentTarget.style.background = "rgba(34, 197, 94, 0.12)";
-                    }}
+                    className="kid-glass-btn kid-glass-leaf flex cursor-pointer flex-col items-center gap-1 rounded-2xl border-0 px-2 py-3.5"
                   >
                     <span style={{ fontSize: 24 }}>{p.emoji}</span>
                     <span style={{
                       fontSize: 14,
                       fontWeight: 800,
-                      color: "#86efac",
+                      color: "rgba(255,255,255,0.95)",
                       fontFamily: "Fredoka, sans-serif",
                     }}>
                       {p.label}
@@ -300,33 +265,13 @@ export function LockScreen() {
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={handleStop}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                width: "100%",
-                padding: "14px 24px",
-                borderRadius: 18,
-                border: "2.5px solid rgba(252, 165, 165, 0.4)",
-                background: "rgba(239, 68, 68, 0.12)",
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(252, 165, 165, 0.7)";
-                e.currentTarget.style.background = "rgba(239, 68, 68, 0.22)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(252, 165, 165, 0.4)";
-                e.currentTarget.style.background = "rgba(239, 68, 68, 0.12)";
-              }}
+              className="kid-glass-btn kid-glass-danger flex w-full items-center justify-center gap-2 rounded-2xl border-0 py-3.5"
             >
               <span style={{ fontSize: 20 }}>🛑</span>
               <span style={{
                 fontSize: 15,
                 fontWeight: 800,
-                color: "#fca5a5",
+                color: "rgba(255,255,255,0.98)",
                 fontFamily: "Fredoka, sans-serif",
               }}>
                 End session &amp; go to dashboard

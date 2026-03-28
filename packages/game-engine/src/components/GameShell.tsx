@@ -14,6 +14,8 @@ interface GameShellProps {
   progress?: number;
   score?: number;
   streak?: number;
+  /** Cumulative stars for the active child (from DB `children.total_stars`). */
+  lifetimeStars?: number;
   onClose: () => void;
   onNextGame?: () => void;
   children: React.ReactNode;
@@ -26,6 +28,7 @@ export function GameShell({
   progress = 0,
   score,
   streak = 0,
+  lifetimeStars,
   onClose,
   onNextGame,
   children,
@@ -53,21 +56,19 @@ export function GameShell({
 
       {/* ── Sticky Header ── */}
       <div
+        className="kid-header-bar"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 30,
           display: "flex",
           alignItems: "center",
-          gap: 10,
-          padding: "10px 12px",
-          backdropFilter: "blur(12px)",
-          backgroundColor: "rgba(255,255,255,0.82)",
-          borderBottom: "2px solid rgba(255,255,255,0.6)",
-          boxShadow: "0 3px 18px rgba(0,0,0,0.09)",
+          gap: 8,
+          padding: "3px 10px",
         }}
       >
         <motion.button
+          className="kid-glass-btn kid-glass-berry"
           whileHover={{ scale: 1.1, y: -2 }}
           whileTap={{ scale: 0.88 }}
           onClick={onClose}
@@ -78,12 +79,8 @@ export function GameShell({
             justifyContent: "center",
             padding: "8px 14px",
             borderRadius: 16,
-            border: "3px solid rgba(255,255,255,0.8)",
-            background: "linear-gradient(135deg, #ff6b9d, #e0456d)",
             cursor: "pointer",
             gap: 1,
-            boxShadow:
-              "0 6px 20px rgba(224,69,109,0.45), inset 0 1px 0 rgba(255,255,255,0.35)",
             minWidth: 66,
             flexShrink: 0,
           }}
@@ -141,6 +138,30 @@ export function GameShell({
             flexShrink: 0,
           }}
         >
+          {lifetimeStars !== undefined && (
+            <motion.div
+              key={lifetimeStars}
+              initial={{ scale: 1.12 }}
+              animate={{ scale: 1 }}
+              className="kid-glass-stat kid-glass-stat--stars"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "5px 10px",
+                borderRadius: 14,
+                fontWeight: 800,
+                fontSize: 13,
+                color: "#b45309",
+                fontFamily: "Fredoka, sans-serif",
+              }}
+              title="Your total stars"
+            >
+              <span style={{ fontSize: 16, lineHeight: 1 }}>⭐</span>
+              <span style={{ fontVariantNumeric: "tabular-nums" }}>{lifetimeStars}</span>
+            </motion.div>
+          )}
+
           {streak > 0 && <StreakCounter count={streak} />}
 
           {score !== undefined && (
@@ -166,6 +187,9 @@ export function GameShell({
           )}
 
           <motion.button
+            className={
+              muted ? "kid-glass-btn kid-glass-danger" : "kid-glass-btn kid-glass-leaf"
+            }
             whileHover={{ scale: 1.12 }}
             whileTap={{ scale: 0.88 }}
             onClick={() => {
@@ -173,17 +197,15 @@ export function GameShell({
               setMuted(!muted);
             }}
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 12,
-              border: "none",
-              background: muted ? "#fee2e2" : "#f0fdf4",
+              width: 44,
+              height: 44,
+              borderRadius: 14,
               cursor: "pointer",
               fontSize: 20,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+              padding: 0,
             }}
             title={muted ? "Unmute sounds" : "Mute sounds"}
           >
@@ -231,6 +253,7 @@ export function GameShell({
 
       {onNextGame && (
         <motion.button
+          className="kid-glass-btn kid-glass-violet"
           whileHover={{ scale: 1.1, y: -4 }}
           whileTap={{ scale: 0.92 }}
           onClick={onNextGame}
@@ -247,12 +270,8 @@ export function GameShell({
             alignItems: "center",
             padding: "10px 18px",
             borderRadius: 20,
-            border: "3px solid rgba(255,255,255,0.7)",
-            background: "linear-gradient(135deg, #a78bfa, #7c3aed)",
             cursor: "pointer",
             gap: 2,
-            boxShadow:
-              "0 8px 28px rgba(124,58,237,0.5), inset 0 1px 0 rgba(255,255,255,0.3)",
           }}
         >
           <span style={{ fontSize: 22 }}>🔀</span>

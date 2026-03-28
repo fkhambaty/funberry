@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { zones, getZoneById } from "@funberry/config";
@@ -28,6 +27,7 @@ import type { GameConfig, GameResult } from "@funberry/game-engine";
 import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank } from "@funberry/supabase";
 import type { Child } from "@funberry/supabase";
 import { LeaderboardModal } from "../../components/Leaderboard";
+import { FunBerryLogo } from "../../components/FunBerryLogo";
 
 type ViewMode = "who" | "zones" | "games" | "playing";
 
@@ -212,14 +212,14 @@ function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel
         exit={{ scale: 0.85, y: 30 }}
         transition={{ type: "spring", stiffness: 300, damping: 22 }}
         onClick={(e) => e.stopPropagation()}
+        className="kid-glass-panel"
         style={{
-          background: "white",
+          background: "rgba(255,255,255,0.95)",
           borderRadius: 28,
           padding: "32px 28px",
           maxWidth: 360,
           width: "90%",
           textAlign: "center",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
         }}
       >
         <div style={{ fontSize: 48, marginBottom: 8 }}>🔒</div>
@@ -294,18 +294,7 @@ function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCancel}
-          style={{
-            padding: "12px 32px",
-            borderRadius: 20,
-            border: "none",
-            background: "#f3f4f6",
-            color: "#6b7280",
-            fontSize: 15,
-            fontWeight: 800,
-            fontFamily: "Fredoka, sans-serif",
-            cursor: "pointer",
-            marginTop: 8,
-          }}
+          className="kid-glass-btn kid-glass-muted mt-2 rounded-kid px-8 py-3 text-sm"
         >
           Cancel
         </motion.button>
@@ -468,8 +457,7 @@ export default function PlayContent() {
             <motion.a
               href="/dashboard"
               whileHover={{ scale: 1.06, x: -3 }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-white text-sm shadow-md"
-              style={{ background: "linear-gradient(135deg, #ff6b9d, #e0456d)" }}
+              className="kid-glass-btn kid-glass-berry flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm"
             >
               🏠 Dashboard
             </motion.a>
@@ -477,11 +465,7 @@ export default function PlayContent() {
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.94 }}
               onClick={() => { playTap(); setShowLeaderboard(true); }}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-              style={{
-                background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
-                color: "#78350f",
-              }}
+              className="kid-glass-btn kid-glass-sunshine flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm"
             >
               🏆 Star Champions
             </motion.button>
@@ -525,8 +509,7 @@ export default function PlayContent() {
               <motion.a
                 href="/dashboard"
                 whileHover={{ scale: 1.05 }}
-                className="inline-block px-8 py-3 rounded-2xl text-white font-bold"
-                style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)" }}
+                className="kid-glass-btn kid-glass-violet inline-block rounded-2xl px-8 py-3"
               >
                 Go to Dashboard
               </motion.a>
@@ -553,7 +536,7 @@ export default function PlayContent() {
   /* ── Zone Selection ── */
   if (view === "zones") {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 p-6">
+      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 px-4 py-4 sm:px-5 sm:py-5">
         {/* Parent Gate Modal */}
         <AnimatePresence>
           {showParentGate && (
@@ -565,52 +548,46 @@ export default function PlayContent() {
         </AnimatePresence>
 
         <div className="mx-auto max-w-4xl">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex min-w-0 items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.06, x: -3 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setView("who"); }}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-white text-sm shadow-md"
-                style={{ background: "linear-gradient(135deg, #ff6b9d, #e0456d)" }}
+                className="kid-glass-btn kid-glass-berry flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm"
               >
-                🏠 Switch Player
+                🏠 Switch
               </motion.button>
-              {/* Active child badge */}
               {selectedChild && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold"
-                  style={{ background: "rgba(255,255,255,0.8)", color: "#6b7280" }}
+                <div
+                  className="flex min-w-0 max-w-[40vw] items-center gap-1.5 truncate rounded-xl px-2.5 py-1.5 text-xs font-bold sm:max-w-none sm:gap-2 sm:px-3 sm:text-sm"
+                  style={{ background: "rgba(255,255,255,0.85)", color: "#6b7280" }}
                 >
-                  <span style={{ fontSize: 20 }}>{selectedChild.photo_url || "🧒"}</span>
-                  {selectedChild.name}
+                  <span className="shrink-0 text-base sm:text-lg">{selectedChild.photo_url || "🧒"}</span>
+                  <span className="truncate">{selectedChild.name}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Leaderboard button */}
+            <div className="flex shrink-0 items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setShowLeaderboard(true); }}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-                style={{
-                  background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
-                  color: "#78350f",
-                }}
+                className="kid-glass-btn kid-glass-sunshine flex items-center gap-1 rounded-xl px-2.5 py-2 text-sm font-black tabular-nums"
+                title="Your stars — tap for Star Champions"
+                type="button"
+                aria-label={`You have ${selectedChild?.total_stars ?? 0} stars. Open Star Champions.`}
               >
-                🏆 Stars
+                <span className="text-base leading-none" aria-hidden>⭐</span>
+                {selectedChild?.total_stars ?? 0}
               </motion.button>
-              {/* Parent Dashboard button */}
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setShowParentGate(true); }}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  color: "white",
-                }}
+                className="kid-glass-btn kid-glass-violet flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-bold sm:text-sm"
+                type="button"
               >
                 🔒 Parent
               </motion.button>
@@ -627,27 +604,27 @@ export default function PlayContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10"
+            className="mb-5 text-center"
           >
             <motion.div
               animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
               transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="text-6xl mb-3"
+              className="mb-1 text-5xl sm:text-6xl"
             >
               🗺️
             </motion.div>
-            <h1 className="font-display text-4xl font-bold text-sky-900">
+            <h1 className="font-display text-3xl font-bold text-sky-900 sm:text-4xl">
               {selectedChild ? `${selectedChild.name}'s World!` : "Choose a Zone!"}
             </h1>
-            <p className="text-gray-500 mt-2 text-lg">Pick a world and start your adventure! 🚀</p>
+            <p className="mt-1 text-base text-gray-500">Pick a world and go! 🚀</p>
           </motion.div>
 
           {loadingProgress ? (
             <div className="text-center py-8">
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }} className="inline-block"><Image src="/logo.png" alt="Loading" width={64} height={38} /></motion.div>
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }} className="inline-block rounded-full p-3 kid-glass-btn border-0"><FunBerryLogo size="md" /></motion.div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
               {zones.map((zone, i) => {
                 const zt = getZoneTheme(zone.id);
                 const zoneGamesData = getGamesForZone(zone.id);
@@ -662,11 +639,12 @@ export default function PlayContent() {
                     whileHover={{ scale: 1.08, y: -6 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleZoneClick(zone.id)}
-                    className="p-5 rounded-kid text-center transition-shadow"
+                    className="kid-glass-panel rounded-kid p-4 text-center transition-shadow sm:p-5"
                     style={{
                       background: zt.bgGradient,
-                      border: `3px solid ${zone.isFree ? "#a7f3d0" : "rgba(0,0,0,0.06)"}`,
-                      boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                      borderWidth: 3,
+                      borderStyle: "solid",
+                      borderColor: zone.isFree ? "#a7f3d0" : "rgba(0,0,0,0.06)",
                     }}
                   >
                     <motion.span
@@ -704,7 +682,7 @@ export default function PlayContent() {
     const classicGames = zoneGames.filter((g) => g.type !== "bubble_pop" && g.type !== "star_catcher");
 
     return (
-      <main className="min-h-screen p-6" style={{ background: theme.bgGradient }}>
+      <main className="min-h-screen px-4 py-4 sm:px-5 sm:py-5" style={{ background: theme.bgGradient }}>
         {/* Parent Gate Modal */}
         <AnimatePresence>
           {showParentGate && (
@@ -717,50 +695,45 @@ export default function PlayContent() {
 
         <div className="mx-auto max-w-2xl">
           {/* Back navigation */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.06, x: -3 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setView("zones"); setSelectedZone(null); }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-white text-sm shadow-md"
-                style={{ background: "linear-gradient(135deg, #ff6b9d, #e0456d)" }}
+                className="kid-glass-btn kid-glass-berry flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm"
               >
-                🗺️ All Zones
+                🗺️ Zones
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setView("who"); }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-                style={{ background: "rgba(255,255,255,0.8)", color: "#6b7280" }}
+                className="kid-glass-btn kid-glass-muted flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm"
               >
-                👥 Switch Player
+                👥 Switch
               </motion.button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setShowLeaderboard(true); }}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-                style={{
-                  background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
-                  color: "#78350f",
-                }}
+                className="kid-glass-btn kid-glass-sunshine flex items-center gap-1 rounded-xl px-2.5 py-2 text-sm font-black tabular-nums"
+                title="Your stars — tap for Star Champions"
+                type="button"
+                aria-label={`You have ${selectedChild?.total_stars ?? 0} stars. Open Star Champions.`}
               >
-                🏆 Stars
+                <span className="text-base leading-none" aria-hidden>⭐</span>
+                {selectedChild?.total_stars ?? 0}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => { playTap(); setShowParentGate(true); }}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl font-bold text-sm shadow-sm"
-                style={{
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  color: "white",
-                }}
+                className="kid-glass-btn kid-glass-violet flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-bold sm:text-sm"
+                type="button"
               >
                 🔒 Parent
               </motion.button>
@@ -778,25 +751,25 @@ export default function PlayContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8 rounded-kid p-8 glass-card"
+            className="glass-card mb-5 rounded-kid p-4 text-center sm:p-6"
           >
             <motion.span
-              className="text-6xl block mb-3"
+              className="mb-1 block text-5xl sm:text-6xl"
               animate={{ y: [0, -10, 0], rotate: [0, -4, 0] }}
               transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
             >
               {zone?.emoji}
             </motion.span>
-            <h2 className="font-display text-3xl font-bold" style={{ color: theme.accentColor }}>
+            <h2 className="font-display text-2xl font-bold sm:text-3xl" style={{ color: theme.accentColor }}>
               {zone?.name}
             </h2>
-            <p className="text-gray-500 text-sm mt-2">{zone?.description}</p>
+            <p className="mt-1 text-xs text-gray-500 sm:text-sm">{zone?.description}</p>
           </motion.div>
 
           {/* Adventure Games */}
           {adventureGames.length > 0 && (
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="mb-4">
+              <div className="mb-2 flex items-center gap-2">
                 <span className="text-2xl">🕹️</span>
                 <h3 className="font-display text-lg font-black" style={{
                   background: "linear-gradient(135deg, #a855f7, #ec4899)",
@@ -807,7 +780,7 @@ export default function PlayContent() {
                 </h3>
                 <span className="text-xs font-bold text-white bg-purple-500 px-2 py-0.5 rounded-full">NEW!</span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {adventureGames.map((game, i) => {
                   const stars = completedGames[game.id] ?? 0;
                   return (
@@ -819,11 +792,12 @@ export default function PlayContent() {
                       whileHover={{ scale: 1.03, x: 5 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => handleGameClick(game)}
-                      className="w-full flex items-center gap-4 p-5 rounded-kid text-left"
+                      className="kid-glass-panel flex w-full items-center gap-3 rounded-kid p-4 text-left sm:gap-4 sm:p-5"
                       style={{
                         background: "linear-gradient(135deg, #fdf4ff, #fae8ff)",
-                        border: "3px solid #e9d5ff",
-                        boxShadow: "0 6px 20px rgba(168,85,247,0.15)",
+                        borderWidth: 3,
+                        borderStyle: "solid",
+                        borderColor: "#e9d5ff",
                       }}
                     >
                       <motion.span
@@ -855,7 +829,7 @@ export default function PlayContent() {
           {/* Classic Games */}
           {classicGames.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-2 flex items-center gap-2">
                 <span className="text-xl">🧩</span>
                 <h3 className="font-display text-base font-bold" style={{ color: theme.accentColor }}>
                   Classic Games ({classicGames.length})
@@ -873,7 +847,7 @@ export default function PlayContent() {
                       whileHover={{ scale: 1.02, x: 4 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => handleGameClick(game)}
-                      className="w-full flex items-center gap-4 p-4 rounded-kid glass-card text-left"
+                      className="kid-glass-panel w-full flex items-center gap-4 rounded-kid p-4 text-left"
                       style={{ borderLeft: `4px solid ${theme.accentColor}` }}
                     >
                       <motion.span
@@ -910,6 +884,7 @@ export default function PlayContent() {
         theme={theme}
         title={selectedGame?.title ?? ""}
         subtitle={selectedGame ? GAME_LABELS[selectedGame.type] : undefined}
+        lifetimeStars={selectedChild ? (selectedChild.total_stars ?? 0) : undefined}
         onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
         onNextGame={handleNextGame}
       >

@@ -1,5 +1,16 @@
 import { supabase } from "./client";
-import type { Child, Parent, Progress, Unlock, Reward } from "./types";
+import {
+  buildParentCoachingReport,
+  FALLBACK_COACHING_AXES,
+  FALLBACK_CONTRIBUTIONS,
+  type CoachingContributionRow,
+  type CoachingCoreCapabilityRow,
+  type CoachingSkillAxisRow,
+  type ParentCoachingReport,
+  type ProgressRowLike,
+  type SkillAxisCapabilityMapRow,
+} from "./coachingReport";
+import type { Child, Database, Parent, Progress, Unlock, Reward } from "./types";
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -150,6 +161,32 @@ export async function getChildProgress(childId: string) {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data as (Progress & { games: Record<string, unknown> })[];
+}
+
+/** Aggregate play telemetry across all children on the account (parent coaching desk). */
+export async function getFamilyPlayStats(): Promise<{
+  totalSessions: number;
+  uniqueGamesTouched: number;
+  lastActivityAt: string | null;
+}> {
+  const kids = await getChildren();
+  let totalSessions = 0;
+  const gameIds = new Set<string>();
+  let lastActivityAt: string | null = null;
+  for (const k of kids) {
+    const rows = await getChildProgress(k.id);
+    totalSessions += rows.length;
+    for (const r of rows) {
+      gameIds.add(r.game_id);
+      const ts = r.completed_at || r.created_at;
+      if (ts && (!lastActivityAt || ts > lastActivityAt)) lastActivityAt = ts;
+    }
+  }
+  return {
+    totalSessions,
+    uniqueGamesTouched: gameIds.size,
+    lastActivityAt,
+  };
 }
 
 /**
@@ -369,4 +406,82 @@ export async function getGamesByZone(zoneId: string) {
     .order("order_index", { ascending: true });
   if (error) throw error;
   return data;
+}
+
+// ── Parent coaching reports (syllabus + skill analysis from play data) ───────
+
+export async function fetchCoachingReference(): Promise<{
+  axes: CoachingSkillAxisRow[];
+  contributions: CoachingContributionRow[];
+  coreCapabilities: CoachingCoreCapabilityRow[];
+  axisCapabilityMap: SkillAxisCapabilityMapRow[];
+}> {
+  const [axesRes, contribRes, capRes, mapRes] = await Promise.all([
+    supabase.from("coaching_skill_axes").select("*").order("sort_order"),
+    supabase.from("game_type_skill_contribution").select("*"),
+    supabase.from("coaching_core_capabilities").select("*").order("sort_order"),
+    supabase.from("skill_axis_capability_map").select("*"),
+  ]);
+  return {
+    axes: axesRes.error ? [] : ((axesRes.data as CoachingSkillAxisRow[]) ?? []),
+    contributions: contribRes.error ? [] : ((contribRes.data as CoachingContributionRow[]) ?? []),
+    coreCapabilities: capRes.error ? [] : ((capRes.data as CoachingCoreCapabilityRow[]) ?? []),
+    axisCapabilityMap: mapRes.error ? [] : ((mapRes.data as SkillAxisCapabilityMapRow[]) ?? []),
+  };
+}
+
+export async function refreshParentCoachingReport(childId: string): Promise<ParentCoachingReport> {
+  const kids = await getChildren();
+  const child = kids.find((c) => c.id === childId);
+  if (!child) throw new Error("Child not found");
+
+  const progress = await getChildProgress(childId);
+  let { axes, contributions, coreCapabilities, axisCapabilityMap } = await fetchCoachingReference();
+  if (!axes.length) axes = FALLBACK_COACHING_AXES;
+  if (!contributions.length) contributions = FALLBACK_CONTRIBUTIONS;
+
+  const report = buildParentCoachingReport(
+    child,
+    progress as ProgressRowLike[],
+    axes,
+    contributions,
+    coreCapabilities,
+    axisCapabilityMap,
+  );
+
+  await supabase.from("parent_coaching_reports").upsert(
+    {
+      child_id: childId,
+      updated_at: new Date().toISOString(),
+      report: report as unknown as Record<string, unknown>,
+    } as never,
+    { onConflict: "child_id" },
+  );
+
+  return report;
+}
+
+function isCompleteCoachingReport(r: unknown): r is ParentCoachingReport {
+  if (typeof r !== "object" || r === null) return false;
+  const o = r as Record<string, unknown>;
+  return (
+    Array.isArray(o.coreCapabilityInsights) &&
+    Array.isArray(o.learningBehaviors) &&
+    typeof o.decisionFramework === "object" &&
+    o.decisionFramework !== null
+  );
+}
+
+export async function getParentCoachingReport(childId: string): Promise<ParentCoachingReport> {
+  const { data, error } = await supabase
+    .from("parent_coaching_reports")
+    .select("report, updated_at")
+    .eq("child_id", childId)
+    .maybeSingle();
+
+  const row = data as Database["public"]["Tables"]["parent_coaching_reports"]["Row"] | null;
+  if (!error && row?.report && isCompleteCoachingReport(row.report)) {
+    return row.report as unknown as ParentCoachingReport;
+  }
+  return refreshParentCoachingReport(childId);
 }

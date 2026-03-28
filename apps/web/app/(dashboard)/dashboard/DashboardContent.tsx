@@ -2,13 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { brand, zones } from "@funberry/config";
-import { getCurrentUser, getChildren, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
+import { zones } from "@funberry/config";
+import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
-import { Leaderboard } from "../../components/Leaderboard";
-import { getZoneTheme } from "@funberry/game-engine";
 import { TimerSetup } from "../../components/TimerSetup";
 import { useTimer } from "../../components/TimerProvider";
 import { playTap } from "@funberry/game-engine";
@@ -119,7 +116,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
 
   if (!showSettings) {
     return (
-      <div style={{ padding: "0 24px 24px", maxWidth: 800, margin: "0 auto" }}>
+      <div style={{ padding: "0 24px 16px", maxWidth: 800, margin: "0 auto" }}>
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
@@ -154,10 +151,10 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{ padding: "0 24px 32px", maxWidth: 800, margin: "0 auto" }}
+        style={{ padding: "0 24px 20px", maxWidth: 800, margin: "0 auto" }}
       >
         <div style={{
-          background: "white", borderRadius: 24, padding: "32px 24px",
+          background: "white", borderRadius: 24, padding: "24px 20px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.06)", border: "2px solid #f3f4f6",
           textAlign: "center",
         }}>
@@ -190,10 +187,8 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
                 disabled={verifying || !verifyPw}
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
+                className="kid-glass-btn kid-glass-violet rounded-xl px-7 py-2.5 text-sm"
                 style={{
-                  padding: "10px 28px", borderRadius: 14, border: "none",
-                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                  color: "white", fontSize: 14, fontWeight: 800,
                   cursor: verifying || !verifyPw ? "default" : "pointer",
                   opacity: verifying || !verifyPw ? 0.5 : 1,
                 }}
@@ -205,10 +200,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => { setShowSettings(false); setVerifyPw(""); setVerifyError(null); }}
-                style={{
-                  padding: "10px 20px", borderRadius: 14, border: "none",
-                  background: "#f3f4f6", color: "#6b7280", fontSize: 14, fontWeight: 800, cursor: "pointer",
-                }}
+                className="kid-glass-btn kid-glass-muted rounded-xl px-5 py-2.5 text-sm"
               >
                 Cancel
               </motion.button>
@@ -224,7 +216,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       style={{
-        padding: "0 24px 32px",
+        padding: "0 24px 20px",
         maxWidth: 800,
         margin: "0 auto",
       }}
@@ -232,7 +224,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
       <div style={{
         background: "white",
         borderRadius: 24,
-        padding: "28px 24px",
+        padding: "24px 20px",
         boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
         border: "2px solid #f3f4f6",
       }}>
@@ -244,16 +236,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => { setShowSettings(false); setVerified(false); }}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 14,
-              border: "none",
-              background: "#f3f4f6",
-              color: "#6b7280",
-              fontSize: 13,
-              fontWeight: 800,
-              cursor: "pointer",
-            }}
+            className="kid-glass-btn kid-glass-muted rounded-xl px-4 py-2 text-xs sm:text-sm"
           >
             Close
           </motion.button>
@@ -311,14 +294,8 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
               disabled={savingPin}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
+              className="kid-glass-btn kid-glass-violet rounded-xl px-5 py-2.5 text-sm"
               style={{
-                padding: "10px 20px",
-                borderRadius: 14,
-                border: "none",
-                background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-                color: "white",
-                fontSize: 14,
-                fontWeight: 800,
                 cursor: savingPin ? "default" : "pointer",
                 opacity: savingPin ? 0.6 : 1,
               }}
@@ -381,14 +358,8 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
               disabled={savingPw}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
+              className="kid-glass-btn kid-glass-sunshine rounded-xl px-5 py-2.5 text-sm"
               style={{
-                padding: "10px 20px",
-                borderRadius: 14,
-                border: "none",
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                color: "white",
-                fontSize: 14,
-                fontWeight: 800,
                 cursor: savingPw ? "default" : "pointer",
                 opacity: savingPw ? 0.6 : 1,
               }}
@@ -417,6 +388,11 @@ export default function DashboardPage() {
   const [showTip, setShowTip] = useState(true);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [familyStats, setFamilyStats] = useState<{
+    totalSessions: number;
+    uniqueGamesTouched: number;
+    lastActivityAt: string | null;
+  } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -443,6 +419,24 @@ export default function DashboardPage() {
     load();
   }, [router, setParentPin]);
 
+  useEffect(() => {
+    if (loading || children.length === 0) {
+      setFamilyStats(null);
+      return;
+    }
+    let cancelled = false;
+    getFamilyPlayStats()
+      .then((s) => {
+        if (!cancelled) setFamilyStats(s);
+      })
+      .catch(() => {
+        if (!cancelled) setFamilyStats(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, children]);
+
   async function handleSignOut() {
     playTap();
     await signOut();
@@ -451,12 +445,13 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-50 to-white">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-100 via-white to-berry-50/40">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+          animate={{ opacity: [0.55, 1, 0.55] }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+          className="font-display text-2xl font-black sm:text-3xl funberry-wordmark"
         >
-          <Image src="/logo.png" alt="Loading" width={80} height={48} />
+          FunBerryKids
         </motion.div>
       </main>
     );
@@ -464,98 +459,165 @@ export default function DashboardPage() {
 
   const freeZones = zones.filter((z) => z.isFree);
   const tier = parent?.subscription_tier ?? "free";
-  const totalStars = children.reduce((sum, c) => sum + (c.total_stars ?? 0), 0);
+  const familyStars = children.reduce((s, c) => s + (c.total_stars ?? 0), 0);
+
+  function formatLastPlay(iso: string | null): string {
+    if (!iso) return "—";
+    const days = (Date.now() - new Date(iso).getTime()) / 86400000;
+    if (days < 1) return "Today";
+    if (days < 2) return "Yesterday";
+    if (days < 7) return `${Math.floor(days)}d ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+  }
 
   return (
     <>
-    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50">
-      {/* Header */}
-      <div className="glass-card sticky top-0 z-20 px-6 py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <Image src="/logo.png" alt="FunBerry Kids" width={48} height={28} />
-            </motion.div>
-            <div>
-              <h1 className="font-display text-xl font-bold text-sky-900">
-                {brand.name}
-              </h1>
-              {parent && (
-                <p className="text-xs text-gray-400">
-                  {parent.name} &middot;{" "}
-                  <span
-                    className="font-bold uppercase"
-                    style={{ color: tier === "free" ? "#6b7280" : "#10b981" }}
-                  >
-                    {tier === "lifetime" ? "Lifetime ✨" : tier}
-                  </span>
-                </p>
-              )}
-            </div>
+    <main className="min-h-screen bg-gradient-to-b from-sky-100/90 via-white to-purple-50/30">
+      {/* Header — colorful wordmark, no logo asset */}
+      <div className="kid-header-bar sticky top-0 z-20 px-3 sm:px-5">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+            <span className="funberry-wordmark shrink-0 text-base sm:text-lg">FunBerryKids</span>
+            {parent && (
+              <p className="min-w-0 truncate text-[10px] font-semibold leading-tight text-gray-400 sm:text-xs">
+                {parent.name} &middot;{" "}
+                <span
+                  className="font-bold uppercase"
+                  style={{ color: tier === "free" ? "#6b7280" : "#10b981" }}
+                >
+                  {tier === "lifetime" ? "Lifetime ✨" : tier}
+                </span>
+              </p>
+            )}
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSignOut}
-            className="rounded-kid bg-gray-100 px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-200 transition"
+            className="kid-glass-btn kid-glass-muted shrink-0 rounded-kid px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs"
           >
             Sign Out
           </motion.button>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-6 py-8">
+      <div className="mx-auto max-w-4xl px-6 py-4 sm:py-5">
         {/* Welcome */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
+          className="mb-4"
         >
-          <h2 className="font-display text-3xl font-bold text-sky-900">
-            Welcome back! 👋
+          <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
+            Parent coaching desk
           </h2>
-          <p className="mt-2 text-gray-500">
-            Ready for some learning fun today?
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+            Your child sees colourful games; you get syllabus-aligned EVS practice and clear signals on where to coach next.
           </p>
         </motion.section>
 
-        {/* Stats Grid */}
+        {/* At-a-glance: fills width — coaching-first parent desk */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-10 grid grid-cols-3 gap-4"
+          className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4"
         >
-          {[
-            { label: "Total Stars", value: totalStars, icon: "⭐", color: "#fbbf24", bg: "#fffbeb" },
-            { label: "Children", value: children.length || "0", icon: "👶", color: "#ec4899", bg: "#fdf2f8" },
-            { label: "Zones Open", value: tier === "free" ? freeZones.length : zones.length, icon: "🗺️", color: "#10b981", bg: "#ecfdf5" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.15 + i * 0.08 }}
-              whileHover={{ scale: 1.04, y: -3 }}
-              className="rounded-kid p-5 text-center"
-              style={{ backgroundColor: stat.bg, border: `1px solid ${stat.color}20` }}
-            >
-              <motion.span
-                className="text-3xl inline-block"
-                animate={{ scale: [1, 1.15, 1] }}
-                transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
+          {(
+            [
+              {
+                label: "Children",
+                value: String(children.length || 0),
+                icon: "👶",
+                color: "#ec4899",
+                glass: "kid-glass-stat--children",
+              },
+              {
+                label: "Zones open",
+                value: String(tier === "free" ? freeZones.length : zones.length),
+                icon: "🗺️",
+                color: "#10b981",
+                glass: "kid-glass-stat--zones",
+              },
+              {
+                label: "Play sessions",
+                value: familyStats ? String(familyStats.totalSessions) : "…",
+                icon: "📊",
+                color: "#0284c7",
+                glass: "",
+              },
+              {
+                label: "Games explored",
+                value: familyStats ? String(familyStats.uniqueGamesTouched) : "…",
+                icon: "🎯",
+                color: "#7c3aed",
+                glass: "",
+              },
+              {
+                label: "Last activity",
+                value: formatLastPlay(familyStats?.lastActivityAt ?? null),
+                icon: "⏱️",
+                color: "#475569",
+                glass: "",
+              },
+              {
+                label: "Family ⭐",
+                value: String(familyStars),
+                icon: "⭐",
+                color: "#d97706",
+                glass: "kid-glass-stat--stars",
+              },
+            ] as const
+          ).map((stat, i) => {
+            const inner = (
+              <>
+                <motion.span
+                  className="inline-block text-base sm:text-lg"
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.2 }}
+                >
+                  {stat.icon}
+                </motion.span>
+                <p className="mt-0.5 truncate font-display text-sm font-bold leading-none sm:text-base" style={{ color: stat.color }}>
+                  {stat.value}
+                </p>
+                <p className="mt-0.5 line-clamp-2 text-[8px] font-bold uppercase leading-tight tracking-wide text-gray-500 sm:text-[9px]">
+                  {stat.label}
+                </p>
+              </>
+            );
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.12 + i * 0.05 }}
+                whileHover={{ scale: 1.02, y: -1 }}
+                className={`kid-glass-stat ${stat.glass} rounded-xl px-2 py-2 text-center sm:rounded-kid sm:px-2.5 sm:py-2.5`.trim()}
               >
-                {stat.icon}
-              </motion.span>
-              <p className="mt-2 font-display text-2xl font-bold" style={{ color: stat.color }}>
-                {stat.value}
-              </p>
-              <p className="text-xs font-bold text-gray-500 mt-1">{stat.label}</p>
-            </motion.div>
-          ))}
+                {inner}
+              </motion.div>
+            );
+          })}
+          <motion.a
+            href="/dashboard/progress"
+            initial={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.45 }}
+            whileHover={{ scale: 1.02, y: -1 }}
+            className="kid-glass-stat kid-glass-violet col-span-2 flex flex-col items-center justify-center rounded-xl px-2 py-2.5 text-center sm:col-span-3 lg:col-span-2 sm:rounded-kid sm:py-3"
+          >
+            <span className="text-lg sm:text-xl" aria-hidden>
+              🧠
+            </span>
+            <p className="mt-0.5 font-display text-xs font-black leading-tight text-violet-950 sm:text-sm">
+              Development report
+            </p>
+            <p className="text-[8px] font-bold uppercase leading-tight text-violet-800/80 sm:text-[9px]">
+              Capabilities & decisions
+            </p>
+          </motion.a>
         </motion.section>
 
         {/* Timer Setup */}
@@ -563,7 +625,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-10"
+          className="mb-3"
         >
           <TimerSetup />
         </motion.section>
@@ -576,23 +638,23 @@ export default function DashboardPage() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 25 }}
-              className="mb-10"
+              className="mb-4"
             >
               <div
-                className="rounded-kid p-5 relative"
+                className="kid-glass-panel relative rounded-kid p-3 sm:p-4"
                 style={{
                   background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)",
-                  border: "1px solid #a7f3d0",
+                  borderColor: "#a7f3d0",
                 }}
               >
                 <button
                   onClick={() => setShowTip(false)}
-                  className="absolute top-3 right-4 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-2 text-gray-400 hover:text-gray-600"
                 >
                   ✕
                 </button>
                 <p className="font-display font-bold text-leaf-700">💡 Parent Tip</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="mt-1 text-sm leading-snug text-gray-600">
                   Set a play timer before handing the device to your child. The app will automatically
                   lock when time is up, and only your 4-digit PIN can unlock it.
                 </p>
@@ -606,21 +668,17 @@ export default function DashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="mb-10"
+          className="mb-6"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display text-lg font-bold text-sky-900">
-              👶 Kid Profiles
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="font-display text-lg font-bold text-slate-800">
+              Learner profiles
             </h3>
             <motion.button
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.94 }}
               onClick={() => setShowAddChild(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold text-white"
-              style={{
-                background: "linear-gradient(135deg, #a78bfa, #8b5cf6)",
-                boxShadow: "0 4px 14px rgba(139,92,246,0.35)",
-              }}
+              className="kid-glass-btn kid-glass-violet flex items-center gap-2 rounded-2xl px-4 py-2 text-sm"
             >
               + Add Child
             </motion.button>
@@ -630,10 +688,12 @@ export default function DashboardPage() {
             <motion.div
               whileHover={{ scale: 1.02 }}
               onClick={() => setShowAddChild(true)}
-              className="rounded-kid p-6 text-center cursor-pointer"
+              className="kid-glass-panel cursor-pointer rounded-kid p-6 text-center"
               style={{
                 background: "linear-gradient(135deg, #fdf4ff, #ede9fe)",
-                border: "2px dashed #c4b5fd",
+                borderStyle: "dashed",
+                borderWidth: 2,
+                borderColor: "#c4b5fd",
               }}
             >
               <span className="text-4xl block mb-2">👶</span>
@@ -660,8 +720,7 @@ export default function DashboardPage() {
                       whileHover={{ scale: 1.06 }}
                       whileTap={{ scale: 0.94 }}
                       onClick={() => setEditingChild(child)}
-                      className="px-3 py-2 rounded-xl text-sm font-bold"
-                      style={{ background: "linear-gradient(135deg, #f3f4f6, #e5e7eb)", color: "#6b7280" }}
+                      className="kid-glass-btn kid-glass-muted rounded-xl px-3 py-2 text-sm"
                     >
                       ✏️
                     </motion.button>
@@ -669,8 +728,7 @@ export default function DashboardPage() {
                       href="/play"
                       whileHover={{ scale: 1.06 }}
                       whileTap={{ scale: 0.94 }}
-                      className="px-4 py-2 rounded-xl text-sm font-bold text-white"
-                      style={{ background: "linear-gradient(135deg, #379df9, #2180ee)" }}
+                      className="kid-glass-btn kid-glass-sky rounded-xl px-4 py-2 text-sm"
                     >
                       🎮 Play
                     </motion.a>
@@ -681,120 +739,48 @@ export default function DashboardPage() {
           )}
         </motion.section>
 
-        {/* Play Button */}
+        {/* Start practice (child-facing play) */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="mb-10 text-center"
+          className="mb-6 text-center"
         >
           <motion.a
             href="/play"
-            whileHover={{ scale: 1.05, y: -3 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 rounded-kid px-12 py-6 text-xl font-bold text-white shadow-kid-lg"
-            style={{
-              background: "linear-gradient(135deg, #379df9, #2180ee)",
-              boxShadow: "0 10px 35px rgba(55,157,249,0.35)",
-            }}
+            whileHover={{ scale: 1.04, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            className="kid-glass-btn kid-glass-sky inline-flex items-center gap-2 rounded-kid px-6 py-3 text-sm font-bold sm:px-8 sm:py-3.5 sm:text-base"
           >
-            <motion.span
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              🎮
-            </motion.span>
-            Start Playing
+            <span>🎮</span>
+            Open play mode for your child
           </motion.a>
         </motion.section>
 
-        {/* Quick Zone Access */}
+        {/* Coaching reports */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mb-10"
-        >
-          <h3 className="font-display text-lg font-bold text-sky-900 mb-4">
-            Quick Access — Free Zones
-          </h3>
-          <div className="grid grid-cols-3 gap-4">
-            {freeZones.map((zone, i) => {
-              const zt = getZoneTheme(zone.id);
-              return (
-                <motion.a
-                  key={zone.id}
-                  href="/play"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.45 + i * 0.08 }}
-                  whileHover={{ scale: 1.06, y: -4 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="rounded-kid p-6 text-center"
-                  style={{
-                    background: zt.bgGradient,
-                    border: "2px solid #a7f3d0",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <motion.span
-                    className="text-4xl inline-block"
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.3 }}
-                  >
-                    {zone.emoji}
-                  </motion.span>
-                  <p className="mt-2 font-display font-bold text-sm text-gray-700">
-                    {zone.name}
-                  </p>
-                  <span className="text-[10px] font-bold text-leaf-700 bg-leaf-100 px-2 py-0.5 rounded-full mt-1 inline-block">
-                    FREE
-                  </span>
-                </motion.a>
-              );
-            })}
-          </div>
-        </motion.section>
-
-        {/* Progress & Reports Link */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-10"
+          className="mb-6"
         >
           <motion.a
             href="/dashboard/progress"
-            whileHover={{ scale: 1.02, x: 4 }}
-            whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-4 rounded-kid p-6 glass-card"
-            style={{ borderLeft: "4px solid #a855f7" }}
+            whileHover={{ scale: 1.01, x: 3 }}
+            whileTap={{ scale: 0.99 }}
+            className="kid-glass-panel flex items-center gap-4 rounded-kid border-l-4 border-l-violet-500 p-5 sm:p-6"
           >
-            <motion.span
-              className="text-3xl"
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
-            >
-              📊
-            </motion.span>
-            <div>
-              <p className="font-display font-bold text-gray-800">View Progress Reports</p>
-              <p className="text-sm text-gray-500">See how your child is learning across all zones</p>
+            <span className="text-3xl" aria-hidden>
+              📋
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-bold text-slate-800">Learning & coaching report</p>
+              <p className="text-sm text-slate-600">
+                Subject strands (EVS themes), skill profile from game types, and plain-language next steps — sourced from play sessions.
+              </p>
             </div>
-            <span className="ml-auto text-gray-400 text-xl">→</span>
+            <span className="shrink-0 text-slate-400 text-xl">→</span>
           </motion.a>
-        </motion.section>
-
-        {/* Family Leaderboard */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55 }}
-          className="mb-10"
-        >
-          <div className="rounded-kid glass-card" style={{ padding: "24px 20px", border: "2px solid #fef3c7" }}>
-            <Leaderboard compact />
-          </div>
         </motion.section>
 
         {/* Upgrade CTA — shown only for free users */}
@@ -802,16 +788,16 @@ export default function DashboardPage() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mb-10"
+            transition={{ delay: 0.5 }}
+            className="mb-6"
           >
             <motion.div
               animate={{ boxShadow: ["0 0 0 0 rgba(167,139,250,0)", "0 0 0 8px rgba(167,139,250,0.2)", "0 0 0 0 rgba(167,139,250,0)"] }}
               transition={{ repeat: Infinity, duration: 2.5 }}
-              className="rounded-kid p-6 text-center"
+              className="kid-glass-panel rounded-kid p-6 text-center"
               style={{
                 background: "linear-gradient(135deg, #fdf4ff, #ede9fe, #e0e7ff)",
-                border: "2px solid #c4b5fd",
+                borderColor: "#c4b5fd",
               }}
             >
               <motion.div
@@ -838,8 +824,7 @@ export default function DashboardPage() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="px-8 py-3 rounded-kid text-white font-bold text-base shadow-lg"
-                style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)", boxShadow: "0 8px 24px rgba(139,92,246,0.4)" }}
+                className="kid-glass-btn kid-glass-violet rounded-kid px-8 py-3 text-base"
                 onClick={() => alert("Upgrade coming soon! Contact us for early access pricing.")}
               >
                 ✨ Upgrade — Unlock Everything

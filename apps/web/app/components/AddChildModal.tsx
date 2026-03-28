@@ -64,12 +64,12 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85, y: 30 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
+          className="kid-glass-panel"
           style={{
             background: "linear-gradient(135deg, #fdf4ff, #ffffff)",
             borderRadius: 28, padding: 28,
             width: "100%", maxWidth: 440,
-            boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
-            border: "2px solid rgba(168,85,247,0.2)",
+            borderColor: "rgba(168,85,247,0.35)",
             maxHeight: "90vh", overflowY: "auto",
           }}
         >
@@ -84,12 +84,9 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
               </p>
             </div>
             <button
+              type="button"
               onClick={onClose}
-              style={{
-                width: 36, height: 36, borderRadius: "50%", border: "none",
-                background: "#f3f4f6", cursor: "pointer", fontSize: 18, color: "#6b7280",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}
+              className="kid-glass-btn kid-glass-muted flex h-9 w-9 items-center justify-center rounded-full border-0 p-0 text-lg"
             >
               ✕
             </button>
@@ -128,14 +125,9 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
                     key={a} type="button"
                     whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
                     onClick={() => setAge(a)}
+                    className={`kid-glass-btn h-11 w-11 rounded-xl border-2 p-0 text-[15px] ${age === a ? "kid-glass-violet" : "kid-glass-muted"}`}
                     style={{
-                      width: 44, height: 44, borderRadius: 14, border: "2px solid",
-                      borderColor: age === a ? "#a78bfa" : "#e5e7eb",
-                      background: age === a ? "linear-gradient(135deg, #a78bfa, #8b5cf6)" : "white",
-                      color: age === a ? "white" : "#374151",
-                      fontWeight: 900, fontSize: 15,
-                      fontFamily: "Fredoka, sans-serif", cursor: "pointer",
-                      boxShadow: age === a ? "0 4px 12px rgba(139,92,246,0.4)" : "none",
+                      borderColor: age === a ? "rgba(255,255,255,0.5)" : "#e5e7eb",
                     }}
                   >
                     {a}
@@ -176,14 +168,9 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
                     key={face} type="button"
                     whileHover={{ scale: 1.18 }} whileTap={{ scale: 0.88 }}
                     onClick={() => setSelectedFace(face)}
+                    className={`kid-glass-btn flex h-[52px] w-[52px] items-center justify-center rounded-2xl border-[3px] p-0 text-[26px] touch-manipulation ${selectedFace === face ? "kid-glass-violet" : "kid-glass-muted"}`}
                     style={{
-                      width: 52, height: 52, borderRadius: 16, border: "3px solid",
-                      borderColor: selectedFace === face ? "#a78bfa" : "#e5e7eb",
-                      background: selectedFace === face ? "#fdf4ff" : "white",
-                      fontSize: 26, cursor: "pointer",
-                      boxShadow: selectedFace === face ? "0 0 0 3px #a78bfa44" : "none",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      touchAction: "manipulation",
+                      borderColor: selectedFace === face ? "rgba(255,255,255,0.55)" : "#e5e7eb",
                     }}
                   >
                     {face}
@@ -202,14 +189,8 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
               type="submit" disabled={loading}
               whileHover={!loading ? { scale: 1.04, y: -2 } : {}}
               whileTap={!loading ? { scale: 0.96 } : {}}
-              style={{
-                width: "100%", padding: "16px", borderRadius: 20, border: "none",
-                background: loading ? "#d1d5db" : "linear-gradient(135deg, #a78bfa, #8b5cf6)",
-                color: "white", fontSize: 18, fontWeight: 900,
-                fontFamily: "Fredoka, sans-serif",
-                cursor: loading ? "default" : "pointer",
-                boxShadow: loading ? "none" : "0 6px 20px rgba(139,92,246,0.4)",
-              }}
+              className="kid-glass-btn kid-glass-violet w-full rounded-kid py-4 text-lg disabled:opacity-60"
+              style={{ cursor: loading ? "default" : "pointer" }}
             >
               {loading ? (isEdit ? "Saving..." : "Adding...") : (isEdit ? "💾 Save Changes" : "🎉 Add Child!")}
             </motion.button>

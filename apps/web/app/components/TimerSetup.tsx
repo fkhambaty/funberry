@@ -25,7 +25,7 @@ export function TimerSetup({ onStart }: { onStart?: () => void }) {
     return (
       <button
         onClick={stopTimer}
-        className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-bold text-sm hover:bg-red-100 transition"
+        className="kid-glass-btn kid-glass-danger flex items-center gap-2 rounded-2xl px-4 py-2 text-sm"
       >
         <span>⏹</span> Stop Timer
       </button>
@@ -36,7 +36,7 @@ export function TimerSetup({ onStart }: { onStart?: () => void }) {
     return (
       <button
         onClick={() => setShowSetup(true)}
-        className="flex items-center gap-2 px-4 py-3 rounded-kid bg-sunshine-100 border-2 border-sunshine-300 text-sunshine-800 font-bold hover:bg-sunshine-200 transition"
+        className="kid-glass-btn kid-glass-sunshine flex items-center gap-2 rounded-kid px-4 py-3"
       >
         <span className="text-xl">⏱️</span>
         Set Play Timer
@@ -45,7 +45,7 @@ export function TimerSetup({ onStart }: { onStart?: () => void }) {
   }
 
   return (
-    <div className="bg-sunshine-50 border-2 border-sunshine-200 rounded-kid p-5 space-y-4">
+    <div className="glass-card space-y-4 rounded-kid border-sunshine-200/60 p-5">
       <div className="flex items-center justify-between">
         <h3 className="font-display font-bold text-sunshine-900">
           Set Timer for Your Child
@@ -69,7 +69,7 @@ export function TimerSetup({ onStart }: { onStart?: () => void }) {
               setShowSetup(false);
               onStart?.();
             }}
-            className="flex-1 flex flex-col items-center gap-1 p-4 rounded-kid bg-white border-2 border-sunshine-300 hover:border-sunshine-500 hover:shadow-md transition"
+            className="kid-glass-btn kid-glass-sunshine flex flex-1 flex-col items-center gap-1 rounded-kid p-4 !text-sunshine-900"
           >
             <span className="text-2xl">{p.emoji}</span>
             <span className="font-bold text-sunshine-800">{p.label}</span>
