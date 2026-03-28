@@ -2,6 +2,88 @@ import type { GameConfig } from "../../types";
 
 export const foodGames: GameConfig[] = [
   {
+    id: "food-nutrient-groups-sort",
+    zoneId: "food",
+    type: "drag_sort",
+    title: "Energy, body-building, protective",
+    description: "Food and Health — like Sarat’s balanced diet in your book.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Energy foods give power to work and play. Body-building foods help you grow strong. Protective foods (fruits and vegetables) help you stay well. Sort!",
+      categories: [
+        { id: "energy", label: "Energy-giving", emoji: "🍚" },
+        { id: "body", label: "Body-building", emoji: "🥛" },
+        { id: "protect", label: "Protective", emoji: "🥕" },
+      ],
+      items: [
+        { id: "rice", label: "Rice", emoji: "🍚", category: "energy" },
+        { id: "chapati", label: "Chapatti", emoji: "🫓", category: "energy" },
+        { id: "bread", label: "Bread", emoji: "🍞", category: "energy" },
+        { id: "butter", label: "Butter", emoji: "🧈", category: "energy" },
+        { id: "milk", label: "Milk", emoji: "🥛", category: "body" },
+        { id: "egg", label: "Eggs", emoji: "🥚", category: "body" },
+        { id: "dal", label: "Dal (pulses)", emoji: "🫘", category: "body" },
+        { id: "apple", label: "Apple", emoji: "🍎", category: "protect" },
+        { id: "carrot", label: "Carrot", emoji: "🥕", category: "protect" },
+        { id: "spinach", label: "Spinach", emoji: "🥬", category: "protect" },
+      ],
+    },
+  },
+  {
+    id: "food-book-mcq",
+    zoneId: "food",
+    type: "picture_quiz",
+    title: "Food and health check",
+    description: "Questions in the style of your textbook exercises.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Tick the best answer — like your class exercises.",
+      questions: [
+        {
+          id: "f1",
+          question: "Which of these foods gives us energy?",
+          options: [
+            { id: "egg", label: "Eggs", emoji: "🥚" },
+            { id: "milk", label: "Milk", emoji: "🥛" },
+            { id: "rice", label: "Rice", emoji: "🍚" },
+            { id: "apple", label: "Apple", emoji: "🍎" },
+          ],
+          correctId: "rice",
+          explanation: "Rice, bread and chapatti are energy-giving foods in your book.",
+        },
+        {
+          id: "f2",
+          question: "Which of these is a junk food?",
+          options: [
+            { id: "apple", label: "Apple", emoji: "🍎" },
+            { id: "brinjal", label: "Brinjal", emoji: "🍆" },
+            { id: "burger", label: "Burger", emoji: "🍔" },
+            { id: "dal", label: "Dal", emoji: "🫘" },
+          ],
+          correctId: "burger",
+          explanation: "Fast foods like burgers and chips are junk — eat them only sometimes.",
+        },
+        {
+          id: "f3",
+          question: "Which food helps protect us from falling sick?",
+          options: [
+            { id: "butter", label: "Butter", emoji: "🧈" },
+            { id: "cheese", label: "Cheese", emoji: "🧀" },
+            { id: "fruit", label: "Fruit", emoji: "🍊" },
+            { id: "sugar", label: "Sugar", emoji: "🍬" },
+          ],
+          correctId: "fruit",
+          explanation: "Fruits and vegetables are protective foods.",
+        },
+      ],
+    },
+  },
+  {
     id: "food-healthy-junk-sort",
     zoneId: "food",
     type: "drag_sort",

@@ -2,6 +2,69 @@ import type { GameConfig } from "../../types";
 
 export const shelterGames: GameConfig[] = [
   {
+    id: "shelter-permanent-movable",
+    zoneId: "shelter",
+    type: "drag_sort",
+    title: "Permanent or movable home?",
+    description: "Our Homes and Clothes — from your textbook.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Pucca and kuchcha houses stay in one place. Tents, caravans and houseboats can move — they are temporary homes in the book.",
+      categories: [
+        { id: "fixed", label: "Stays in one place", emoji: "🏠" },
+        { id: "move", label: "Can move / temporary", emoji: "🚐" },
+      ],
+      items: [
+        { id: "pucca", label: "Brick pucca house", emoji: "🧱", category: "fixed" },
+        { id: "kuchcha", label: "Mud & straw house", emoji: "🛖", category: "fixed" },
+        { id: "stilt", label: "Stilt house on poles", emoji: "🏠", category: "fixed" },
+        { id: "igloo", label: "Igloo", emoji: "🧊", category: "fixed" },
+        { id: "tent", label: "Canvas tent", emoji: "⛺", category: "move" },
+        { id: "caravan", label: "Caravan (wheels)", emoji: "🚐", category: "move" },
+        { id: "boat", label: "Houseboat", emoji: "🛶", category: "move" },
+      ],
+    },
+  },
+  {
+    id: "shelter-why-home-tf",
+    zoneId: "shelter",
+    type: "true_false",
+    title: "Why do we need a home?",
+    description: "Heat, cold, rain, safety — from Chapter 7.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction: "Your book lists reasons we need a home. True or false?",
+      questions: [
+        {
+          id: "h1",
+          statement: "A home protects us from heat and cold.",
+          emoji: "🏡",
+          isTrue: true,
+          explanation: "Homes shelter us from weather.",
+        },
+        {
+          id: "h2",
+          statement: "A home helps keep us safe from strong wind and rain.",
+          emoji: "🌧️",
+          isTrue: true,
+          explanation: "Walls and roofs block wind and rain.",
+        },
+        {
+          id: "h3",
+          statement: "We do not need a home to feel safe.",
+          emoji: "😰",
+          isTrue: false,
+          explanation: "The book says we feel safe and happy in a home.",
+        },
+      ],
+    },
+  },
+  {
     id: "shelter-houses-quiz",
     zoneId: "shelter",
     type: "picture_quiz",

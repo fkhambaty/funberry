@@ -1,7 +1,4 @@
 import type { GameConfig } from "../../types";
-import { bookPageUrl } from "../../data/bookPages";
-
-const NEP_INTRO_PAGE = bookPageUrl("20260328_104630.jpg");
 
 export const plantsGames: GameConfig[] = [
   {
@@ -9,10 +6,9 @@ export const plantsGames: GameConfig[] = [
     zoneId: "plants",
     type: "true_false",
     title: "How we learn science",
-    description: "Ideas from the start of your New Learning Science book (NEP).",
+    description: "NEP Foundational Stage — play, puzzles and learning-by-doing.",
     difficulty: 1,
     maxStars: 3,
-    bookPageSrc: NEP_INTRO_PAGE,
     data: {
       type: "true_false",
       instruction:
@@ -41,6 +37,153 @@ export const plantsGames: GameConfig[] = [
           isTrue: true,
           explanation: "Learning-by-doing is doing the activity yourself.",
         },
+      ],
+    },
+  },
+  {
+    id: "plants-eco-smart-three-rs",
+    zoneId: "plants",
+    type: "true_false",
+    title: "Eco Smart — the Three Rs",
+    description: "Reduce, reuse, recycle from your Eco Smart pages.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction:
+        "Your book says children can help the environment. Decide if each sentence matches Eco Smart.",
+      questions: [
+        {
+          id: "e1",
+          statement: "Reduce means cutting down on garbage by buying only what we need.",
+          emoji: "♻️",
+          isTrue: true,
+          explanation: "Reduce means less waste — buy only what you need.",
+        },
+        {
+          id: "e2",
+          statement: "Reuse means throwing everything away after one use.",
+          emoji: "🗑️",
+          isTrue: false,
+          explanation: "Reuse means using something again instead of throwing it away.",
+        },
+        {
+          id: "e3",
+          statement: "Recycle means making new products from old materials.",
+          emoji: "🔁",
+          isTrue: true,
+          explanation: "Recycle turns finished items into new useful things.",
+        },
+        {
+          id: "e4",
+          statement: "Plants purify and clean the air we breathe.",
+          emoji: "🌳",
+          isTrue: true,
+          explanation: "Your book reminds us plants help keep air fresh.",
+        },
+      ],
+    },
+  },
+  {
+    id: "plants-ch1-types-sort",
+    zoneId: "plants",
+    type: "drag_sort",
+    title: "Plant World — types of plants",
+    description: "Trees, shrubs, herbs, climbers and creepers (Chapter 1).",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Trees are tall with a thick woody trunk. Shrubs are smaller with thin woody stems. Herbs are small with soft stems. Climbers coil around support. Creepers spread on the ground. Sort each plant!",
+      categories: [
+        { id: "tree", label: "Trees", emoji: "🌳" },
+        { id: "shrub", label: "Shrubs", emoji: "🌺" },
+        { id: "herb", label: "Herbs", emoji: "🌿" },
+        { id: "climber", label: "Climbers", emoji: "🪴" },
+        { id: "creeper", label: "Creepers", emoji: "🍉" },
+      ],
+      items: [
+        { id: "banyan", label: "Banyan", emoji: "🌳", category: "tree" },
+        { id: "mango-t", label: "Mango tree", emoji: "🥭", category: "tree" },
+        { id: "rose", label: "Rose bush", emoji: "🌹", category: "shrub" },
+        { id: "sunflower", label: "Sunflower", emoji: "🌻", category: "shrub" },
+        { id: "mint", label: "Mint", emoji: "🌿", category: "herb" },
+        { id: "spinach", label: "Spinach", emoji: "🥬", category: "herb" },
+        { id: "grape", label: "Grapevine", emoji: "🍇", category: "climber" },
+        { id: "money", label: "Money plant", emoji: "🪴", category: "climber" },
+        { id: "melon", label: "Watermelon vine", emoji: "🍉", category: "creeper" },
+        { id: "pumpkin", label: "Pumpkin vine", emoji: "🎃", category: "creeper" },
+      ],
+    },
+  },
+  {
+    id: "plants-photosynthesis-facts",
+    zoneId: "plants",
+    type: "true_false",
+    title: "Photosynthesis facts",
+    description: "Green plants make their own food — from your book.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction:
+        "Green plants need air, sunlight and water. Leaves make food. The process is called photosynthesis.",
+      questions: [
+        {
+          id: "ph1",
+          statement: "Green plants are the only living things that can make their own food.",
+          emoji: "🍃",
+          isTrue: true,
+          explanation: "That is what your science book says.",
+        },
+        {
+          id: "ph2",
+          statement: "Plants get water from the soil through their roots.",
+          emoji: "💧",
+          isTrue: true,
+          explanation: "Roots absorb water from the soil.",
+        },
+        {
+          id: "ph3",
+          statement: "Food for the plant is mainly made in the roots.",
+          emoji: "🌱",
+          isTrue: false,
+          explanation: "Leaves make food using sunlight — not the roots.",
+        },
+      ],
+    },
+  },
+  {
+    id: "plants-ch2-part-we-eat",
+    zoneId: "plants",
+    type: "drag_sort",
+    title: "Which part do we eat?",
+    description: "Roots, stems, seeds, leaves, fruits — Plants are Useful.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Some plants store food in roots (carrot). Some stems are eaten (potato, ginger). Seeds give cereals and pulses. We eat leaves and fruits too. Sort!",
+      categories: [
+        { id: "root", label: "Root food", emoji: "🥕" },
+        { id: "stem", label: "Stem food", emoji: "🥔" },
+        { id: "seed", label: "Seeds / dal", emoji: "🫘" },
+        { id: "leaf", label: "Leaves", emoji: "🥬" },
+        { id: "fruit", label: "Fruits", emoji: "🍎" },
+      ],
+      items: [
+        { id: "carrot", label: "Carrot", emoji: "🥕", category: "root" },
+        { id: "beet", label: "Beetroot", emoji: "🟣", category: "root" },
+        { id: "potato", label: "Potato", emoji: "🥔", category: "stem" },
+        { id: "ginger", label: "Ginger", emoji: "🫚", category: "stem" },
+        { id: "rice", label: "Rice (cereal)", emoji: "🍚", category: "seed" },
+        { id: "gram", label: "Gram (pulse)", emoji: "🫘", category: "seed" },
+        { id: "spinach2", label: "Spinach", emoji: "🥬", category: "leaf" },
+        { id: "cabbage", label: "Cabbage", emoji: "🥬", category: "leaf" },
+        { id: "mango", label: "Mango", emoji: "🥭", category: "fruit" },
+        { id: "apple", label: "Apple", emoji: "🍎", category: "fruit" },
       ],
     },
   },

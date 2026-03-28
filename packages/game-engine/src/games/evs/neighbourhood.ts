@@ -2,6 +2,39 @@ import type { GameConfig } from "../../types";
 
 export const neighbourhoodGames: GameConfig[] = [
   {
+    id: "neighbourhood-waste-sort",
+    zoneId: "neighbourhood",
+    type: "drag_sort",
+    title: "Clean the stuff",
+    description: "Eco Smart — sort waste the way your activity sheet shows.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Compost food scraps, recycle bottles and cans, paper in its bin, trash that cannot be recycled, and reusable things for charity.",
+      categories: [
+        { id: "compost", label: "Compost", emoji: "🪣" },
+        { id: "can", label: "Bottles & cans", emoji: "♻️" },
+        { id: "trash", label: "Garbage", emoji: "🗑️" },
+        { id: "paper", label: "Paper & cardboard", emoji: "📦" },
+        { id: "charity", label: "Charity / reuse", emoji: "📚" },
+      ],
+      items: [
+        { id: "core", label: "Apple core", emoji: "🍎", category: "compost" },
+        { id: "bread", label: "Bread scraps", emoji: "🍞", category: "compost" },
+        { id: "bottle", label: "Glass bottle", emoji: "🍾", category: "can" },
+        { id: "can1", label: "Metal drink can", emoji: "🥫", category: "can" },
+        { id: "chip", label: "Crisp / chip packet", emoji: "🍟", category: "trash" },
+        { id: "balloon", label: "Burst balloons", emoji: "🎈", category: "trash" },
+        { id: "card", label: "Cardboard box", emoji: "📦", category: "paper" },
+        { id: "paper1", label: "Old worksheets", emoji: "📄", category: "paper" },
+        { id: "book", label: "Story book to share", emoji: "📖", category: "charity" },
+        { id: "shirt", label: "Shirt that still fits someone else", emoji: "👕", category: "charity" },
+      ],
+    },
+  },
+  {
     id: "neighbourhood-places-quiz",
     zoneId: "neighbourhood",
     type: "picture_quiz",

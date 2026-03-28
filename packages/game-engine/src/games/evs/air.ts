@@ -2,6 +2,95 @@ import type { GameConfig } from "../../types";
 
 export const airGames: GameConfig[] = [
   {
+    id: "air-clean-dirty-sort",
+    zoneId: "air",
+    type: "drag_sort",
+    title: "Keep the air clean",
+    description: "From Air Around Us — what helps or harms the air?",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Your book says smoke from factories and vehicles makes air unclean. Trees, bicycles and walking help. Sort each picture!",
+      categories: [
+        { id: "clean", label: "Helps clean air", emoji: "🌬️" },
+        { id: "dirty", label: "Can make air unclean", emoji: "🏭" },
+      ],
+      items: [
+        { id: "tree", label: "Planting trees", emoji: "🌳", category: "clean" },
+        { id: "bike", label: "Riding a bicycle", emoji: "🚲", category: "clean" },
+        { id: "walk", label: "Walking instead of driving", emoji: "🚶", category: "clean" },
+        { id: "recycle", label: "Using recycled paper / bags", emoji: "♻️", category: "clean" },
+        { id: "factory", label: "Factory smoke", emoji: "🏭", category: "dirty" },
+        { id: "car", label: "Car exhaust smoke", emoji: "🚗", category: "dirty" },
+        { id: "cut", label: "Cutting many trees", emoji: "🪓", category: "dirty" },
+      ],
+    },
+  },
+  {
+    id: "air-ch9-mcq",
+    zoneId: "air",
+    type: "picture_quiz",
+    title: "Air & wind check-up",
+    description: "Questions like the exercises in your book.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Pick the answer that matches what you learnt about air and wind.",
+      questions: [
+        {
+          id: "a1",
+          question: "Air contains…",
+          options: [
+            { id: "wood", label: "Wood", emoji: "🪵" },
+            { id: "vapour", label: "Water vapour", emoji: "💨" },
+            { id: "paper", label: "Paper", emoji: "📄" },
+            { id: "stone", label: "Stone blocks", emoji: "🪨" },
+          ],
+          correctId: "vapour",
+          explanation: "Air has water vapour, dust, smoke and germs — not wood or paper as part of air itself.",
+        },
+        {
+          id: "a2",
+          question: "Which helps keep the air clean and fresh?",
+          options: [
+            { id: "veh", label: "Vehicles", emoji: "🚗" },
+            { id: "plants", label: "Plants", emoji: "🌿" },
+            { id: "anim", label: "Animals only", emoji: "🐕" },
+            { id: "toys", label: "Plastic toys", emoji: "🧸" },
+          ],
+          correctId: "plants",
+          explanation: "Plants help make the air fresh — your book says do not destroy plants.",
+        },
+        {
+          id: "a3",
+          question: "We should cover our mouth while sneezing because it spreads…",
+          options: [
+            { id: "gems", label: "Gems", emoji: "💎" },
+            { id: "germs", label: "Germs", emoji: "🦠" },
+            { id: "toys", label: "Toys", emoji: "🧸" },
+            { id: "candy", label: "Candy", emoji: "🍬" },
+          ],
+          correctId: "germs",
+          explanation: "Germs can travel through the air when we sneeze without covering up.",
+        },
+        {
+          id: "a4",
+          question: "Wind helps us to…",
+          options: [
+            { id: "scooter", label: "Move a scooter with the engine off", emoji: "🛵" },
+            { id: "kite", label: "Fly a kite", emoji: "🪁" },
+            { id: "skate", label: "Ice skate with no ice", emoji: "⛸️" },
+          ],
+          correctId: "kite",
+          explanation: "On a windy day, wind lifts a kite — from your book.",
+        },
+      ],
+    },
+  },
+  {
     id: "air-needs-sort",
     zoneId: "air",
     type: "drag_sort",

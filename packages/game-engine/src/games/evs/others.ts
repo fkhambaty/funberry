@@ -2,6 +2,28 @@ import type { GameConfig } from "../../types";
 
 export const othersGames: GameConfig[] = [
   {
+    id: "others-minerals-match",
+    zoneId: "others-in-my-world",
+    type: "memory_match",
+    title: "Minerals in daily life",
+    description: "Rocks and Minerals — what things are made of.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "memory_match",
+      instruction:
+        "Your book links talc to powder, graphite to pencil lead, diamond to jewellery, and more. Find the pairs!",
+      pairs: [
+        { id: "talc", front: "Talc → powder", emoji: "🧴" },
+        { id: "graphite", front: "Graphite → pencil", emoji: "✏️" },
+        { id: "diamond", front: "Diamond → jewellery", emoji: "💎" },
+        { id: "clay", front: "China clay → pot", emoji: "🏺" },
+        { id: "gypsum", front: "Gypsum → chalk", emoji: "🖍️" },
+        { id: "tungsten", front: "Tungsten → bulb part", emoji: "💡" },
+      ],
+    },
+  },
+  {
     id: "others-who-helps-quiz",
     zoneId: "others-in-my-world",
     type: "picture_quiz",

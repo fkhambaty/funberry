@@ -1,8 +1,4 @@
 import type { GameConfig } from "../../types";
-import { bookPageUrl } from "../../data/bookPages";
-
-/** Textbook photo: Chapter 3 — Animals that Help Us */
-const CH3_PAGE = bookPageUrl("20260328_104740.jpg");
 
 export const animalsGames: GameConfig[] = [
   {
@@ -13,7 +9,6 @@ export const animalsGames: GameConfig[] = [
     description: "Chapter 3 from your book — read what domestic animals do for us.",
     difficulty: 1,
     maxStars: 3,
-    bookPageSrc: CH3_PAGE,
     data: {
       type: "interactive_story",
       instruction:
@@ -82,7 +77,6 @@ export const animalsGames: GameConfig[] = [
     description: "Check ideas from Animals that Help Us.",
     difficulty: 1,
     maxStars: 3,
-    bookPageSrc: CH3_PAGE,
     data: {
       type: "true_false",
       instruction: "These ideas come from your textbook. Are they true or false?",
@@ -133,7 +127,6 @@ export const animalsGames: GameConfig[] = [
     description: "Sort animals into the same groups as Chapter 3.",
     difficulty: 2,
     maxStars: 3,
-    bookPageSrc: CH3_PAGE,
     data: {
       type: "drag_sort",
       instruction:
@@ -169,7 +162,6 @@ export const animalsGames: GameConfig[] = [
     description: "Match animals that carry load or help in agriculture.",
     difficulty: 2,
     maxStars: 3,
-    bookPageSrc: CH3_PAGE,
     data: {
       type: "drag_sort",
       instruction:
@@ -196,7 +188,6 @@ export const animalsGames: GameConfig[] = [
     description: "Same activity as the book: unscramble useful animal names.",
     difficulty: 2,
     maxStars: 3,
-    bookPageSrc: CH3_PAGE,
     data: {
       type: "word_picture_link",
       instruction:
@@ -209,6 +200,83 @@ export const animalsGames: GameConfig[] = [
         { id: "donkey", word: "Donkey", wordDisplay: "kdoeyn", emoji: "🫏" },
         { id: "horse", word: "Horse", wordDisplay: "ohser", emoji: "🐴" },
         { id: "sheep", word: "Sheep", wordDisplay: "hesep", emoji: "🐑" },
+      ],
+    },
+  },
+  {
+    id: "animals-ch4-wild-facts",
+    zoneId: "animals",
+    type: "true_false",
+    title: "Wild animals (Chapter 4)",
+    description: "Ideas from New Learning Science — Eco Smart.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction:
+        "Wild animals live in forests and find their own food, water, shelter and space. Are these lines true or false?",
+      questions: [
+        {
+          id: "w1",
+          statement:
+            "Animals that live in natural conditions like forests are called wild animals.",
+          emoji: "🌳",
+          isTrue: true,
+          explanation: "Your book says wild animals live in natural places, unlike domestic animals.",
+        },
+        {
+          id: "w2",
+          statement: "We should kill wild animals for fun or for their skin.",
+          emoji: "🐅",
+          isTrue: false,
+          explanation: "The book says we must protect animals and not kill them for sport or skin.",
+        },
+        {
+          id: "w3",
+          statement: "Vultures eat the flesh of dead animals.",
+          emoji: "🦅",
+          isTrue: true,
+          explanation: "Scavengers like vultures eat dead animals — your book calls them scavengers.",
+        },
+        {
+          id: "w4",
+          statement: "A lion lives in water.",
+          emoji: "🦁",
+          isTrue: false,
+          explanation: "Lions live on land — often in forests — not in water.",
+        },
+      ],
+    },
+  },
+  {
+    id: "animals-food-habits-sort",
+    zoneId: "animals",
+    type: "drag_sort",
+    title: "What do they eat?",
+    description: "Herbivores, carnivores, scavengers and omnivores — from your book.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "drag_sort",
+      instruction:
+        "Sort each animal into how it eats: plants only, other animals, dead animals, or both plants and animals.",
+      categories: [
+        { id: "herb", label: "Eat plants", emoji: "🌿" },
+        { id: "carn", label: "Eat other animals", emoji: "🥩" },
+        { id: "scav", label: "Eat dead animals", emoji: "🦴" },
+        { id: "omni", label: "Eat plants & animals", emoji: "🐻" },
+      ],
+      items: [
+        { id: "deer", label: "Deer", emoji: "🦌", category: "herb" },
+        { id: "giraffe", label: "Giraffe", emoji: "🦒", category: "herb" },
+        { id: "elephant", label: "Elephant", emoji: "🐘", category: "herb" },
+        { id: "lion", label: "Lion", emoji: "🦁", category: "carn" },
+        { id: "tiger", label: "Tiger", emoji: "🐯", category: "carn" },
+        { id: "croc", label: "Crocodile", emoji: "🐊", category: "carn" },
+        { id: "vulture", label: "Vulture", emoji: "🦅", category: "scav" },
+        { id: "hyena", label: "Hyena", emoji: "🐺", category: "scav" },
+        { id: "bear", label: "Bear", emoji: "🐻", category: "omni" },
+        { id: "crow", label: "Crow", emoji: "🐦‍⬛", category: "omni" },
       ],
     },
   },

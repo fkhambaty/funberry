@@ -2,6 +2,90 @@ import type { GameConfig } from "../../types";
 
 export const healthSafetyGames: GameConfig[] = [
   {
+    id: "health-first-aid-order",
+    zoneId: "health-safety",
+    type: "sequence_builder",
+    title: "First aid steps",
+    description: "Keeping Safe — order from your Life Skills page.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction:
+        "First aid is help before the doctor comes. Put the steps in a sensible order for a small cut.",
+      steps: [
+        { id: "hands", label: "Wash your hands with soap", emoji: "🧼", order: 1 },
+        { id: "rinse", label: "Wash the wound in clean running water", emoji: "💧", order: 2 },
+        { id: "dry", label: "Pat the wound dry gently", emoji: "🩹", order: 3 },
+        { id: "cream", label: "Apply antiseptic ointment", emoji: "🧴", order: 4 },
+        { id: "band", label: "Cover with a Band-aid", emoji: "🩹", order: 5 },
+      ],
+    },
+  },
+  {
+    id: "health-safety-book-mcq",
+    zoneId: "health-safety",
+    type: "picture_quiz",
+    title: "Keeping safe — quick check",
+    description: "Style of questions from your exercises.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Choose the safe and sensible option.",
+      questions: [
+        {
+          id: "s1",
+          question: "Which could you use without hurting yourself (with a grown-up nearby)?",
+          options: [
+            { id: "knife", label: "Sharp knife alone", emoji: "🔪" },
+            { id: "book", label: "A story book", emoji: "📖" },
+            { id: "stove", label: "Gas stove knobs", emoji: "🔥" },
+            { id: "plug", label: "Wet hands on plugs", emoji: "⚡" },
+          ],
+          correctId: "book",
+          explanation: "Books are safe to handle; sharp tools and electricity need adult help.",
+        },
+        {
+          id: "s2",
+          question: "We should play…",
+          options: [
+            { id: "road", label: "On the busy road", emoji: "🛣️" },
+            { id: "park", label: "In a park or playground", emoji: "🛝" },
+            { id: "night", label: "Outside alone at night", emoji: "🌙" },
+            { id: "car", label: "Inside a moving car boot", emoji: "🚗" },
+          ],
+          correctId: "park",
+          explanation: "Safe play areas are parks and playgrounds — not roads.",
+        },
+        {
+          id: "s3",
+          question: "If someone is hurt badly, you should…",
+          options: [
+            { id: "run", label: "Run away and hide", emoji: "🏃" },
+            { id: "adult", label: "Tell a trusted adult at once", emoji: "👩‍🏫" },
+            { id: "laugh", label: "Laugh and walk off", emoji: "😂" },
+            { id: "push", label: "Push them again", emoji: "🚫" },
+          ],
+          correctId: "adult",
+          explanation: "Get help from a grown-up you trust.",
+        },
+        {
+          id: "s4",
+          question: "In a car you should…",
+          options: [
+            { id: "belt", label: "Wear a seat belt", emoji: "🔒" },
+            { id: "distract", label: "Distract the driver", emoji: "📢" },
+            { id: "hang", label: "Hang out of the window", emoji: "🪟" },
+            { id: "stand", label: "Stand on the seat", emoji: "🧍" },
+          ],
+          correctId: "belt",
+          explanation: "Seat belts keep passengers safe — never distract the driver.",
+        },
+      ],
+    },
+  },
+  {
     id: "health-good-habits-quiz",
     zoneId: "health-safety",
     type: "picture_quiz",

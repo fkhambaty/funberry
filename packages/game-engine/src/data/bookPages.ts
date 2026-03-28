@@ -1,6 +1,12 @@
 /**
  * Textbook photos synced to `apps/web/public/book-pages/` (see `scripts/sync-book-photos.sh`).
  * Filenames are stable sorted order from the source folder “Photos-3-001 2”.
+ *
+ * Games use **paraphrased questions and activities** from these pages (Eco Smart, Grade 2 —
+ * New Learning Science). They do **not** embed the JPEGs in play — see `bookPageUrl` only for
+ * tooling or future authoring; chapter flow follows the book’s contents list (Plant World,
+ * Animals that Help Us, Wild Animals, Bones and Muscles, Food and Health, Homes and Clothes,
+ * Keeping Safe, Air, Water, Rocks and Minerals, Light and Shadow).
  */
 export const BOOK_PAGE_FILES = [
   "20260328_104630.jpg",

@@ -2,6 +2,57 @@ import type { GameConfig } from "../../types";
 
 export const timeSpaceDirectionGames: GameConfig[] = [
   {
+    id: "timespace-compass-rose",
+    zoneId: "time-space-direction",
+    type: "picture_quiz",
+    title: "North, South, East, West",
+    description: "Like naming the arms of a wind vane in your book.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "N, S, E and W are the four main directions.",
+      questions: [
+        {
+          id: "d1",
+          question: "The letter N on a compass usually stands for…",
+          options: [
+            { id: "north", label: "North", emoji: "⬆️" },
+            { id: "night", label: "Night", emoji: "🌙" },
+            { id: "nest", label: "Nest", emoji: "🪺" },
+            { id: "nose", label: "Nose", emoji: "👃" },
+          ],
+          correctId: "north",
+          explanation: "N is North — toward the top of many maps.",
+        },
+        {
+          id: "d2",
+          question: "S usually stands for…",
+          options: [
+            { id: "sun", label: "Sun", emoji: "☀️" },
+            { id: "south", label: "South", emoji: "⬇️" },
+            { id: "sleep", label: "Sleep", emoji: "😴" },
+            { id: "soap", label: "Soap", emoji: "🧼" },
+          ],
+          correctId: "south",
+          explanation: "S is South — opposite to North.",
+        },
+        {
+          id: "d3",
+          question: "E and W stand for East and…",
+          options: [
+            { id: "window", label: "Window", emoji: "🪟" },
+            { id: "west", label: "West", emoji: "⬅️" },
+            { id: "water", label: "Water", emoji: "💧" },
+            { id: "wheel", label: "Wheel", emoji: "🛞" },
+          ],
+          correctId: "west",
+          explanation: "W is West — where the sun appears to set.",
+        },
+      ],
+    },
+  },
+  {
     id: "timespace-clock-quiz",
     zoneId: "time-space-direction",
     type: "picture_quiz",

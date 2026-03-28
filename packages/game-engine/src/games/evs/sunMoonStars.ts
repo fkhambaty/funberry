@@ -2,6 +2,43 @@ import type { GameConfig } from "../../types";
 
 export const sunMoonStarsGames: GameConfig[] = [
   {
+    id: "sunmoon-light-shadow-facts",
+    zoneId: "sun-moon-stars",
+    type: "true_false",
+    title: "Light and shadows",
+    description: "Sunlight makes shadows — like your fun activity.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction:
+        "Light and Shadow chapter ideas: the sun gives light; objects block light to make shadows.",
+      questions: [
+        {
+          id: "sh1",
+          statement: "We need light to see our shadow on the ground.",
+          emoji: "🌤️",
+          isTrue: true,
+          explanation: "Shadows form when something blocks light.",
+        },
+        {
+          id: "sh2",
+          statement: "Shadows are usually colourful like a rainbow shirt.",
+          emoji: "🌈",
+          isTrue: false,
+          explanation: "Shadows are dark shapes — not colourful like clothes.",
+        },
+        {
+          id: "sh3",
+          statement: "The sun gives us daylight.",
+          emoji: "☀️",
+          isTrue: true,
+          explanation: "Sunlight lights the day sky.",
+        },
+      ],
+    },
+  },
+  {
     id: "sunmoon-day-night-sort",
     zoneId: "sun-moon-stars",
     type: "drag_sort",

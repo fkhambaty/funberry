@@ -2,6 +2,114 @@ import type { GameConfig } from "../../types";
 
 export const waterGames: GameConfig[] = [
   {
+    id: "water-ch10-living-things",
+    zoneId: "water",
+    type: "true_false",
+    title: "Water around us",
+    description: "All living things need water (Chapter 10).",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "true_false",
+      instruction:
+        "Your book says all living things need water. Animals drink water; plants get water through roots.",
+      questions: [
+        {
+          id: "w10a",
+          statement: "All animals need water to drink.",
+          emoji: "🦒",
+          isTrue: true,
+          explanation: "The book shows animals drinking from ponds and rivers.",
+        },
+        {
+          id: "w10b",
+          statement: "Plants get water from the soil through their roots.",
+          emoji: "🌳",
+          isTrue: true,
+          explanation: "Roots take in water from the ground.",
+        },
+        {
+          id: "w10c",
+          statement: "Water on Earth never moves — it stays in one place forever.",
+          emoji: "🌧️",
+          isTrue: false,
+          explanation: "The water cycle moves water: evaporation, clouds, rain, rivers and seas.",
+        },
+      ],
+    },
+  },
+  {
+    id: "water-cycle-sequence",
+    zoneId: "water",
+    type: "sequence_builder",
+    title: "Water cycle story",
+    description: "Sun heats water → vapour → clouds → rain — like your diagram.",
+    difficulty: 2,
+    maxStars: 3,
+    data: {
+      type: "sequence_builder",
+      instruction: "Put the water cycle steps in the right order (simplified).",
+      steps: [
+        { id: "heat", label: "Sun heats water", emoji: "☀️", order: 1 },
+        { id: "evap", label: "Water becomes vapour (evaporation)", emoji: "💨", order: 2 },
+        { id: "cloud", label: "Vapour cools into cloud droplets", emoji: "☁️", order: 3 },
+        { id: "rain", label: "Heavy clouds give rain", emoji: "🌧️", order: 4 },
+        { id: "collect", label: "Rain fills rivers, lakes and seas", emoji: "🌊", order: 5 },
+      ],
+    },
+  },
+  {
+    id: "water-states-quiz",
+    zoneId: "water",
+    type: "picture_quiz",
+    title: "Ice, water, steam",
+    description: "Solid, liquid and gas — from your book.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "picture_quiz",
+      instruction: "Water can be solid ice, liquid water, or gas like steam.",
+      questions: [
+        {
+          id: "st1",
+          question: "When water in a tray gets very cold in the freezer, it turns into…",
+          options: [
+            { id: "steam", label: "Steam", emoji: "💨" },
+            { id: "ice", label: "Ice", emoji: "🧊" },
+            { id: "sand", label: "Sand", emoji: "🏖️" },
+            { id: "oil", label: "Oil", emoji: "🫗" },
+          ],
+          correctId: "ice",
+          explanation: "Freezing changes water into solid ice.",
+        },
+        {
+          id: "st2",
+          question: "Boiling water gives off hot water vapour called…",
+          options: [
+            { id: "ice", label: "Ice cubes", emoji: "🧊" },
+            { id: "steam", label: "Steam", emoji: "💨" },
+            { id: "rock", label: "Rock", emoji: "🪨" },
+            { id: "juice", label: "Juice", emoji: "🧃" },
+          ],
+          correctId: "steam",
+          explanation: "Steam is the gas you see rising from a hot pan.",
+        },
+        {
+          id: "st3",
+          question: "What is it called when ice turns back into water?",
+          options: [
+            { id: "boil", label: "Boiling", emoji: "🔥" },
+            { id: "melt", label: "Melting", emoji: "💧" },
+            { id: "freeze", label: "Freezing", emoji: "❄️" },
+            { id: "sleep", label: "Sleeping", emoji: "😴" },
+          ],
+          correctId: "melt",
+          explanation: "Melting is when a solid like ice becomes liquid water.",
+        },
+      ],
+    },
+  },
+  {
     id: "water-uses-sort",
     zoneId: "water",
     type: "drag_sort",
