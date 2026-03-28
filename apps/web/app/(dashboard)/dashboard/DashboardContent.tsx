@@ -510,14 +510,14 @@ export default function DashboardPage() {
           className="mb-4"
         >
           <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
-            Parent coaching desk
+            Grown-up HQ 🫐
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-            Your child sees colourful games; you get syllabus-aligned EVS practice and clear signals on where to coach next.
+            Kids chase stars and worlds; you get the behind-the-scenes scoop — syllabus, skills, and where to cheer (or nudge) next.
           </p>
         </motion.section>
 
-        {/* At-a-glance: fills width — coaching-first parent desk */}
+        {/* At-a-glance stats for Grown-up HQ */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -612,10 +612,10 @@ export default function DashboardPage() {
               🧠
             </span>
             <p className="mt-0.5 font-display text-xs font-black leading-tight text-violet-950 sm:text-sm">
-              Development report
+              Growth &amp; smarts
             </p>
             <p className="text-[8px] font-bold uppercase leading-tight text-violet-800/80 sm:text-[9px]">
-              Capabilities & decisions
+              Open the full report
             </p>
           </motion.a>
         </motion.section>
@@ -757,7 +757,7 @@ export default function DashboardPage() {
           </motion.a>
         </motion.section>
 
-        {/* Coaching reports */}
+        {/* Grown-up HQ — growth & smarts report */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -774,7 +774,7 @@ export default function DashboardPage() {
               📋
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-display font-bold text-slate-800">Learning & coaching report</p>
+              <p className="font-display font-bold text-slate-800">Growth &amp; smarts report</p>
               <p className="text-sm text-slate-600">
                 Subject strands (EVS themes), skill profile from game types, and plain-language next steps — sourced from play sessions.
               </p>

@@ -71,7 +71,7 @@ export default function ProgressPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 to-white">
-        <p className="text-sm font-semibold text-slate-500">Loading coaching report…</p>
+        <p className="text-sm font-semibold text-slate-500">Loading your growth report…</p>
       </div>
     );
   }
@@ -99,14 +99,13 @@ export default function ProgressPage() {
         </div>
 
         <header className="mb-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Parent coaching desk</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-violet-600">FunBerry · Grown-up zone</p>
           <h1 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">
-            Child development & decisions
+            Growth, smarts &amp; your game plan
           </h1>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Your child sees games; this screen translates play into syllabus themes, core capabilities, learning habits,
-            and a decision frame for where to invest your attention — not a clinical diagnosis, but a serious coaching
-            lens.
+            Play stays playful for kids; here you get the berry-powered view — themes, skills, habits, and a simple
+            game plan for what to focus on next. Fun first, facts for grown-ups (not a doctor&apos;s report).
           </p>
         </header>
 
@@ -155,18 +154,18 @@ export default function ProgressPage() {
             </section>
 
             <section className="mb-6 rounded-2xl border border-indigo-200/80 bg-indigo-50/50 p-4 sm:p-5">
-              <h2 className="font-display text-lg font-bold text-indigo-950">How to use this with real decisions</h2>
+              <h2 className="font-display text-lg font-bold text-indigo-950">How to read this HQ screen</h2>
               <p className="mt-2 text-sm leading-relaxed text-indigo-950/85">
-                Start with <strong>Parent decision frame</strong> (below) for the single biggest priority. Cross-check{" "}
-                <strong>Core capabilities</strong> for developmental language you can share with a tutor or teacher.
-                Use <strong>Learning habits</strong> to separate &quot;doesn&apos;t know the topic&quot; from
-                &quot;hasn&apos;t practiced broadly enough yet.&quot; Syllabus strands tie back to school EVS themes.
+                Start with <strong>Your game plan</strong> (below) for the biggest priority. Peek at{" "}
+                <strong>Core capabilities</strong> for words you can share with a tutor or teacher.
+                Use <strong>Learning habits</strong> to tell &quot;needs practice&quot; from &quot;hasn&apos;t tried enough
+                game types yet.&quot; Syllabus strands map to school EVS themes.
               </p>
             </section>
 
             {report.decisionFramework && (
               <section className="mb-6 rounded-2xl border-2 border-slate-800/10 bg-slate-900 text-white p-4 shadow-lg sm:p-6">
-                <h2 className="font-display text-lg font-bold text-white">Parent decision frame</h2>
+                <h2 className="font-display text-lg font-bold text-white">Your game plan</h2>
                 <p className="mt-2 text-sm font-semibold text-sky-200">{report.decisionFramework.headline}</p>
                 <div className="mt-4 space-y-3 text-sm leading-relaxed text-slate-100">
                   <p>
@@ -408,7 +407,7 @@ export default function ProgressPage() {
             </section>
 
             <section className="mb-6 rounded-2xl border border-violet-200/80 bg-violet-50/40 p-4 sm:p-5">
-              <h2 className="font-display text-lg font-bold text-violet-950">Coaching narrative</h2>
+              <h2 className="font-display text-lg font-bold text-violet-950">The big-picture scoop</h2>
               <p className="mt-2 text-sm leading-relaxed text-violet-950/90">{report.coachingNarrative}</p>
             </section>
 
