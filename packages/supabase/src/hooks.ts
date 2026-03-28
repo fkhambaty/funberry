@@ -156,11 +156,11 @@ export async function updateChildPhoto(childId: string, photoUrl: string) {
 export async function getChildProgress(childId: string) {
   const { data, error } = await supabase
     .from("progress")
-    .select("*, games(*)")
+    .select("*")
     .eq("child_id", childId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return data as (Progress & { games: Record<string, unknown> })[];
+  return data as Progress[];
 }
 
 /** Aggregate play telemetry across all children on the account (Grown-up Headquarters dashboard). */
@@ -222,15 +222,19 @@ async function incrementChildStars(childId: string, delta: number): Promise<void
     .select("total_stars")
     .eq("id", childId)
     .single();
-  if (selErr || row == null) return;
+  if (selErr || row == null) throw selErr ?? new Error("Child not found for star update");
   const cur = (row as { total_stars: number | null }).total_stars ?? 0;
-  await supabase.from("children").update({ total_stars: cur + delta } as never).eq("id", childId);
+  const { error: upErr } = await supabase
+    .from("children")
+    .update({ total_stars: cur + delta } as never)
+    .eq("id", childId);
+  if (upErr) throw upErr;
 }
 
 /**
  * Save (or update) game progress for a child.
- * Uses upsert logic: keeps the best stars_earned, increments attempt count.
- * Only increments total_stars in `children` by the net improvement (new personal best on that game).
+ * `gameId` is the client key (GameConfig.id), stored in `progress.game_id` as text.
+ * Keeps the best stars_earned per game; adds this round's stars to `children.total_stars` every time.
  */
 export async function saveProgress(
   childId: string,
@@ -241,7 +245,6 @@ export async function saveProgress(
 ): Promise<Progress> {
   type ProgressRow = { id: string; stars_earned: number; attempts: number };
 
-  // Check if there's already a progress record for this child + game
   const { data: existingRaw } = await supabase
     .from("progress")
     .select("id, stars_earned, attempts")
@@ -253,10 +256,11 @@ export async function saveProgress(
 
   const existing = existingRaw as ProgressRow | null;
 
+  let row: Progress;
+
   if (existing) {
     const prevStars = existing.stars_earned ?? 0;
     const newBestStars = Math.max(prevStars, starsEarned);
-    const starDelta = Math.max(0, starsEarned - prevStars);
 
     const { data, error } = await supabase
       .from("progress")
@@ -273,40 +277,32 @@ export async function saveProgress(
       .single();
 
     if (error) throw error;
+    row = data as Progress;
+  } else {
+    const { data, error } = await supabase
+      .from("progress")
+      .insert({
+        child_id: childId,
+        game_id: gameId,
+        stars_earned: starsEarned,
+        score,
+        time_spent_seconds: timeSpent,
+        attempts: 1,
+        completed: starsEarned > 0,
+        completed_at: starsEarned > 0 ? new Date().toISOString() : null,
+      } as never)
+      .select()
+      .single();
 
-    if (starDelta > 0) {
-      await incrementChildStars(childId, starDelta);
-    } else if (starsEarned > 0) {
-      // Same best as before — still award 1 ⭐ so the header counter moves and play feels rewarded.
-      await incrementChildStars(childId, 1);
-    }
-
-    return data as Progress;
+    if (error) throw error;
+    row = data as Progress;
   }
-
-  // First time playing this game
-  const { data, error } = await supabase
-    .from("progress")
-    .insert({
-      child_id: childId,
-      game_id: gameId,
-      stars_earned: starsEarned,
-      score,
-      time_spent_seconds: timeSpent,
-      attempts: 1,
-      completed: starsEarned > 0,
-      completed_at: starsEarned > 0 ? new Date().toISOString() : null,
-    } as never)
-    .select()
-    .single();
-
-  if (error) throw error;
 
   if (starsEarned > 0) {
     await incrementChildStars(childId, starsEarned);
   }
 
-  return data as Progress;
+  return row;
 }
 
 // ── Unlocks ───────────────────────────────────────────────────────────────────

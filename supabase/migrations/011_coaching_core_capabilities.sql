@@ -68,9 +68,11 @@ INSERT INTO skill_axis_capability_map (skill_axis_id, capability_id, weight) VAL
 ON CONFLICT (skill_axis_id, capability_id) DO NOTHING;
 
 ALTER TABLE coaching_core_capabilities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS coaching_core_capabilities_read ON coaching_core_capabilities;
 CREATE POLICY coaching_core_capabilities_read ON coaching_core_capabilities
   FOR SELECT USING (auth.uid() IS NOT NULL);
 
 ALTER TABLE skill_axis_capability_map ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS skill_axis_capability_map_read ON skill_axis_capability_map;
 CREATE POLICY skill_axis_capability_map_read ON skill_axis_capability_map
   FOR SELECT USING (auth.uid() IS NOT NULL);

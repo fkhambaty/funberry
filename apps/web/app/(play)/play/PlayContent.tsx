@@ -409,8 +409,8 @@ export default function PlayContent() {
 
           const rank = await getChildRank(selectedChild.id);
           setChildRank(rank);
-        } catch {
-          // Non-fatal
+        } catch (e) {
+          console.error("[play] saveProgress failed", e);
         }
       }
     }
