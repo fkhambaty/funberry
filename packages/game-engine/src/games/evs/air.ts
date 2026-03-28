@@ -29,6 +29,24 @@ export const airGames: GameConfig[] = [
     },
   },
   {
+    id: "air-pixi-wind-glide",
+    zoneId: "air",
+    type: "pixi_lab",
+    title: "Wind & fresh air flight",
+    description: "WebGL mini-game — steer through clean air like your kite and wind chapter.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: "/syllabus-photos/20260328_104900.jpg",
+    data: {
+      type: "pixi_lab",
+      mode: "wind_glide",
+      instruction:
+        "Slide your finger to fly the kite. Catch green fresh-air sparkles; dodge grey smog! Wind arrow hints at drift.",
+      durationSec: 40,
+      targetGood: 14,
+    },
+  },
+  {
     id: "air-ch9-mcq",
     zoneId: "air",
     type: "picture_quiz",

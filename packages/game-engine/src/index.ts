@@ -44,6 +44,7 @@ export { BubblePopAdventure } from "./templates/BubblePopAdventure";
 export { StarCatcher } from "./templates/StarCatcher";
 export { OddOneOut } from "./templates/OddOneOut";
 export { TrueFalse } from "./templates/TrueFalse";
+export { PixiLab } from "./templates/PixiLab";
 
 // Progression
 export {
@@ -59,6 +60,7 @@ export {
 export { allEvsGames, getGamesForZone } from "./games/evs";
 export { BOOK_PAGE_FILES, bookPageUrl } from "./data/bookPages";
 export type { BookPageFile } from "./data/bookPages";
+export { SYLLABUS_PHOTO_FILES, syllabusPhotoUrl } from "./data/syllabusManifest";
 
 // Types
 export type * from "./types";

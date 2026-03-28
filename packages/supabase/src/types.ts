@@ -249,7 +249,8 @@ export type GameType =
   | "word_picture_link"
   | "interactive_story"
   | "bubble_pop"
-  | "star_catcher";
+  | "star_catcher"
+  | "pixi_lab";
 
 export interface AvatarConfig {
   body: string;

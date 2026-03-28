@@ -24,6 +24,30 @@ export const othersGames: GameConfig[] = [
     },
   },
   {
+    id: "others-pixi-rocks-hard-soft",
+    zoneId: "others-in-my-world",
+    type: "pixi_lab",
+    title: "Rocks: hard or soft?",
+    description: "WebGL tap lab — like SAFAL rocks & minerals worksheet.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: "/syllabus-photos/20260328_104940.jpg",
+    data: {
+      type: "pixi_lab",
+      mode: "rock_tap",
+      instruction:
+        "Tap Hard (H) or Soft (S) for each rock — same idea as marking H/S on your practice sheet.",
+      rounds: [
+        { id: "coal", emoji: "⚫", label: "Coal", answer: "S" },
+        { id: "sandstone", emoji: "🪨", label: "Sandstone", answer: "H" },
+        { id: "slate", emoji: "⬛", label: "Slate", answer: "H" },
+        { id: "marble", emoji: "🤍", label: "Marble", answer: "H" },
+        { id: "granite", emoji: "🪨", label: "Granite", answer: "H" },
+        { id: "chalk", emoji: "🖍️", label: "Chalk (rock)", answer: "S" },
+      ],
+    },
+  },
+  {
     id: "others-who-helps-quiz",
     zoneId: "others-in-my-world",
     type: "picture_quiz",

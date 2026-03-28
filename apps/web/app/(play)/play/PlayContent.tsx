@@ -19,6 +19,7 @@ import {
   InteractiveStory,
   BubblePopAdventure,
   StarCatcher,
+  PixiLab,
   GameShell,
   playTap,
   RankProvider,
@@ -54,6 +55,7 @@ const GAME_ICONS: Record<string, string> = {
   interactive_story: "📖",
   bubble_pop: "🫧",
   star_catcher: "⭐",
+  pixi_lab: "🧪",
 };
 
 const GAME_LABELS: Record<string, string> = {
@@ -69,6 +71,7 @@ const GAME_LABELS: Record<string, string> = {
   interactive_story: "Story Time",
   bubble_pop: "🫧 ADVENTURE",
   star_catcher: "⭐ ADVENTURE",
+  pixi_lab: "WEBGL LAB",
 };
 
 function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) {
@@ -452,6 +455,8 @@ export default function PlayContent() {
         return <BubblePopAdventure data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       case "star_catcher":
         return <StarCatcher data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
+      case "pixi_lab":
+        return <PixiLab data={data} onComplete={handleGameComplete} accentColor={accent} onNextGame={handleNextGame} />;
       default:
         return (
           <div style={{ textAlign: "center", padding: 40 }}>

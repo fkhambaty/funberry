@@ -41,6 +41,36 @@ export const plantsGames: GameConfig[] = [
     },
   },
   {
+    id: "plants-pixi-tidy-room",
+    zoneId: "plants",
+    type: "pixi_lab",
+    title: "Tidy the room (drag lab)",
+    description: "WebGL — learning-by-doing like the Fun Time “clean the room” activity in your book.",
+    difficulty: 2,
+    maxStars: 3,
+    bookPageSrc: "/syllabus-photos/20260328_104630.jpg",
+    data: {
+      type: "pixi_lab",
+      mode: "animal_product",
+      instruction:
+        "Drag each item to the toy bin, bookshelf, or closet — same sorting idea as helping Karam tidy up!",
+      bins: [
+        { id: "toys", label: "Toy bin", emoji: "🧸" },
+        { id: "books", label: "Bookshelf", emoji: "📚" },
+        { id: "clothes", label: "Closet", emoji: "👕" },
+      ],
+      creatures: [
+        { id: "teddy", emoji: "🧸", label: "Teddy bear", correctBinId: "toys" },
+        { id: "car", emoji: "🚗", label: "Toy car", correctBinId: "toys" },
+        { id: "ball", emoji: "⚽", label: "Ball", correctBinId: "toys" },
+        { id: "story", emoji: "📖", label: "Story book", correctBinId: "books" },
+        { id: "notebook", emoji: "📓", label: "Notebook", correctBinId: "books" },
+        { id: "shirt", emoji: "👔", label: "Shirt", correctBinId: "clothes" },
+        { id: "socks", emoji: "🧦", label: "Socks", correctBinId: "clothes" },
+      ],
+    },
+  },
+  {
     id: "plants-eco-smart-three-rs",
     zoneId: "plants",
     type: "true_false",

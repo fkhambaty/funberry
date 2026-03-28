@@ -10,7 +10,9 @@ export type GameType =
   | "word_picture_link"
   | "interactive_story"
   | "bubble_pop"
-  | "star_catcher";
+  | "star_catcher"
+  /** WebGL labs (PixiJS): drag physics, wind glide, multi-step touch missions */
+  | "pixi_lab";
 
 export interface GameConfig {
   id: string;
@@ -23,7 +25,20 @@ export interface GameConfig {
   timeLimit?: number;
   /** Textbook page image under web `public/book-pages/` (e.g. `/book-pages/20260328_104740.jpg`). */
   bookPageSrc?: string;
-  data: DragSortData | MemoryMatchData | PictureQuizData | SequenceBuilderData | SpotDifferenceData | OddOneOutData | TrueFalseData | ColorActivityData | WordPictureLinkData | InteractiveStoryData | BubblePopData | StarCatcherData;
+  data:
+    | DragSortData
+    | MemoryMatchData
+    | PictureQuizData
+    | SequenceBuilderData
+    | SpotDifferenceData
+    | OddOneOutData
+    | TrueFalseData
+    | ColorActivityData
+    | WordPictureLinkData
+    | InteractiveStoryData
+    | BubblePopData
+    | StarCatcherData
+    | PixiLabData;
 }
 
 /* ── Drag & Sort ── */
@@ -220,3 +235,43 @@ export interface StarCatcherData {
   items: CatchItem[];
   lives: number;
 }
+
+/* ── Pixi lab (WebGL) — syllabus-aligned missions, high interaction ── */
+
+export type PixiLabBin = { id: string; label: string; emoji: string };
+export type PixiLabCreature = {
+  id: string;
+  emoji: string;
+  label: string;
+  correctBinId: string;
+};
+
+/** Textbook “Animals that help us” style: drag each animal to what it gives. */
+export interface PixiLabAnimalProductData {
+  type: "pixi_lab";
+  mode: "animal_product";
+  instruction: string;
+  bins: PixiLabBin[];
+  creatures: PixiLabCreature[];
+}
+
+/** Air / wind chapter: glide collector, fresh-air vs smog (variable reward loop). */
+export interface PixiLabWindGlideData {
+  type: "pixi_lab";
+  mode: "wind_glide";
+  instruction: string;
+  /** Round length seconds */
+  durationSec: number;
+  /** Good collects needed for “perfect” bonus scoring */
+  targetGood: number;
+}
+
+/** Rocks & minerals worksheet style: hard vs soft (tap zones, immediate feedback). */
+export interface PixiLabRockTapData {
+  type: "pixi_lab";
+  mode: "rock_tap";
+  instruction: string;
+  rounds: { id: string; emoji: string; label: string; answer: "H" | "S" }[];
+}
+
+export type PixiLabData = PixiLabAnimalProductData | PixiLabWindGlideData | PixiLabRockTapData;

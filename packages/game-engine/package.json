@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@funberry/config": "*",
-    "canvas-confetti": "^1.9.4"
+    "canvas-confetti": "^1.9.4",
+    "pixi.js": "^8.17.1"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",

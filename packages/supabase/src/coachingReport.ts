@@ -146,6 +146,9 @@ export const FALLBACK_CONTRIBUTIONS: CoachingContributionRow[] = [
   { game_type: "bubble_pop", skill_axis_id: "memory_focus", weight: 1 },
   { game_type: "star_catcher", skill_axis_id: "visual_attention", weight: 3 },
   { game_type: "star_catcher", skill_axis_id: "sequential_thinking", weight: 1 },
+  { game_type: "pixi_lab", skill_axis_id: "visual_attention", weight: 2 },
+  { game_type: "pixi_lab", skill_axis_id: "classification_logic", weight: 2 },
+  { game_type: "pixi_lab", skill_axis_id: "inference_control", weight: 2 },
 ];
 
 export const FALLBACK_CORE_CAPABILITIES: CoachingCoreCapabilityRow[] = [
