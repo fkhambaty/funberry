@@ -8,8 +8,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "build": "echo 'Use EAS Build for production builds'",
-    "build:apk": "export $(cat .env | grep -v '#' | xargs) && export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home && cd android && ./gradlew assembleRelease && cp app/build/outputs/apk/release/app-release.apk ~/Desktop/funberrykids.apk && echo '✅ APK copied to Desktop!'",
-    "build:apk:debug": "export $(cat .env | grep -v '#' | xargs) && export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home && cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk ~/Desktop/funberrykids-debug.apk && echo '✅ Debug APK copied to Desktop!'",
+    "build:apk": "bash scripts/build-release-apk.sh",
+    "build:apk:debug": "set -a && test -f .env && source .env && set +a && export JAVA_HOME=\"$(/usr/libexec/java_home 2>/dev/null || echo \"$JAVA_HOME\")\" && cd android && ./gradlew assembleDebug && cp app/build/outputs/apk/debug/app-debug.apk ~/Desktop/FunBerry-Kids-debug.apk && echo '✅ Debug APK → ~/Desktop/FunBerry-Kids-debug.apk'",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit"
   },
