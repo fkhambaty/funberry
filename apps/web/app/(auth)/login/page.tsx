@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
 import { signIn } from "@funberry/supabase";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justVerified = searchParams.get("verified") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -51,6 +53,12 @@ export default function LoginPage() {
           onSubmit={handleLogin}
           className="glass-card space-y-5 rounded-kid p-8"
         >
+          {justVerified && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-sm">
+              Email verified! Sign in with the email and password you chose.
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
               {error}
@@ -103,5 +111,19 @@ export default function LoginPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-fuchsia-50/40 p-6">
+          <p className="text-gray-500">Loading…</p>
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

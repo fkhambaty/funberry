@@ -103,10 +103,11 @@ export function Leaderboard({ highlightChildId, compact = false, onClose }: Lead
             if (!e) return null;
             const isFirst = podiumIdx === 0;
             const heights = [100, 130, 80];
-            const isMe = e.child_id === highlightChildId;
+            const isMe = e.child_id != null && e.child_id === highlightChildId;
+            const entryKey = e.child_id ?? `anon-${e.rank}`;
             return (
               <motion.div
-                key={e.child_id}
+                key={entryKey}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: podiumIdx * 0.15, duration: 0.4, ease: "easeOut" }}
@@ -131,7 +132,7 @@ export function Leaderboard({ highlightChildId, compact = false, onClose }: Lead
                     marginBottom: 6,
                   }}
                 >
-                  {e.photo_url || "🧒"}
+                  {!e.child_id ? "🌟" : e.photo_url || "🧒"}
                 </motion.div>
                 <span style={{
                   fontSize: 12, fontWeight: 800, fontFamily: "Fredoka, sans-serif",
@@ -168,12 +169,13 @@ export function Leaderboard({ highlightChildId, compact = false, onClose }: Lead
       <div style={{ display: "flex", flexDirection: "column", gap: compact ? 6 : 8 }}>
         {entries.map((e, i) => {
           if (!compact && i < 3) return null;
-          const isMe = e.child_id === highlightChildId;
+          const isMe = e.child_id != null && e.child_id === highlightChildId;
           const barPct = maxStars > 0 ? (e.total_stars / maxStars) * 100 : 0;
+          const entryKey = e.child_id ?? `anon-${e.rank}`;
 
           return (
             <motion.div
-              key={e.child_id}
+              key={entryKey}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: (compact ? i : i - 3) * 0.04, duration: 0.25 }}
@@ -211,7 +213,7 @@ export function Leaderboard({ highlightChildId, compact = false, onClose }: Lead
                 fontSize: compact ? 16 : 20, flexShrink: 0,
                 border: isMe ? "2px solid #6366f1" : "2px solid #e5e7eb",
               }}>
-                {e.photo_url || "🧒"}
+                {!e.child_id ? "🌟" : e.photo_url || "🧒"}
               </div>
 
               {/* Name + bar */}

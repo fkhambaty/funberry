@@ -29,17 +29,20 @@ type BerrySpec = {
 const WORDMARK = "FunBerryKids";
 
 /**
- * Glass berry cluster + high-contrast wordmark (readable on every berry).
+ * `default` — glass berry cluster + high-contrast wordmark (readable everywhere).
+ * `editorial` — same berries, gradient wordmark without the white pill or heavy ink stroke (hero / marketing).
  */
 export function FunBerryLogo({
   size = "md",
   className = "",
   animate = false,
+  variant = "default",
 }: {
   size?: LogoSize;
   className?: string;
   animate?: boolean;
   priority?: boolean;
+  variant?: "default" | "editorial";
 }) {
   const h = heights[size];
   const w = Math.round((h * VB_W) / VB_H);
@@ -155,6 +158,13 @@ export function FunBerryLogo({
           <stop offset="45%" stopColor="#ffffff" stopOpacity="0" />
           <stop offset="100%" stopColor="#64748b" stopOpacity="0.12" />
         </linearGradient>
+
+        <linearGradient id={`${id}-editorialText`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#e11d48" />
+          <stop offset="38%" stopColor="#9333ea" />
+          <stop offset="72%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#0ea5e9" />
+        </linearGradient>
       </defs>
 
       <ellipse cx="180" cy="60" rx="158" ry="9" fill="#0f172a" opacity="0.07" />
@@ -176,8 +186,8 @@ export function FunBerryLogo({
             rx={b.rx}
             ry={b.ry}
             fill="none"
-            stroke="rgba(255,255,255,0.55)"
-            strokeWidth="1.25"
+            stroke={variant === "editorial" ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.55)"}
+            strokeWidth={variant === "editorial" ? 0.9 : 1.25}
           />
           <path
             d={`M ${b.cx - b.rx * 0.35} ${b.cy - b.ry * 0.55} Q ${b.cx} ${b.cy - b.ry * 0.95} ${b.cx + b.rx * 0.35} ${b.cy - b.ry * 0.55}`}
@@ -189,47 +199,60 @@ export function FunBerryLogo({
         </g>
       ))}
 
-      {/* Opaque nameplate — separates lettering from busy berry color (glass “plaque”) */}
-      <rect
-        x="22"
-        y="17"
-        width="316"
-        height="36"
-        rx="18"
-        fill="rgba(255,255,255,0.94)"
-        stroke="rgba(15,23,42,0.14)"
-        strokeWidth="1.25"
-      />
-      <rect
-        x="22"
-        y="17"
-        width="316"
-        height="36"
-        rx="18"
-        fill={`url(#${id}-plateShine)`}
-        opacity="0.5"
-      />
+      {variant === "default" && (
+        <>
+          <rect
+            x="22"
+            y="17"
+            width="316"
+            height="36"
+            rx="18"
+            fill="rgba(255,255,255,0.94)"
+            stroke="rgba(15,23,42,0.14)"
+            strokeWidth="1.25"
+          />
+          <rect
+            x="22"
+            y="17"
+            width="316"
+            height="36"
+            rx="18"
+            fill={`url(#${id}-plateShine)`}
+            opacity="0.5"
+          />
+          <text
+            {...textProps}
+            fill="none"
+            stroke="#0f172a"
+            strokeWidth="3.2"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          >
+            {WORDMARK}
+          </text>
+          <text
+            {...textProps}
+            fill={`url(#${id}-letter)`}
+            stroke="#1e293b"
+            strokeWidth="0.85"
+            filter={`url(#${id}-wordShadow)`}
+          >
+            {WORDMARK}
+          </text>
+        </>
+      )}
 
-      {/* Outer ink ring + crisp fill — reads like precision-cut type */}
-      <text
-        {...textProps}
-        fill="none"
-        stroke="#0f172a"
-        strokeWidth="3.2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      >
-        {WORDMARK}
-      </text>
-      <text
-        {...textProps}
-        fill={`url(#${id}-letter)`}
-        stroke="#1e293b"
-        strokeWidth="0.85"
-        filter={`url(#${id}-wordShadow)`}
-      >
-        {WORDMARK}
-      </text>
+      {variant === "editorial" && (
+        <text
+          {...textProps}
+          fill={`url(#${id}-editorialText)`}
+          stroke="rgba(15,23,42,0.06)"
+          strokeWidth="0.6"
+          style={{ paintOrder: "stroke fill" }}
+        >
+          {WORDMARK}
+        </text>
+      )}
     </svg>
   );
 
@@ -237,8 +260,8 @@ export function FunBerryLogo({
     return (
       <motion.div
         className="shrink-0 leading-none"
-        animate={{ y: [0, -3, 0] }}
-        transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
+        animate={variant === "editorial" ? { y: [0, -2, 0] } : { y: [0, -3, 0] }}
+        transition={{ repeat: Infinity, duration: variant === "editorial" ? 5 : 3.2, ease: "easeInOut" }}
         style={{ height: h, width: w }}
       >
         {svg}

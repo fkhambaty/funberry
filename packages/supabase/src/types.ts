@@ -8,8 +8,11 @@ export interface Database {
           name: string;
           username: string | null;
           pin: string | null;
-          subscription_tier: "free" | "premium_monthly" | "premium_yearly" | "lifetime";
+          subscription_tier: "free" | "premium_weekly" | "premium_monthly" | "premium_yearly" | "lifetime";
           subscription_expires_at: string | null;
+          welcome_email_sent_at: string | null;
+          razorpay_subscription_id: string | null;
+          razorpay_customer_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -19,8 +22,11 @@ export interface Database {
           name?: string;
           username?: string | null;
           pin?: string | null;
-          subscription_tier?: "free" | "premium_monthly" | "premium_yearly" | "lifetime";
+          subscription_tier?: "free" | "premium_weekly" | "premium_monthly" | "premium_yearly" | "lifetime";
           subscription_expires_at?: string | null;
+          welcome_email_sent_at?: string | null;
+          razorpay_subscription_id?: string | null;
+          razorpay_customer_id?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["parents"]["Insert"]>;
       };
@@ -232,6 +238,23 @@ export interface Database {
           weight?: number;
         };
         Update: Partial<Database["public"]["Tables"]["skill_axis_capability_map"]["Insert"]>;
+      };
+    };
+    Functions: {
+      leaderboard_top_stars: {
+        Args: { p_limit?: number };
+        Returns: {
+          rank: number;
+          child_id: string | null;
+          total_stars: number;
+          display_name: string;
+          photo_url: string | null;
+          is_mine: boolean;
+        };
+      };
+      get_child_star_rank: {
+        Args: { p_child_id: string };
+        Returns: { rank: number; total: number };
       };
     };
   };

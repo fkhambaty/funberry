@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import {
   buildParentCoachingReport,
@@ -14,30 +15,91 @@ import type { Child, Database, Parent, Progress, Unlock, Reward } from "./types"
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
-export async function signUp(email: string, password: string, name: string, pin?: string) {
-  const siteUrl =
+export type SignUpOptions = {
+  /** Overrides default web redirect after email confirmation (use Expo deep link on mobile). */
+  emailRedirectTo?: string;
+};
+
+/**
+ * Sign up a parent. Name and PIN are stored in auth user metadata so a DB trigger can
+ * insert into `parents` even when email confirmation leaves the client without a session
+ * (RLS would block a client-side insert).
+ */
+export async function signUp(
+  email: string,
+  password: string,
+  name: string,
+  pin?: string,
+  options?: SignUpOptions
+) {
+  const defaultSite =
     (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
     "https://funberrykids-web.vercel.app";
+  const emailRedirectTo =
+    options?.emailRedirectTo ?? `${defaultSite.replace(/\/$/, "")}/auth/confirm-email`;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${siteUrl}/dashboard` },
+    options: {
+      emailRedirectTo,
+      data: {
+        full_name: name,
+        name,
+        ...(pin ? { pin } : {}),
+      },
+    },
   });
   if (error) throw error;
-  if (data.user) {
-    await supabase.from("parents").insert({
-      id: data.user.id,
-      email,
-      name,
-      ...(pin ? { pin } : {}),
-    } as never);
+
+  // If confirmations are disabled, session exists — upsert parent for redundancy with trigger.
+  if (data.session && data.user) {
+    await supabase.from("parents").upsert(
+      {
+        id: data.user.id,
+        email,
+        name,
+        ...(pin ? { pin } : {}),
+      } as never,
+      { onConflict: "id" }
+    );
   }
   return data;
+}
+
+/** Resend the signup confirmation email (Supabase rate limits apply on free tier). */
+export async function resendSignupConfirmation(email: string, redirectTo?: string) {
+  const defaultSite =
+    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
+    "https://funberrykids-web.vercel.app";
+  const emailRedirectTo =
+    redirectTo ?? `${defaultSite.replace(/\/$/, "")}/auth/confirm-email`;
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo },
+  });
+  if (error) throw error;
+}
+
+/**
+ * Sends the one-time welcome email (Edge Function + Resend) using the caller's session.
+ * Pass the app's Supabase client on React Native (SecureStore session); omit on web.
+ * Safe to call on every login — the server skips if already sent.
+ */
+export async function trySendWelcomeEmailAfterAuth(
+  client: SupabaseClient<Database> = supabase as SupabaseClient<Database>
+): Promise<void> {
+  const { error } = await client.functions.invoke("send-welcome-email", { body: {} });
+  if (error && typeof console !== "undefined" && console.warn) {
+    console.warn("[FunBerry] welcome email:", error.message);
+  }
 }
 
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
+  void trySendWelcomeEmailAfterAuth();
   return data;
 }
 
@@ -89,9 +151,12 @@ export async function updateParentPassword(newPassword: string) {
 // ── Children ──────────────────────────────────────────────────────────────────
 
 export async function getChildren(): Promise<Child[]> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not authenticated");
   const { data, error } = await supabase
     .from("children")
     .select("*")
+    .eq("parent_id", user.id)
     .order("created_at", { ascending: true });
   if (error) throw error;
   return data as Child[];
@@ -129,6 +194,8 @@ export async function updateChild(
   age: number,
   photoUrl?: string | null
 ): Promise<Child> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not authenticated");
   const { data, error } = await supabase
     .from("children")
     .update({
@@ -137,6 +204,7 @@ export async function updateChild(
       ...(photoUrl !== undefined ? { photo_url: photoUrl } : {}),
     } as never)
     .eq("id", childId)
+    .eq("parent_id", user.id)
     .select()
     .single();
   if (error) throw error;
@@ -144,10 +212,13 @@ export async function updateChild(
 }
 
 export async function updateChildPhoto(childId: string, photoUrl: string) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not authenticated");
   const { error } = await supabase
     .from("children")
     .update({ photo_url: photoUrl } as never)
-    .eq("id", childId);
+    .eq("id", childId)
+    .eq("parent_id", user.id);
   if (error) throw error;
 }
 
@@ -361,7 +432,8 @@ export async function awardReward(
 // ── Leaderboard ──────────────────────────────────────────────────────────────
 
 export interface LeaderboardEntry {
-  child_id: string;
+  /** Set only for the signed-in parent's children; other players are anonymized. */
+  child_id: string | null;
   child_name: string;
   photo_url: string | null;
   total_stars: number;
@@ -369,32 +441,26 @@ export interface LeaderboardEntry {
 }
 
 export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
-  const { data, error } = await supabase
-    .from("children")
-    .select("id, name, photo_url, total_stars")
-    .gt("total_stars", 0)
-    .order("total_stars", { ascending: false })
-    .limit(limit);
-
+  const { data, error } = await supabase.rpc("leaderboard_top_stars", { p_limit: limit } as never);
   if (error || !data) return [];
 
-  return (data as { id: string; name: string; photo_url: string | null; total_stars: number }[]).map(
-    (row, i) => ({
-      child_id: row.id,
-      child_name: row.name,
-      photo_url: row.photo_url,
-      total_stars: row.total_stars,
-      rank: i + 1,
-    })
-  );
+  const rows = data as unknown as Database["public"]["Functions"]["leaderboard_top_stars"]["Returns"][];
+  return rows.map((row) => ({
+    child_id: row.child_id,
+    child_name: row.display_name,
+    photo_url: row.photo_url,
+    total_stars: row.total_stars,
+    rank: Number(row.rank),
+  }));
 }
 
 export async function getChildRank(childId: string): Promise<{ rank: number; total: number } | null> {
-  const board = await getLeaderboard(200);
-  const total = board.length;
-  const entry = board.find((e) => e.child_id === childId);
-  if (!entry) return null;
-  return { rank: entry.rank, total };
+  const { data, error } = await supabase.rpc("get_child_star_rank", { p_child_id: childId } as never);
+  if (error || !data) return null;
+  const rows = data as unknown as Database["public"]["Functions"]["get_child_star_rank"]["Returns"][];
+  const row = rows[0];
+  if (!row) return null;
+  return { rank: Number(row.rank), total: Number(row.total) };
 }
 
 // ── Zone / Game data (DB-backed) ──────────────────────────────────────────────

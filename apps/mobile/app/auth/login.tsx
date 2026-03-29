@@ -9,7 +9,8 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { trySendWelcomeEmailAfterAuth } from "@funberry/supabase";
 import { supabase } from "../../lib/supabase";
 
 const BERRY = "#ff2d6a";
@@ -17,6 +18,8 @@ const APP_NAME = "FunBerry Kids";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { verified } = useLocalSearchParams<{ verified?: string }>();
+  const justVerified = verified === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -32,7 +35,7 @@ export default function LoginScreen() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      // Explicit navigation — don't rely solely on the auth state listener
+      void trySendWelcomeEmailAfterAuth(supabase);
       router.replace("/(tabs)");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Login failed. Check your email and password.");
@@ -57,6 +60,13 @@ export default function LoginScreen() {
         </Text>
 
         <View style={styles.form}>
+          {justVerified ? (
+            <View style={styles.successBox}>
+              <Text style={styles.successText}>
+                Email verified! Sign in with the email and password you chose.
+              </Text>
+            </View>
+          ) : null}
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>{error}</Text>
@@ -157,6 +167,14 @@ const styles = StyleSheet.create({
     borderColor: "#fecaca",
   },
   errorText: { color: "#b91c1c", fontSize: 14 },
+  successBox: {
+    backgroundColor: "#ecfdf5",
+    borderRadius: 16,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#a7f3d0",
+  },
+  successText: { color: "#065f46", fontSize: 14 },
   link: {
     textAlign: "center",
     color: "#6b7280",

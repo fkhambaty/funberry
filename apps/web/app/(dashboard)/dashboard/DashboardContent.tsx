@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { zones } from "@funberry/config";
-import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword } from "@funberry/supabase";
+import { motion, AnimatePresence } from "framer-motion";
+import { zones, isPremium as tierIsPremium, pricing } from "@funberry/config";
+import type { SubscriptionTier } from "@funberry/config";
+import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword, trySendWelcomeEmailAfterAuth, supabase } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
 import { TimerSetup } from "../../components/TimerSetup";
 import { useTimer } from "../../components/TimerProvider";
@@ -378,6 +379,34 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
   );
 }
 
+function loadRazorpayScript(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("No window"));
+      return;
+    }
+    const w = window as unknown as { Razorpay?: unknown };
+    if (w.Razorpay) {
+      resolve();
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Could not load Razorpay checkout"));
+    document.body.appendChild(s);
+  });
+}
+
+function tierDisplayLabel(tier: SubscriptionTier): string {
+  if (tier === "lifetime") return "Lifetime ✨";
+  if (tier === "premium_weekly") return "Premium · Weekly";
+  if (tier === "premium_monthly") return "Premium · Monthly";
+  if (tier === "premium_yearly") return "Premium · Yearly";
+  return "Free";
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { setParentPin } = useTimer();
@@ -387,6 +416,8 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showAddChild, setShowAddChild] = useState(false);
   const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [payBusy, setPayBusy] = useState<string | null>(null);
   const [familyStats, setFamilyStats] = useState<{
     totalSessions: number;
     uniqueGamesTouched: number;
@@ -402,6 +433,7 @@ export default function DashboardPage() {
           return;
         }
         setUserEmail(user.email ?? null);
+        void trySendWelcomeEmailAfterAuth();
         const p = await getParent();
         if (p) {
           setParent(p);
@@ -457,8 +489,65 @@ export default function DashboardPage() {
   }
 
   const freeZones = zones.filter((z) => z.isFree);
-  const tier = parent?.subscription_tier ?? "free";
+  const tier = (parent?.subscription_tier ?? "free") as SubscriptionTier;
   const familyStars = children.reduce((s, c) => s + (c.total_stars ?? 0), 0);
+
+  async function startRazorpayCheckout(plan: "weekly" | "monthly") {
+    setPayBusy(plan);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        alert("Please sign in again.");
+        return;
+      }
+      const res = await fetch("/api/razorpay/subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const json = (await res.json()) as {
+        error?: string;
+        subscriptionId?: string;
+        keyId?: string;
+        planLabel?: string;
+      };
+      if (!res.ok) throw new Error(json.error || "Could not start checkout");
+
+      await loadRazorpayScript();
+      type RazorpayInstance = { open: () => void };
+      type RazorpayCtor = new (opts: Record<string, unknown>) => RazorpayInstance;
+      const RazorpayClass = (window as unknown as { Razorpay?: RazorpayCtor }).Razorpay;
+      if (!RazorpayClass) throw new Error("Razorpay failed to load");
+
+      const rzp = new RazorpayClass({
+        key: json.keyId,
+        subscription_id: json.subscriptionId,
+        name: "FunBerry Kids",
+        description: json.planLabel ?? "Premium",
+        handler: async () => {
+          setPayBusy(null);
+          setUpgradeOpen(false);
+          await new Promise((r) => setTimeout(r, 2000));
+          const p = await getParent();
+          if (p) setParent(p);
+        },
+        prefill: { email: userEmail ?? "", name: parent?.name ?? "" },
+        theme: { color: "#7c3aed" },
+        modal: {
+          ondismiss: () => setPayBusy(null),
+        },
+      });
+      rzp.open();
+    } catch (e: unknown) {
+      setPayBusy(null);
+      alert(e instanceof Error ? e.message : "Payment could not start. Try again.");
+    }
+  }
 
   function formatLastPlay(iso: string | null): string {
     if (!iso) return "—";
@@ -483,9 +572,9 @@ export default function DashboardPage() {
                 {parent.name} &middot;{" "}
                 <span
                   className="font-bold uppercase"
-                  style={{ color: tier === "free" ? "#6b7280" : "#10b981" }}
+                  style={{ color: tierIsPremium(tier) ? "#10b981" : "#6b7280" }}
                 >
-                  {tier === "lifetime" ? "Lifetime ✨" : tier}
+                  {tierDisplayLabel(tier)}
                 </span>
               </p>
             )}
@@ -536,7 +625,7 @@ export default function DashboardPage() {
               },
               {
                 label: "Zones open",
-                value: String(tier === "free" ? freeZones.length : zones.length),
+                value: String(tierIsPremium(tier) ? zones.length : freeZones.length),
                 icon: "🗺️",
                 color: "#10b981",
                 glass: "kid-glass-stat--zones",
@@ -764,7 +853,7 @@ export default function DashboardPage() {
         </motion.section>
 
         {/* Upgrade CTA — shown only for free users */}
-        {tier === "free" && (
+        {!tierIsPremium(tier) && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -805,7 +894,7 @@ export default function DashboardPage() {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className="kid-glass-btn kid-glass-violet rounded-kid px-8 py-3 text-base"
-                onClick={() => alert("Upgrade coming soon! Contact us for early access pricing.")}
+                onClick={() => setUpgradeOpen(true)}
               >
                 ✨ Upgrade — Unlock Everything
               </motion.button>
@@ -814,6 +903,86 @@ export default function DashboardPage() {
         )}
       </div>
     </main>
+
+    <AnimatePresence>
+      {upgradeOpen && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => !payBusy && setUpgradeOpen(false)}
+        >
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upgrade-title"
+            className="glass-card max-w-md rounded-kid p-6 shadow-2xl"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="upgrade-title" className="font-display text-xl font-bold text-purple-900 mb-1 text-center">
+              Choose your plan
+            </h3>
+            <p className="text-center text-sm text-gray-600 mb-5">
+              Auto-renewing subscriptions in INR (Razorpay). Cancel anytime from your Razorpay mandate.
+            </p>
+            <div className="space-y-3">
+              <motion.button
+                type="button"
+                disabled={!!payBusy}
+                whileHover={!payBusy ? { scale: 1.02 } : {}}
+                whileTap={!payBusy ? { scale: 0.98 } : {}}
+                onClick={() => startRazorpayCheckout("weekly")}
+                className="w-full rounded-kid border-2 border-violet-200 bg-white p-4 text-left shadow-sm disabled:opacity-60"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-purple-900">Weekly</span>
+                  <span className="text-lg font-black text-violet-600">
+                    ₹{pricing.premiumWeeklyInr.priceInr}
+                    <span className="text-xs font-semibold text-gray-500">/week</span>
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Best for trying everything — renews every 7 days.</p>
+                {payBusy === "weekly" && (
+                  <p className="text-xs font-bold text-violet-600 mt-2">Opening checkout…</p>
+                )}
+              </motion.button>
+              <motion.button
+                type="button"
+                disabled={!!payBusy}
+                whileHover={!payBusy ? { scale: 1.02 } : {}}
+                whileTap={!payBusy ? { scale: 0.98 } : {}}
+                onClick={() => startRazorpayCheckout("monthly")}
+                className="w-full rounded-kid border-2 border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-violet-50 p-4 text-left shadow-sm disabled:opacity-60"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-purple-900">Monthly</span>
+                  <span className="text-lg font-black text-fuchsia-600">
+                    ₹{pricing.premiumMonthlyInr.priceInr}
+                    <span className="text-xs font-semibold text-gray-500">/month</span>
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Best value for daily play — renews every month.</p>
+                {payBusy === "monthly" && (
+                  <p className="text-xs font-bold text-fuchsia-600 mt-2">Opening checkout…</p>
+                )}
+              </motion.button>
+            </div>
+            <button
+              type="button"
+              className="mt-4 w-full text-center text-sm font-bold text-gray-500 hover:text-gray-700"
+              onClick={() => setUpgradeOpen(false)}
+              disabled={!!payBusy}
+            >
+              Cancel
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
     {/* Account Settings Section */}
     <AccountSettings parent={parent} userEmail={userEmail} onPinUpdated={(newPin) => {

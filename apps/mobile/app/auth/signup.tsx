@@ -9,8 +9,9 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
+import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import { supabase } from "../../lib/supabase";
+import { signUp } from "@funberry/supabase";
 
 const LEAF = "#18b05a";
 const APP_NAME = "FunBerry Kids";
@@ -22,6 +23,7 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [awaitingEmail, setAwaitingEmail] = useState(false);
 
   async function handleSignup() {
     setError("");
@@ -35,25 +37,34 @@ export default function SignupScreen() {
     }
     setLoading(true);
     try {
-      // 1. Create auth user
-      const { data, error: authError } = await supabase.auth.signUp({ email, password });
-      if (authError) throw authError;
+      const emailRedirectTo = Linking.createURL("auth/callback");
+      const data = await signUp(email, password, name, undefined, { emailRedirectTo });
 
-      // 2. Insert parent row
-      if (data.user) {
-        await supabase.from("parents").insert({
-          id: data.user.id,
-          email,
-          name,
-        } as never);
+      if (data.session) {
+        router.replace("/(tabs)" as never);
+      } else {
+        setAwaitingEmail(true);
       }
-      // Explicit navigation — don't rely solely on the auth state listener
-      router.replace("/(tabs)");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (awaitingEmail) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", padding: 24 }]}>
+        <Text style={styles.emoji}>📧</Text>
+        <Text style={styles.title}>Check your email</Text>
+        <Text style={[styles.subtitle, { marginBottom: 16 }]}>
+          We sent a link to <Text style={styles.linkBold}>{email}</Text>. Tap it to confirm, then sign in.
+        </Text>
+        <Pressable style={[styles.button, { backgroundColor: "#2180ee" }]} onPress={() => router.push("/auth/login" as never)}>
+          <Text style={styles.buttonText}>Go to Sign In</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
