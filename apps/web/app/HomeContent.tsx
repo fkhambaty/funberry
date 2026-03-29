@@ -103,7 +103,7 @@ export default function HomeContent() {
             transition={{ delay: 0.06, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="mb-8 flex justify-center"
           >
-            <div className="drop-shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
+            <div className="rounded-[32px] border border-white/70 bg-white/35 px-3 py-2 shadow-[0_30px_80px_rgba(30,41,59,0.14)] backdrop-blur-xl sm:px-5 sm:py-3">
               <FunBerryLogo size="hero" variant="editorial" animate={!reduceMotion} />
             </div>
           </motion.div>
