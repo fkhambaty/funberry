@@ -128,27 +128,6 @@ export default function SignupPage() {
                   </p>
                 )}
               </div>
-              <p className="text-xs text-gray-400 mt-4 leading-relaxed text-left">
-                <strong className="text-gray-500">Confirmation emails are sent by Supabase Auth via SMTP</strong>{" "}
-                (not the Resend REST API — your Resend &quot;Metrics&quot; chart can stay at zero even when SMTP works).
-                In Supabase: <strong>Authentication → Emails → SMTP</strong> using{" "}
-                <a
-                  href="https://resend.com/docs/send-with-supabase-smtp"
-                  className="text-sky-600 font-semibold underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Resend SMTP
-                </a>{" "}
-                (<code className="text-gray-600">smtp.resend.com</code>, port <code className="text-gray-600">465</code>
-                , user <code className="text-gray-600">resend</code>, password = API key).{" "}
-                <strong>You cannot verify a Vercel URL</strong> like{" "}
-                <code className="text-gray-600">funberry-web.vercel.app</code> as a sending domain — use{" "}
-                <code className="text-gray-600">onboarding@resend.dev</code> as the SMTP sender until you add a real
-                domain in Resend. Add your app URLs under <strong>Authentication → URL configuration</strong>{" "}
-                (redirect allow list), including <code className="text-gray-600 break-all">https://funberry-web.vercel.app/**</code>
-                .
-              </p>
             </div>
           </motion.div>
         </AnimatePresence>

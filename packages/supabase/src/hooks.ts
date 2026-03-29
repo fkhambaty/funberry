@@ -52,6 +52,12 @@ export async function signUp(
   });
   if (error) throw error;
 
+  // Supabase returns an obfuscated user for existing confirmed accounts when confirmations are enabled.
+  // Detect that shape and surface a clear, actionable message to the UI.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new Error("An account with this email already exists. Please sign in instead.");
+  }
+
   // If confirmations are disabled, session exists — upsert parent for redundancy with trigger.
   if (data.session && data.user) {
     await supabase.from("parents").upsert(

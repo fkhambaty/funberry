@@ -223,7 +223,7 @@ otp_expiry = 3600
 
 # Auth emails (signup confirm, reset password) — use Resend SMTP. Set RESEND_API_KEY in the shell when running `supabase config push`.
 [auth.email.smtp]
-enabled = true
+enabled = false
 host = "smtp.resend.com"
 port = 465
 user = "resend"
