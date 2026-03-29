@@ -590,14 +590,24 @@ export default function DashboardPage() {
               </p>
             )}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSignOut}
-            className="kid-glass-btn kid-glass-muted shrink-0 rounded-kid px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs"
-          >
-            Sign Out
-          </motion.button>
+          <div className="flex shrink-0 items-center gap-2">
+            <motion.a
+              href="/dashboard"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="kid-glass-btn kid-glass-sky rounded-kid px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs"
+            >
+              🏠 Home
+            </motion.a>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSignOut}
+              className="kid-glass-btn kid-glass-muted rounded-kid px-2.5 py-1 text-[10px] font-bold sm:px-3 sm:text-xs"
+            >
+              Sign Out
+            </motion.button>
+          </div>
         </div>
       </div>
 

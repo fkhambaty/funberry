@@ -11,6 +11,7 @@ const TIME_PRESETS = [
   { minutes: 10, label: "10 min", emoji: "⏱️" },
   { minutes: 15, label: "15 min", emoji: "⏲️" },
   { minutes: 20, label: "20 min", emoji: "🕐" },
+  { minutes: 25, label: "25 min", emoji: "🕜" },
   { minutes: 30, label: "30 min", emoji: "🕑" },
 ];
 
@@ -227,9 +228,9 @@ export function LockScreen() {
               </p>
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
+                gridTemplateColumns: "repeat(5, 1fr)",
                 gap: 10,
-                maxWidth: 380,
+                maxWidth: 460,
                 margin: "0 auto",
               }}>
                 {TIME_PRESETS.map((p) => (

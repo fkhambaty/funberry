@@ -745,8 +745,10 @@ export function PixiLab({ data, onComplete, accentColor = "#6366f1", onNextGame 
 
   return (
     <div className="relative mx-auto w-full max-w-md">
-      <p className="mb-2 text-center text-sm font-bold text-white/90 drop-shadow-md">{data.instruction}</p>
-      <div ref={hostRef} className="relative flex min-h-[200px] justify-center rounded-2xl bg-white/10 p-1 shadow-inner ring-2 ring-white/30" />
+      <p className="mb-2 rounded-xl bg-white/80 px-3 py-2 text-center text-sm font-extrabold leading-snug text-slate-800 shadow-sm ring-1 ring-white/90">
+        {data.instruction}
+      </p>
+      <div ref={hostRef} className="relative flex min-h-[200px] justify-center rounded-2xl bg-white/16 p-1 shadow-inner ring-2 ring-white/40" />
       {phase === "playing" && combo >= 2 && (
         <div
           className="pointer-events-none absolute left-1/2 top-20 z-10 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-1 text-sm font-black text-amber-950 shadow-lg animate-pulse"
@@ -755,7 +757,7 @@ export function PixiLab({ data, onComplete, accentColor = "#6366f1", onNextGame 
           🔥 {combo}x streak — bigger points!
         </div>
       )}
-      <div className="mt-2 flex justify-between px-2 text-xs font-bold text-white/80">
+      <div className="mt-2 flex justify-between rounded-lg bg-white/75 px-2 py-1 text-xs font-extrabold text-slate-700 ring-1 ring-white/80">
         <span>Score {hud.score}</span>
         <span>Goal ~{hud.max}</span>
       </div>

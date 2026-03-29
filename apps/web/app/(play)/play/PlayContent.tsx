@@ -493,12 +493,23 @@ export default function PlayContent() {
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center justify-between mb-8">
             <motion.a
-              href="/dashboard"
+              href="/play"
               whileHover={{ scale: 1.06, x: -3 }}
               className="kid-glass-btn kid-glass-berry flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm"
             >
-              🏠 Dashboard
+              🏠 Home
             </motion.a>
+            <motion.button
+              whileHover={{ scale: 1.06 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => {
+                playTap();
+                setShowParentGate(true);
+              }}
+              className="kid-glass-btn kid-glass-violet flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm"
+            >
+              🔒 For Parents
+            </motion.button>
             <motion.button
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.94 }}
@@ -549,13 +560,17 @@ export default function PlayContent() {
               <p className="text-5xl mb-4">👶</p>
               <p className="font-display font-bold text-gray-700 text-xl mb-2">No children added yet!</p>
               <p className="text-gray-500 text-sm mb-6">Add a child profile from the dashboard first.</p>
-              <motion.a
-                href="/dashboard"
+              <motion.button
                 whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setShowParentGate(true);
+                }}
                 className="kid-glass-btn kid-glass-violet inline-block rounded-2xl px-8 py-3"
               >
-                Go to Dashboard
-              </motion.a>
+                🔒 Parent Zone
+              </motion.button>
             </motion.div>
           ) : (
             <div className="flex flex-wrap justify-center gap-6">
@@ -594,17 +609,27 @@ export default function PlayContent() {
 
         <div className="mx-auto max-w-6xl">
           <div className="mb-4 flex items-center justify-between gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                playTap();
-                setView("who");
-              }}
-              className="kid-glass-btn kid-glass-muted rounded-xl px-3 py-2 text-xs font-bold sm:text-sm"
-            >
-              Switch Player
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.a
+                href="/play"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="kid-glass-btn kid-glass-berry rounded-xl px-3 py-2 text-xs font-bold sm:text-sm"
+              >
+                🏠 Home
+              </motion.a>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setView("who");
+                }}
+                className="kid-glass-btn kid-glass-muted rounded-xl px-3 py-2 text-xs font-bold sm:text-sm"
+              >
+                Switch Player
+              </motion.button>
+            </div>
             <div className="flex items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -734,6 +759,14 @@ export default function PlayContent() {
           {/* Back navigation */}
           <div className="mb-3 flex items-center justify-between gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <motion.a
+                href="/play"
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                className="kid-glass-btn kid-glass-sky flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm"
+              >
+                🏠 Home
+              </motion.a>
               <motion.button
                 whileHover={{ scale: 1.06, x: -3 }}
                 whileTap={{ scale: 0.94 }}
@@ -927,7 +960,7 @@ export default function PlayContent() {
         lifetimeStars={selectedChild ? (selectedChild.total_stars ?? 0) : undefined}
         progressSavesHint={KID_SAVED_PROGRESS_INGAME}
         bookPageSrc={selectedGame?.bookPageSrc}
-        onClose={() => { playTap(); setView("games"); setSelectedGame(null); }}
+        onClose={() => { playTap(); setView("zones"); setSelectedGame(null); }}
         onNextGame={handleNextGame}
       >
         <AnimatePresence mode="wait">

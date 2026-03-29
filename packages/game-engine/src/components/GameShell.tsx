@@ -229,17 +229,21 @@ export function GameShell({
         {progressSavesHint ? (
           <p
             style={{
-              margin: "4px 0 0",
-              padding: "0 4px",
+              margin: "6px auto 0",
+              padding: "4px 10px",
               textAlign: "center",
               fontSize: 10,
-              fontWeight: 600,
-              color: "#64748b",
+              fontWeight: 800,
+              color: "#334155",
               lineHeight: 1.35,
               fontFamily: "Nunito, system-ui, sans-serif",
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              background: "rgba(255,255,255,0.84)",
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.92)",
+              maxWidth: "fit-content",
             }}
           >
             {progressSavesHint}
@@ -271,12 +275,17 @@ export function GameShell({
           />
           <p
             style={{
-              margin: "4px 0 0",
-              fontSize: 9,
-              fontWeight: 700,
-              color: "#64748b",
+              margin: "4px auto 0",
+              fontSize: 10,
+              fontWeight: 800,
+              color: "#334155",
               textAlign: "center",
               fontFamily: "Nunito, system-ui, sans-serif",
+              background: "rgba(255,255,255,0.86)",
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.94)",
+              maxWidth: "fit-content",
+              padding: "2px 8px",
             }}
           >
             From your textbook

@@ -93,9 +93,9 @@ export default function HomeContent() {
             transition={{ duration: 0.52, delay: 0.05 }}
             className="font-display mx-auto max-w-4xl text-[2rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 [text-shadow:0_2px_0_#fff] sm:text-5xl md:text-6xl"
           >
-            Fun games kids love.
-            <span className="block bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-600 bg-clip-text text-transparent [filter:drop-shadow(0_3px_0_rgba(255,255,255,0.9))]">
-              Real learning parents trust.
+            Kids play exciting game adventures.
+            <span className="block text-violet-700 [text-shadow:0_2px_0_rgba(255,255,255,0.95)]">
+              Parents see real progress and stronger skills.
             </span>
           </motion.h1>
 

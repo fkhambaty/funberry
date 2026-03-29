@@ -112,6 +112,19 @@ export async function signIn(email: string, password: string) {
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
+  if (typeof window !== "undefined") {
+    try {
+      sessionStorage.removeItem("funberrykids_timer");
+      const keysToClear: string[] = [];
+      for (let i = 0; i < sessionStorage.length; i += 1) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith("funberrykids_timer_")) keysToClear.push(key);
+      }
+      for (const key of keysToClear) sessionStorage.removeItem(key);
+    } catch {
+      // Ignore storage cleanup errors in restricted browser contexts.
+    }
+  }
 }
 
 export async function getCurrentUser() {
