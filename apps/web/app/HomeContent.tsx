@@ -1,349 +1,244 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { brand, pricing } from "@funberry/config";
+import { motion, useReducedMotion } from "framer-motion";
+import { FunBerryLogo } from "./components/FunBerryLogo";
 
-const flowSteps = [
-  {
-    title: "Enter your idea",
-    desc: "Describe what you want in plain language, from a chatbot to an internal ops tool.",
-    icon: "💡",
-  },
-  {
-    title: "AI generates your app",
-    desc: "Our engine instantly scaffolds UI, logic, and workflows so you start from a working build.",
-    icon: "⚡",
-  },
-  {
-    title: "Customize and share",
-    desc: "Refine components, prompts, branding, and publish with one click.",
-    icon: "🚀",
-  },
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+};
+
+const zones = [
+  { emoji: "🌱", name: "Plants", hint: "Nature & growth", tone: "from-emerald-200/80 to-teal-200/70 border-emerald-300/80" },
+  { emoji: "🐾", name: "Animals", hint: "Creatures big & small", tone: "from-amber-200/80 to-orange-200/70 border-amber-300/80" },
+  { emoji: "🚗", name: "Transport", hint: "How we move", tone: "from-sky-200/80 to-blue-200/70 border-sky-300/80" },
+  { emoji: "💧", name: "Water", hint: "Sources & care", tone: "from-cyan-200/80 to-sky-200/70 border-cyan-300/80" },
+  { emoji: "🍎", name: "Food", hint: "Healthy choices", tone: "from-rose-200/80 to-red-200/70 border-rose-300/80" },
+  { emoji: "🏠", name: "Shelter", hint: "Homes & safety", tone: "from-violet-200/80 to-purple-200/70 border-violet-300/80" },
+  { emoji: "⭐", name: "Space", hint: "Sky & beyond", tone: "from-indigo-200/80 to-violet-200/70 border-indigo-300/80" },
+  { emoji: "🕐", name: "Time", hint: "Days & routines", tone: "from-slate-200/90 to-zinc-200/80 border-slate-300/80" },
+  { emoji: "👋", name: "About Me", hint: "Self & feelings", tone: "from-fuchsia-200/80 to-pink-200/70 border-fuchsia-300/80" },
+  { emoji: "🌍", name: "& more", hint: "ICSE-aligned themes", tone: "from-green-200/80 to-emerald-200/70 border-green-300/80" },
 ];
 
-const templates = [
-  { title: "AI Chatbot", subtitle: "Support, sales, and onboarding bots", hue: "from-violet-500 to-indigo-500" },
-  { title: "Portfolio Generator", subtitle: "Personal or agency showcase sites", hue: "from-fuchsia-500 to-rose-500" },
-  { title: "Landing Page Builder", subtitle: "High-converting launch pages", hue: "from-sky-500 to-cyan-500" },
-  { title: "Business Tool Generator", subtitle: "Quote tools, forms, automations", hue: "from-emerald-500 to-teal-500" },
-  { title: "Internal Dashboard Tool", subtitle: "Data views and team workflows", hue: "from-amber-500 to-orange-500" },
+const games = [
+  { icon: "🎯", title: "Drag & Sort", desc: "Sort into the right groups", glow: "shadow-emerald-400/40" },
+  { icon: "🃏", title: "Memory Match", desc: "Find pairs that belong together", glow: "shadow-pink-400/40" },
+  { icon: "❓", title: "Picture Quiz", desc: "Choose from friendly visuals", glow: "shadow-sky-400/40" },
+  { icon: "📋", title: "Sequence", desc: "Put steps in order", glow: "shadow-amber-400/40" },
+  { icon: "🔍", title: "Spot Difference", desc: "Notice what changed", glow: "shadow-violet-400/40" },
+  { icon: "🎨", title: "Color Activity", desc: "Creative, guided coloring", glow: "shadow-orange-400/40" },
+  { icon: "🔗", title: "Word–picture", desc: "Link words to images", glow: "shadow-lime-400/40" },
+  { icon: "📖", title: "Story Time", desc: "Stories with light choices", glow: "shadow-rose-400/40" },
 ];
-
-const features = [
-  {
-    title: "Lightning Fast Generation",
-    desc: "Go from idea to usable app in minutes, not weeks.",
-    icon: "⚡",
-  },
-  {
-    title: "No-Code Customization",
-    desc: "Edit layouts, flows, and behavior visually with zero engineering bottlenecks.",
-    icon: "🧩",
-  },
-  {
-    title: "Export & Share Anywhere",
-    desc: "Publish links, embed widgets, or export builds to your stack.",
-    icon: "🌐",
-  },
-  {
-    title: "Smart AI Suggestions",
-    desc: "Get intelligent recommendations for UX, copy, and conversion.",
-    icon: "🧠",
-  },
-];
-
-const testimonials = [
-  {
-    quote: "We shipped 3 internal tools in one week. This replaced months of backlog.",
-    by: "Head of Ops, Nova Commerce",
-  },
-  {
-    quote: "Our marketers now launch landing pages without waiting on engineering.",
-    by: "Growth Lead, PixelPilot",
-  },
-  {
-    quote: "The fastest route from idea to clickable product I have used.",
-    by: "Founder, Orbit Labs",
-  },
-];
-
-function mockOutputForIdea(input: string): string {
-  if (!input.trim()) return "Your generated app preview appears here.";
-  const normalized = input.toLowerCase();
-  if (normalized.includes("chat") || normalized.includes("support")) {
-    return "Generated: AI Support Chatbot with intent routing, FAQ retrieval, and escalation flow.";
-  }
-  if (normalized.includes("portfolio")) {
-    return "Generated: Portfolio site with hero, project cards, testimonials, and contact form.";
-  }
-  if (normalized.includes("dashboard") || normalized.includes("analytics")) {
-    return "Generated: Internal dashboard with KPI tiles, filters, and role-based views.";
-  }
-  return `Generated: ${input.trim()} app with auth, responsive UI, and publish-ready flow.`;
-}
 
 export default function HomeContent() {
-  const [idea, setIdea] = useState("Build a customer support AI chatbot for my SaaS");
-  const generatedOutput = useMemo(() => mockOutputForIdea(idea), [idea]);
+  const reduceMotion = useReducedMotion();
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <a href="/" className="text-lg font-semibold tracking-tight text-white">
-            ForgeFlow AI
+    <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#fce7f3_0,#eff6ff_36%,#ecfeff_72%,#f8fafc_100%)] text-slate-800 antialiased">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
+      >
+        Skip to content
+      </a>
+
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-white/50 bg-white/70 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <a href="/" className="rounded-lg outline-none ring-sky-400/50 focus-visible:ring-2">
+            <FunBerryLogo size="sm" variant="editorial" />
           </a>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-300 md:flex">
-            <a href="#features" className="transition hover:text-white">Features</a>
-            <a href="#templates" className="transition hover:text-white">Templates</a>
-            <a href="#pricing" className="transition hover:text-white">Pricing</a>
+          <nav className="flex items-center gap-2" aria-label="Primary">
+            <a href="/login" className="rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-[0_4px_0_#cbd5e1] transition hover:-translate-y-0.5 hover:shadow-[0_6px_0_#cbd5e1]">Log in</a>
+            <a href="/signup" className="rounded-full bg-gradient-to-b from-fuchsia-500 to-pink-600 px-5 py-2 text-sm font-bold text-white shadow-[0_6px_0_#9d174d] transition hover:-translate-y-0.5 hover:shadow-[0_8px_0_#9d174d]">Get started</a>
           </nav>
-          <a
-            href="/signup"
-            className="rounded-xl bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_-12px_rgba(99,102,241,0.9)] transition hover:-translate-y-0.5 hover:bg-indigo-400"
-          >
-            Get Started
-          </a>
         </div>
       </header>
 
-      <section className="relative overflow-hidden border-b border-white/10 px-4 pb-16 pt-16 sm:px-6 lg:px-8">
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute left-[-10%] top-[-10%] h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
-          <div className="absolute right-[-8%] top-[10%] h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+      <section id="main" className="relative flex min-h-[80dvh] flex-col justify-center px-4 pb-10 pt-24 sm:px-6 sm:pt-24">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+          <div className="absolute -left-24 top-16 h-64 w-64 rounded-full bg-fuchsia-300/30 blur-3xl" />
+          <div className="absolute -right-20 top-20 h-72 w-72 rounded-full bg-sky-300/35 blur-3xl" />
+          <div className="absolute bottom-8 left-1/2 h-56 w-[82vw] -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl" />
         </div>
-        <div className="relative mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-2">
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45 }}
-              className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl"
-            >
-              Turn your ideas into interactive AI apps in minutes
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.08 }}
-              className="mt-4 max-w-xl text-lg text-slate-300"
-            >
-              No coding required. Build, customize, and launch instantly.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.14 }}
-              className="mt-8 flex flex-wrap gap-3"
-            >
-              <a
-                href="/signup"
-                className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_-16px_rgba(99,102,241,0.95)] transition hover:-translate-y-0.5 hover:bg-indigo-400"
-              >
-                Start Building Free
-              </a>
-              <a
-                href="#live-demo"
-                className="rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10"
-              >
-                View Demo
-              </a>
-            </motion.div>
-            <p className="mt-5 text-sm text-slate-400">Loved by creators and builders worldwide</p>
-          </div>
+
+        <div className="relative z-10 mx-auto w-full max-w-5xl text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-4 text-[11px] font-black uppercase tracking-[0.2em] text-violet-700"
+          >
+            ICSE-aligned · Ages 4–8 · Learn through play
+          </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.12 }}
-            className="rounded-2xl border border-white/10 bg-slate-900/80 p-4 shadow-2xl shadow-black/40"
+            transition={{ duration: 0.5 }}
+            className="mb-5 flex justify-center"
           >
-            <div className="rounded-xl border border-white/10 bg-slate-950 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-200">Generated App Preview</p>
-                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-300">Live</span>
-              </div>
-              <div className="space-y-3">
-                <div className="rounded-lg border border-white/10 bg-slate-900 p-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Input</p>
-                  <p className="mt-1 text-sm text-slate-100">{idea}</p>
-                </div>
-                <div className="rounded-lg border border-indigo-400/30 bg-indigo-500/10 p-3">
-                  <p className="text-xs uppercase tracking-wide text-indigo-300">AI Output</p>
-                  <p className="mt-1 text-sm text-slate-100">{generatedOutput}</p>
-                </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <div className="rounded-lg border border-white/10 bg-slate-900 p-3 text-sm text-slate-300">Components: 12</div>
-                  <div className="rounded-lg border border-white/10 bg-slate-900 p-3 text-sm text-slate-300">Time to generate: 19s</div>
-                </div>
-              </div>
+            <div className="rounded-[32px] border border-white/80 bg-white/55 p-2 shadow-[0_16px_40px_rgba(99,102,241,0.2)] backdrop-blur-xl sm:p-3">
+              <FunBerryLogo size="hero" variant="editorial" animate={!reduceMotion} />
             </div>
           </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, delay: 0.05 }}
+            className="font-display mx-auto max-w-4xl text-[2rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 [text-shadow:0_2px_0_#fff] sm:text-5xl md:text-6xl"
+          >
+            Fun games kids love.
+            <span className="block bg-gradient-to-r from-fuchsia-600 via-violet-600 to-sky-600 bg-clip-text text-transparent [filter:drop-shadow(0_3px_0_rgba(255,255,255,0.9))]">
+              Real learning parents trust.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.12 }}
+            className="mx-auto mt-4 max-w-2xl text-base font-medium leading-relaxed text-slate-700 sm:text-lg"
+          >
+            {brand.tagline}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2 }}
+            className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row"
+          >
+            <a href="/signup" className="inline-flex min-w-[190px] items-center justify-center rounded-full bg-gradient-to-b from-rose-500 to-fuchsia-600 px-8 py-3.5 text-base font-extrabold text-white shadow-[0_7px_0_#9d174d] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_#9d174d]">Start free</a>
+            <a href="/login" className="inline-flex min-w-[190px] items-center justify-center rounded-full bg-gradient-to-b from-sky-400 to-blue-600 px-8 py-3.5 text-base font-extrabold text-white shadow-[0_7px_0_#1e40af] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_#1e40af]">Parent login</a>
+          </motion.div>
+
+          <p className="mt-5 text-xs font-semibold text-slate-600">No credit card needed for free plan</p>
         </div>
       </section>
 
-      <section className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-center text-2xl font-semibold text-white sm:text-3xl">How it works</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {flowSteps.map((step, idx) => (
-              <article
-                key={step.title}
-                className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-lg transition hover:-translate-y-1 hover:border-indigo-400/40"
+      <section id="zones" className="border-t border-white/70 bg-gradient-to-b from-white/80 to-cyan-50/70 px-4 py-12 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
+            <h2 className="font-display text-3xl font-extrabold text-slate-900 sm:text-4xl [text-shadow:0_2px_0_#fff]">A colorful world of learning zones</h2>
+            <p className="mt-3 text-slate-700 sm:text-lg">Every zone feels like play first, learning second - exactly how kids stay curious.</p>
+          </motion.div>
+
+          <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {zones.map((zone, i) => (
+              <motion.article
+                key={zone.name}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.03, duration: 0.38 }}
+                whileHover={reduceMotion ? undefined : { y: -4, scale: 1.02 }}
+                className={`rounded-2xl border bg-gradient-to-br p-4 shadow-[0_8px_0_rgba(148,163,184,0.35)] transition ${zone.tone}`}
               >
-                <p className="text-2xl">{step.icon}</p>
-                <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-indigo-300">Step {idx + 1}</p>
-                <h3 className="mt-1 text-lg font-semibold text-white">{step.title}</h3>
-                <p className="mt-2 text-sm text-slate-300">{step.desc}</p>
-              </article>
+                <div className="text-3xl">{zone.emoji}</div>
+                <h3 className="mt-2 font-display text-sm font-extrabold text-slate-900 sm:text-base">{zone.name}</h3>
+                <p className="text-xs font-medium text-slate-700 sm:text-sm">{zone.hint}</p>
+              </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="templates" className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">Start with a template</h2>
-          <p className="mt-2 text-slate-300">Choose a proven starting point and customize from there.</p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {templates.map((t) => (
-              <article key={t.title} className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 shadow-lg transition hover:-translate-y-1 hover:border-cyan-400/40">
-                <div className={`h-32 rounded-xl bg-gradient-to-br ${t.hue} p-3`}>
-                  <div className="h-full rounded-lg border border-white/35 bg-white/20" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-white">{t.title}</h3>
-                <p className="mt-1 text-sm text-slate-300">{t.subtitle}</p>
-                <button className="mt-4 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20">
-                  Use Template
-                </button>
-              </article>
+      <section className="border-t border-white/70 bg-gradient-to-b from-fuchsia-50/70 to-sky-50/70 px-4 py-12 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp} className="mx-auto max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-extrabold text-slate-900 sm:text-4xl [text-shadow:0_2px_0_#fff]">Eight game types, zero boredom</h2>
+          </motion.div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {games.map((game, i) => (
+              <motion.article
+                key={game.title}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.03, duration: 0.35 }}
+                whileHover={reduceMotion ? undefined : { y: -5 }}
+                className={`rounded-2xl border border-white/90 bg-white/90 p-5 shadow-[0_10px_0_rgba(148,163,184,0.35),0_18px_24px_-14px_rgba(14,116,144,0.4)] ${game.glow}`}
+              >
+                <div className="text-3xl">{game.icon}</div>
+                <h3 className="mt-2 font-display text-base font-extrabold text-slate-900">{game.title}</h3>
+                <p className="mt-1 text-sm font-medium text-slate-700">{game.desc}</p>
+              </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="live-demo" className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">Live demo</h2>
-          <p className="mt-2 text-slate-300">Type an idea and see a generated output instantly.</p>
+      <section className="border-t border-white/70 bg-gradient-to-b from-white to-rose-50/70 px-4 py-12 sm:px-6 sm:py-14">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp} className="text-center">
+            <h2 className="font-display text-3xl font-extrabold text-slate-900 sm:text-4xl [text-shadow:0_2px_0_#fff]">Choose your plan</h2>
+            <p className="mx-auto mt-2 max-w-2xl font-medium text-slate-700">Weekly and monthly are separate plans. Pick one and start instantly.</p>
+          </motion.div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-              <label className="mb-2 block text-sm font-medium text-slate-200">Your idea</label>
-              <textarea
-                value={idea}
-                onChange={(e) => setIdea(e.target.value)}
-                className="h-36 w-full rounded-xl border border-white/15 bg-slate-950 p-3 text-sm text-white outline-none ring-indigo-500/30 transition focus:ring-2"
-                placeholder="e.g. Build an onboarding planner for my SaaS"
-              />
-            </div>
-            <div className="rounded-2xl border border-indigo-400/25 bg-indigo-500/10 p-5">
-              <p className="text-sm font-medium text-indigo-200">Generated output</p>
-              <div className="mt-3 rounded-xl border border-indigo-300/20 bg-slate-950/80 p-4 text-sm text-slate-100">
-                {generatedOutput}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="features" className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">Built for speed and scale</h2>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {features.map((feature) => (
-              <article key={feature.title} className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 transition hover:-translate-y-1 hover:border-indigo-400/40">
-                <p className="text-2xl">{feature.icon}</p>
-                <h3 className="mt-3 text-lg font-semibold text-white">{feature.title}</h3>
-                <p className="mt-2 text-sm text-slate-300">{feature.desc}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="pricing" className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">Pricing</h2>
-          <p className="mt-2 text-slate-300">Choose the plan that matches your build volume.</p>
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            <article className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-              <p className="text-sm font-semibold text-white">Free</p>
-              <p className="mt-2 text-3xl font-bold text-white">$0</p>
-              <ul className="mt-4 space-y-2 text-sm text-slate-300">
-                <li>Limited usage</li>
-                <li>Watermark</li>
+            <motion.div {...fadeUp} className="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-[0_10px_0_rgba(203,213,225,0.8)]">
+              <p className="text-xs font-black uppercase tracking-wider text-slate-500">{pricing.free.name}</p>
+              <p className="mt-2 font-display text-4xl font-extrabold text-slate-900">₹0</p>
+              <p className="mt-1 text-sm font-medium text-slate-600">Forever free</p>
+              <ul className="mt-5 space-y-2.5 text-sm font-medium text-slate-700">
+                {pricing.free.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-emerald-600">✓</span>{f}</li>
+                ))}
               </ul>
-              <button className="mt-6 w-full rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10">Start Free</button>
-            </article>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-b from-slate-200 to-slate-300 py-3 font-extrabold text-slate-800 shadow-[0_5px_0_#94a3b8] transition hover:-translate-y-0.5">Create free account</a>
+            </motion.div>
 
-            <article className="rounded-2xl border border-indigo-400/40 bg-indigo-500/10 p-5 shadow-[0_14px_40px_-22px_rgba(99,102,241,1)]">
-              <p className="text-sm font-semibold text-indigo-200">Pro</p>
-              <p className="mt-2 text-3xl font-bold text-white">$29<span className="text-base text-slate-300">/mo</span></p>
-              <ul className="mt-4 space-y-2 text-sm text-slate-200">
-                <li>Unlimited builds</li>
-                <li>No watermark</li>
-                <li>Export features</li>
+            <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.05 }} className="rounded-3xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-100 via-white to-rose-100 p-6 shadow-[0_10px_0_rgba(192,38,211,0.35)]">
+              <p className="text-xs font-black uppercase tracking-wider text-fuchsia-700">Premium Weekly</p>
+              <p className="mt-2 font-display text-4xl font-extrabold text-slate-900">₹{pricing.premiumWeeklyInr.priceInr}<span className="text-base font-bold text-slate-600">/week</span></p>
+              <p className="mt-1 text-sm font-medium text-slate-700">Auto-renews weekly</p>
+              <ul className="mt-5 space-y-2.5 text-sm font-medium text-slate-800">
+                {pricing.premiumWeeklyInr.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-fuchsia-600">✓</span>{f}</li>
+                ))}
+                <li className="flex gap-2"><span className="text-fuchsia-600">✓</span>Up to 4 child profiles · Parent timer</li>
               </ul>
-              <button className="mt-6 w-full rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-400">Upgrade Now</button>
-            </article>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-b from-fuchsia-500 to-fuchsia-700 py-3 font-extrabold text-white shadow-[0_6px_0_#86198f] transition hover:-translate-y-0.5">Start weekly plan</a>
+            </motion.div>
 
-            <article className="rounded-2xl border border-cyan-400/40 bg-cyan-500/10 p-5 shadow-[0_14px_40px_-22px_rgba(34,211,238,0.95)]">
-              <p className="text-sm font-semibold text-cyan-200">Premium</p>
-              <p className="mt-2 text-3xl font-bold text-white">$79<span className="text-base text-slate-300">/mo</span></p>
-              <ul className="mt-4 space-y-2 text-sm text-slate-200">
-                <li>Advanced AI</li>
-                <li>Custom branding</li>
-                <li>Priority processing</li>
+            <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.1 }} className="rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-100 via-white to-indigo-100 p-6 shadow-[0_10px_0_rgba(2,132,199,0.35)]">
+              <p className="text-xs font-black uppercase tracking-wider text-sky-700">Premium Monthly</p>
+              <p className="mt-2 font-display text-4xl font-extrabold text-slate-900">₹{pricing.premiumMonthlyInr.priceInr}<span className="text-base font-bold text-slate-600">/month</span></p>
+              <p className="mt-1 text-sm font-medium text-slate-700">Auto-renews monthly</p>
+              <ul className="mt-5 space-y-2.5 text-sm font-medium text-slate-800">
+                {pricing.premiumMonthlyInr.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-sky-600">✓</span>{f}</li>
+                ))}
+                <li className="flex gap-2"><span className="text-sky-600">✓</span>Up to 4 child profiles · Parent timer</li>
               </ul>
-              <button className="mt-6 w-full rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Upgrade Now</button>
-            </article>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-b from-sky-500 to-blue-700 py-3 font-extrabold text-white shadow-[0_6px_0_#1e3a8a] transition hover:-translate-y-0.5">Start monthly plan</a>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-white/10 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl">Trusted by builders</h2>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
-            {testimonials.map((t) => (
-              <article key={t.by} className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
-                <p className="text-sm text-slate-200">"{t.quote}"</p>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.by}</p>
-              </article>
-            ))}
-          </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4 text-center">
-              <p className="text-2xl font-bold text-white">10,000+</p>
-              <p className="text-sm text-slate-300">Apps created</p>
+      <footer className="border-t border-slate-800 bg-slate-950 px-4 py-10 text-slate-400 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between">
+            <div className="text-center sm:text-left">
+              <FunBerryLogo size="lg" variant="editorial" />
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">{brand.tagline}</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4 text-center">
-              <p className="text-2xl font-bold text-white">150+</p>
-              <p className="text-sm text-slate-300">Countries reached</p>
+            <div className="flex flex-col items-center gap-3 sm:items-end">
+              <div className="flex gap-6 text-sm font-semibold">
+                <a href="/privacy" className="text-slate-400 transition hover:text-white">Privacy</a>
+                <a href="/terms" className="text-slate-400 transition hover:text-white">Terms</a>
+                <a href="/pricing" className="text-slate-400 transition hover:text-white">Pricing</a>
+              </div>
+              <p className="text-center text-xs text-slate-600 sm:text-right">© {new Date().getFullYear()} {brand.name}. Crafted for little learners and proud parents.</p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4 text-center">
-              <p className="text-2xl font-bold text-white">98%</p>
-              <p className="text-sm text-slate-300">Customer satisfaction</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 border-t border-white/10 pt-6 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-base font-semibold text-white">ForgeFlow AI</p>
-            <p className="mt-1 text-sm text-slate-400">Build smarter products with AI.</p>
-          </div>
-          <div className="flex flex-wrap gap-5 text-sm text-slate-300">
-            <a href="#features" className="transition hover:text-white">Product</a>
-            <a href="#pricing" className="transition hover:text-white">Pricing</a>
-            <a href="/terms" className="transition hover:text-white">Terms</a>
-            <a href="/privacy" className="transition hover:text-white">Privacy</a>
-            <a href="#" className="transition hover:text-white">X</a>
-            <a href="#" className="transition hover:text-white">LinkedIn</a>
-            <a href="#" className="transition hover:text-white">GitHub</a>
           </div>
         </div>
       </footer>
