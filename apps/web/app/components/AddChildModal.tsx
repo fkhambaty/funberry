@@ -38,8 +38,12 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
       }
       onAdded();
       onClose();
-    } catch {
-      setError(isEdit ? "Couldn't update child. Please try again." : "Couldn't add child. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message) {
+        setError(err.message);
+      } else {
+        setError(isEdit ? "Couldn't update child. Please try again." : "Couldn't add child. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

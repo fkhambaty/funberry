@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { supabase } from "./client";
 import {
   buildParentCoachingReport,
@@ -119,6 +119,27 @@ export async function getCurrentUser() {
   return data.user;
 }
 
+async function ensureParentRowFromAuth(user: User): Promise<void> {
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const fullName =
+    typeof meta.full_name === "string" && meta.full_name.trim()
+      ? meta.full_name.trim()
+      : typeof meta.name === "string" && meta.name.trim()
+        ? meta.name.trim()
+        : "";
+  const pin =
+    typeof meta.pin === "string" && meta.pin.trim() ? meta.pin.trim() : undefined;
+
+  const payload = {
+    id: user.id,
+    email: user.email ?? "",
+    name: fullName,
+    ...(pin ? { pin } : {}),
+  };
+
+  await supabase.from("parents").upsert(payload as never, { onConflict: "id" });
+}
+
 // ── Parent ────────────────────────────────────────────────────────────────────
 
 export async function getParent(): Promise<Parent | null> {
@@ -179,6 +200,7 @@ export async function addChild(
 ): Promise<Child> {
   const user = await getCurrentUser();
   if (!user) throw new Error("Not authenticated");
+  await ensureParentRowFromAuth(user);
 
   const { data, error } = await supabase
     .from("children")
