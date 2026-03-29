@@ -92,21 +92,6 @@ const GAME_LEARNING_MAP: Record<string, { subject: "Math" | "Science" | "English
   pixi_lab: { subject: "Science", topic: "Cause and effect" },
 };
 
-type KidCategory = "quick" | "brain" | "challenge" | "new";
-const CATEGORY_LABELS: Record<KidCategory, string> = {
-  quick: "Quick Fun ⚡",
-  brain: "Brain Boost 🧠",
-  challenge: "Challenge Mode 🔥",
-  new: "New Games ✨",
-};
-
-function categoryForGameType(type: string): KidCategory {
-  if (type === "bubble_pop" || type === "star_catcher") return "new";
-  if (type === "spot_difference" || type === "sequence_builder" || type === "pixi_lab") return "challenge";
-  if (type === "word_picture_link" || type === "true_false" || type === "memory_match") return "brain";
-  return "quick";
-}
-
 function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) {
   const photoUrl = child.photo_url;
   const isImage = photoUrl?.startsWith("data:") || photoUrl?.startsWith("http");
@@ -395,20 +380,6 @@ export default function PlayContent() {
     [selectedZone]
   );
 
-  const allGames = useMemo(
-    () =>
-      zones.flatMap((z) =>
-        getGamesForZone(z.id).map((g) => ({
-          ...g,
-          zoneId: z.id,
-          zoneName: z.name,
-          zoneEmoji: z.emoji,
-          kidCategory: categoryForGameType(g.type),
-        }))
-      ),
-    []
-  );
-
   const theme = useMemo(
     () => getZoneTheme(selectedZone ?? ""),
     [selectedZone]
@@ -605,17 +576,10 @@ export default function PlayContent() {
     );
   }
 
-  /* ── Kid Game Hub (default experience) ── */
+  /* ── Kid World Browser (default experience) ── */
   if (view === "zones") {
-    const byCategory = {
-      quick: allGames.filter((g) => g.kidCategory === "quick"),
-      brain: allGames.filter((g) => g.kidCategory === "brain"),
-      challenge: allGames.filter((g) => g.kidCategory === "challenge"),
-      new: allGames.filter((g) => g.kidCategory === "new"),
-    } as const;
-
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#ede9fe_0,#dbeafe_32%,#cffafe_68%,#f8fafc_100%)] px-4 py-4 sm:px-5 sm:py-5">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#7B61FF_0%,#00C2FF_36%,#FFD93D_78%,#FF6B6B_120%)] px-4 py-4 sm:px-5 sm:py-5">
         <AnimatePresence>
           {showParentGate && (
             <PinGateModal
@@ -629,7 +593,7 @@ export default function PlayContent() {
         </AnimatePresence>
 
         <div className="mx-auto max-w-6xl">
-          <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="mb-4 flex items-center justify-between gap-2">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -673,82 +637,33 @@ export default function PlayContent() {
             highlightChildId={selectedChild?.id}
           />
 
-          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-5 text-center">
-            <div className="text-5xl sm:text-6xl">🎮</div>
-            <h1 className="mt-1 font-display text-3xl font-black text-indigo-900 sm:text-5xl">
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-5 rounded-[28px] border-[3px] border-white/60 bg-white/25 p-4 text-center backdrop-blur-md shadow-[0_20px_44px_rgba(30,41,59,0.28)] sm:p-6"
+          >
+            <div className="text-6xl sm:text-7xl">🎮</div>
+            <h1 className="mt-1 font-display text-3xl font-black text-white [text-shadow:0_3px_0_rgba(55,65,81,0.35)] sm:text-5xl">
               Play Games. Beat Levels. Have Fun 🎮
             </h1>
-            <p className="mt-2 text-sm font-semibold text-slate-600 sm:text-lg">
+            <p className="mt-2 text-sm font-bold text-white/95 sm:text-lg">
               Jump into exciting games and see how far you can go!
             </p>
-            <motion.button
-              whileHover={{ scale: 1.04, y: -2 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => {
-                const first = allGames[0];
-                if (!first) return;
-                playTap();
-                setSelectedZone(first.zoneId);
-                setSelectedGame(first);
-                setView("playing");
-              }}
-              className="kid-glass-btn kid-glass-berry mt-4 rounded-kid px-8 py-3 text-sm font-black sm:text-base"
-            >
-              Start Playing
-            </motion.button>
+            <p className="mt-3 text-xs font-black uppercase tracking-wider text-white/90 sm:text-sm">
+              Pick your world below and jump straight into play
+            </p>
           </motion.section>
 
-          {(Object.keys(CATEGORY_LABELS) as KidCategory[]).map((cat) => {
-            const list = byCategory[cat];
-            if (!list.length) return null;
-            return (
-              <section key={cat} className="mb-5">
-                <h2 className="mb-2 font-display text-lg font-black text-slate-800 sm:text-xl">{CATEGORY_LABELS[cat]}</h2>
-                <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2">
-                  {list.map((game, i) => {
-                    const stars = completedGames[game.id] ?? 0;
-                    return (
-                      <motion.article
-                        key={`${cat}-${game.id}-${i}`}
-                        whileHover={{ y: -4, scale: 1.02 }}
-                        className="kid-glass-panel min-w-[220px] snap-start rounded-kid p-4"
-                        style={{ borderLeft: `4px solid ${getZoneTheme(game.zoneId).accentColor}` }}
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-3xl">{GAME_ICONS[game.type] ?? "🎮"}</span>
-                          <span className="text-xs font-bold text-slate-500">{game.zoneEmoji} {game.zoneName}</span>
-                        </div>
-                        <h3 className="font-display text-base font-black text-slate-800">{game.title}</h3>
-                        <p className="text-xs font-semibold text-slate-500">{GAME_LABELS[game.type]}</p>
-                        <div className="mt-2 flex gap-0.5">
-                          {[1, 2, 3].map((s) => (
-                            <span key={s} className={`text-sm ${s <= stars ? "" : "opacity-25 grayscale"}`}>⭐</span>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => {
-                            playTap();
-                            setSelectedZone(game.zoneId);
-                            setSelectedGame(game);
-                            setView("playing");
-                          }}
-                          className="kid-glass-btn kid-glass-sky mt-3 w-full rounded-xl px-3 py-2 text-xs font-black"
-                        >
-                          Play
-                        </button>
-                      </motion.article>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-
           <section className="mb-4">
-            <h2 className="mb-2 font-display text-base font-black text-slate-700 sm:text-lg">Browse by Worlds 🗺️</h2>
+            <h2 className="mb-3 text-center font-display text-xl font-black text-white [text-shadow:0_2px_0_rgba(55,65,81,0.35)] sm:text-2xl">
+              Browse by Worlds 🗺️
+            </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {zones.map((zone, i) => {
                 const zt = getZoneTheme(zone.id);
+                const zoneGamesData = getGamesForZone(zone.id);
+                const zoneBestStars = zoneGamesData.reduce((sum, g) => sum + (completedGames[g.id] ?? 0), 0);
+                const zoneMaxStars = zoneGamesData.length * 3;
                 return (
                   <motion.button
                     key={zone.id}
@@ -762,11 +677,31 @@ export default function PlayContent() {
                       setSelectedZone(zone.id);
                       setView("games");
                     }}
-                    className="kid-glass-panel rounded-kid p-4 text-center"
-                    style={{ background: zt.bgGradient }}
+                    className="kid-glass-panel rounded-[22px] p-4 text-center shadow-[0_12px_0_rgba(255,255,255,0.35),0_20px_26px_-16px_rgba(30,41,59,0.45)]"
+                    style={{
+                      background: zt.bgGradient,
+                      border: "3px solid rgba(255,255,255,0.75)",
+                    }}
                   >
-                    <div className="text-3xl">{zone.emoji}</div>
+                    <motion.div
+                      className="text-4xl"
+                      animate={{ y: [0, -6, 0] }}
+                      transition={{ repeat: Infinity, duration: 2.6, delay: i * 0.14 }}
+                    >
+                      {zone.emoji}
+                    </motion.div>
                     <p className="mt-1 font-display text-sm font-black text-slate-800">{zone.name}</p>
+                    <p className="text-[10px] font-bold text-slate-600">{zoneGamesData.length} games</p>
+                    <div className="mt-1 flex items-center justify-center gap-0.5">
+                      {[1, 2, 3].map((s) => (
+                        <span
+                          key={s}
+                          className={`text-sm ${s <= Math.ceil(zoneBestStars / Math.max(1, zoneMaxStars / 3)) ? "" : "opacity-20 grayscale"}`}
+                        >
+                          ⭐
+                        </span>
+                      ))}
+                    </div>
                   </motion.button>
                 );
               })}
