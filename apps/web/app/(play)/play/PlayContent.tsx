@@ -74,6 +74,39 @@ const GAME_LABELS: Record<string, string> = {
   pixi_lab: "WEBGL LAB",
 };
 
+
+// Hidden mapping for parent analytics; never shown in kid UI.
+const GAME_LEARNING_MAP: Record<string, { subject: "Math" | "Science" | "English"; topic: string }> = {
+  picture_quiz: { subject: "Science", topic: "Observation" },
+  drag_sort: { subject: "Science", topic: "Classification" },
+  memory_match: { subject: "English", topic: "Recall" },
+  sequence_builder: { subject: "Math", topic: "Ordering" },
+  spot_difference: { subject: "Science", topic: "Detail recognition" },
+  odd_one_out: { subject: "Math", topic: "Patterns" },
+  true_false: { subject: "English", topic: "Comprehension" },
+  color_activity: { subject: "Science", topic: "Color concepts" },
+  word_picture_link: { subject: "English", topic: "Vocabulary" },
+  interactive_story: { subject: "English", topic: "Reading flow" },
+  bubble_pop: { subject: "Math", topic: "Speed and counting" },
+  star_catcher: { subject: "Math", topic: "Focus and reaction" },
+  pixi_lab: { subject: "Science", topic: "Cause and effect" },
+};
+
+type KidCategory = "quick" | "brain" | "challenge" | "new";
+const CATEGORY_LABELS: Record<KidCategory, string> = {
+  quick: "Quick Fun ⚡",
+  brain: "Brain Boost 🧠",
+  challenge: "Challenge Mode 🔥",
+  new: "New Games ✨",
+};
+
+function categoryForGameType(type: string): KidCategory {
+  if (type === "bubble_pop" || type === "star_catcher") return "new";
+  if (type === "spot_difference" || type === "sequence_builder" || type === "pixi_lab") return "challenge";
+  if (type === "word_picture_link" || type === "true_false" || type === "memory_match") return "brain";
+  return "quick";
+}
+
 function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) {
   const photoUrl = child.photo_url;
   const isImage = photoUrl?.startsWith("data:") || photoUrl?.startsWith("http");
@@ -328,6 +361,7 @@ export default function PlayContent() {
   const [showParentGate, setShowParentGate] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [childRank, setChildRank] = useState<{ rank: number; total: number } | null>(null);
+  const [replayNonce, setReplayNonce] = useState(0);
 
   // Load children on mount
   useEffect(() => {
@@ -359,6 +393,20 @@ export default function PlayContent() {
   const zoneGames = useMemo(
     () => (selectedZone ? getGamesForZone(selectedZone) : []),
     [selectedZone]
+  );
+
+  const allGames = useMemo(
+    () =>
+      zones.flatMap((z) =>
+        getGamesForZone(z.id).map((g) => ({
+          ...g,
+          zoneId: z.id,
+          zoneName: z.name,
+          zoneEmoji: z.emoji,
+          kidCategory: categoryForGameType(g.type),
+        }))
+      ),
+    []
   );
 
   const theme = useMemo(
@@ -557,146 +605,173 @@ export default function PlayContent() {
     );
   }
 
-  /* ── Zone Selection ── */
+  /* ── Kid Game Hub (default experience) ── */
   if (view === "zones") {
+    const byCategory = {
+      quick: allGames.filter((g) => g.kidCategory === "quick"),
+      brain: allGames.filter((g) => g.kidCategory === "brain"),
+      challenge: allGames.filter((g) => g.kidCategory === "challenge"),
+      new: allGames.filter((g) => g.kidCategory === "new"),
+    } as const;
+
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 px-4 py-4 sm:px-5 sm:py-5">
-        {/* Parent Gate Modal */}
+      <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#ede9fe_0,#dbeafe_32%,#cffafe_68%,#f8fafc_100%)] px-4 py-4 sm:px-5 sm:py-5">
         <AnimatePresence>
           {showParentGate && (
             <PinGateModal
-              onSuccess={() => { setShowParentGate(false); router.push("/dashboard"); }}
+              onSuccess={() => {
+                setShowParentGate(false);
+                router.push("/dashboard");
+              }}
               onCancel={() => setShowParentGate(false)}
             />
           )}
         </AnimatePresence>
 
-        <div className="mx-auto max-w-4xl">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex min-w-0 items-center gap-2">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                playTap();
+                setView("who");
+              }}
+              className="kid-glass-btn kid-glass-muted rounded-xl px-3 py-2 text-xs font-bold sm:text-sm"
+            >
+              Switch Player
+            </motion.button>
+            <div className="flex items-center gap-2">
               <motion.button
-                whileHover={{ scale: 1.06, x: -3 }}
-                whileTap={{ scale: 0.94 }}
-                onClick={() => { playTap(); setView("who"); }}
-                className="kid-glass-btn kid-glass-berry flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs sm:text-sm"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setShowLeaderboard(true);
+                }}
+                className="kid-glass-btn kid-glass-sunshine rounded-xl px-3 py-2 text-xs font-black sm:text-sm"
               >
-                🏠 Switch
-              </motion.button>
-              {selectedChild && (
-                <div
-                  className="flex min-w-0 max-w-[40vw] items-center gap-1.5 truncate rounded-xl px-2.5 py-1.5 text-xs font-bold sm:max-w-none sm:gap-2 sm:px-3 sm:text-sm"
-                  style={{ background: "rgba(255,255,255,0.85)", color: "#6b7280" }}
-                >
-                  <span className="shrink-0 text-base sm:text-lg">{selectedChild.photo_url || "🧒"}</span>
-                  <span className="truncate">{selectedChild.name}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                onClick={() => { playTap(); setShowLeaderboard(true); }}
-                className="kid-glass-btn kid-glass-sunshine flex items-center gap-1 rounded-xl px-2.5 py-2 text-sm font-black tabular-nums"
-                title="Your stars — tap for Star Champions"
-                type="button"
-                aria-label={`You have ${selectedChild?.total_stars ?? 0} stars. Open Star Champions.`}
-              >
-                <span className="text-base leading-none" aria-hidden>⭐</span>
-                {selectedChild?.total_stars ?? 0}
+                ⭐ {selectedChild?.total_stars ?? 0}
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                onClick={() => { playTap(); setShowParentGate(true); }}
-                className="kid-glass-btn kid-glass-violet flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-bold sm:text-sm"
-                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setShowParentGate(true);
+                }}
+                className="kid-glass-btn kid-glass-violet rounded-xl px-3 py-2 text-xs font-bold sm:text-sm"
               >
-                🔒 Parent
+                For Parents
               </motion.button>
             </div>
           </div>
 
-          {/* Leaderboard Modal */}
           <LeaderboardModal
             open={showLeaderboard}
             onClose={() => setShowLeaderboard(false)}
             highlightChildId={selectedChild?.id}
           />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-5 text-center"
-          >
-            <motion.div
-              animate={{ y: [0, -10, 0], rotate: [0, -5, 0] }}
-              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-              className="mb-1 text-5xl sm:text-6xl"
-            >
-              🗺️
-            </motion.div>
-            <h1 className="font-display text-3xl font-bold text-sky-900 sm:text-4xl">
-              {selectedChild ? `${selectedChild.name}'s World!` : "Choose a Zone!"}
+          <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-5 text-center">
+            <div className="text-5xl sm:text-6xl">🎮</div>
+            <h1 className="mt-1 font-display text-3xl font-black text-indigo-900 sm:text-5xl">
+              Play Games. Beat Levels. Have Fun 🎮
             </h1>
-            <p className="mt-1 text-base text-gray-500">Pick a world and go! 🚀</p>
-          </motion.div>
+            <p className="mt-2 text-sm font-semibold text-slate-600 sm:text-lg">
+              Jump into exciting games and see how far you can go!
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.04, y: -2 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => {
+                const first = allGames[0];
+                if (!first) return;
+                playTap();
+                setSelectedZone(first.zoneId);
+                setSelectedGame(first);
+                setView("playing");
+              }}
+              className="kid-glass-btn kid-glass-berry mt-4 rounded-kid px-8 py-3 text-sm font-black sm:text-base"
+            >
+              Start Playing
+            </motion.button>
+          </motion.section>
 
-          {loadingProgress ? (
-            <div className="text-center py-8">
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }} className="inline-block rounded-full p-3 kid-glass-btn border-0"><FunBerryLogo size="md" /></motion.div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
+          {(Object.keys(CATEGORY_LABELS) as KidCategory[]).map((cat) => {
+            const list = byCategory[cat];
+            if (!list.length) return null;
+            return (
+              <section key={cat} className="mb-5">
+                <h2 className="mb-2 font-display text-lg font-black text-slate-800 sm:text-xl">{CATEGORY_LABELS[cat]}</h2>
+                <div className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2">
+                  {list.map((game, i) => {
+                    const stars = completedGames[game.id] ?? 0;
+                    return (
+                      <motion.article
+                        key={`${cat}-${game.id}-${i}`}
+                        whileHover={{ y: -4, scale: 1.02 }}
+                        className="kid-glass-panel min-w-[220px] snap-start rounded-kid p-4"
+                        style={{ borderLeft: `4px solid ${getZoneTheme(game.zoneId).accentColor}` }}
+                      >
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="text-3xl">{GAME_ICONS[game.type] ?? "🎮"}</span>
+                          <span className="text-xs font-bold text-slate-500">{game.zoneEmoji} {game.zoneName}</span>
+                        </div>
+                        <h3 className="font-display text-base font-black text-slate-800">{game.title}</h3>
+                        <p className="text-xs font-semibold text-slate-500">{GAME_LABELS[game.type]}</p>
+                        <div className="mt-2 flex gap-0.5">
+                          {[1, 2, 3].map((s) => (
+                            <span key={s} className={`text-sm ${s <= stars ? "" : "opacity-25 grayscale"}`}>⭐</span>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => {
+                            playTap();
+                            setSelectedZone(game.zoneId);
+                            setSelectedGame(game);
+                            setView("playing");
+                          }}
+                          className="kid-glass-btn kid-glass-sky mt-3 w-full rounded-xl px-3 py-2 text-xs font-black"
+                        >
+                          Play
+                        </button>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+
+          <section className="mb-4">
+            <h2 className="mb-2 font-display text-base font-black text-slate-700 sm:text-lg">Browse by Worlds 🗺️</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {zones.map((zone, i) => {
                 const zt = getZoneTheme(zone.id);
-                const zoneGamesData = getGamesForZone(zone.id);
-                const zoneBestStars = zoneGamesData.reduce((sum, g) => sum + (completedGames[g.id] ?? 0), 0);
-                const zoneMaxStars = zoneGamesData.length * 3;
                 return (
                   <motion.button
                     key={zone.id}
-                    initial={{ opacity: 0, y: 25, scale: 0.88 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: i * 0.04, type: "spring", stiffness: 200, damping: 18 }}
-                    whileHover={{ scale: 1.08, y: -6 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleZoneClick(zone.id)}
-                    className="kid-glass-panel rounded-kid p-4 text-center transition-shadow sm:p-5"
-                    style={{
-                      background: zt.bgGradient,
-                      borderWidth: 3,
-                      borderStyle: "solid",
-                      borderColor: zone.isFree ? "#a7f3d0" : "rgba(0,0,0,0.06)",
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.02 }}
+                    whileHover={{ y: -4, scale: 1.03 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      playTap();
+                      setSelectedZone(zone.id);
+                      setView("games");
                     }}
+                    className="kid-glass-panel rounded-kid p-4 text-center"
+                    style={{ background: zt.bgGradient }}
                   >
-                    <motion.span
-                      className="text-4xl block mb-2"
-                      animate={{ rotate: [0, -6, 0], scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 3.5, delay: i * 0.25, ease: "easeInOut" }}
-                    >
-                      {zone.emoji}
-                    </motion.span>
-                    <span className="font-display font-bold text-sm text-gray-800 block leading-tight">
-                      {zone.name}
-                    </span>
-                    {zone.isFree && (
-                      <span className="text-[10px] font-bold text-leaf-700 bg-leaf-100 px-2 py-0.5 rounded-full mt-1 inline-block">FREE</span>
-                    )}
-                    {zoneBestStars > 0 && (
-                      <p className="text-[10px] font-bold text-amber-600 mt-1">
-                        ⭐ {zoneBestStars}/{zoneMaxStars}
-                      </p>
-                    )}
+                    <div className="text-3xl">{zone.emoji}</div>
+                    <p className="mt-1 font-display text-sm font-black text-slate-800">{zone.name}</p>
                   </motion.button>
                 );
               })}
             </div>
-          )}
-          <p className="mx-auto mt-4 max-w-lg px-2 text-center text-[10px] font-semibold leading-snug text-slate-500 sm:text-xs">
-            {KID_SAVED_PROGRESS_ZONES}
-          </p>
+          </section>
         </div>
       </main>
     );
@@ -922,13 +997,33 @@ export default function PlayContent() {
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedGame?.id}
+            key={`${selectedGame?.id}-${replayNonce}`}
             initial={{ opacity: 0, scale: 0.94 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.94 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
           >
             {renderGame()}
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <button
+                className="kid-glass-btn kid-glass-berry rounded-xl px-4 py-2 text-xs font-black sm:text-sm"
+                onClick={() => {
+                  playTap();
+                  setReplayNonce((n) => n + 1);
+                }}
+              >
+                Play Again
+              </button>
+              <button
+                className="kid-glass-btn kid-glass-sky rounded-xl px-4 py-2 text-xs font-black sm:text-sm"
+                onClick={() => {
+                  playTap();
+                  handleNextGame();
+                }}
+              >
+                Try More Games
+              </button>
+            </div>
           </motion.div>
         </AnimatePresence>
       </GameShell>

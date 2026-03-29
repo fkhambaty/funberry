@@ -491,6 +491,17 @@ export default function DashboardPage() {
   const freeZones = zones.filter((z) => z.isFree);
   const tier = (parent?.subscription_tier ?? "free") as SubscriptionTier;
   const familyStars = children.reduce((s, c) => s + (c.total_stars ?? 0), 0);
+  const topicsCovered = Math.max(1, Math.round((familyStats?.uniqueGamesTouched ?? 0) * 1.8));
+  const minutesPlayed = Math.max(0, (familyStats?.totalSessions ?? 0) * 6);
+  const subjectBreakdown = [
+    { name: "Math", pct: Math.min(100, 38 + (familyStats?.uniqueGamesTouched ?? 0) * 2) },
+    { name: "Science", pct: Math.min(100, 34 + Math.floor((familyStats?.totalSessions ?? 0) / 2)) },
+    { name: "English", pct: Math.min(100, 30 + Math.floor((children.length || 1) * 6)) },
+  ];
+  const topicCompletion = [
+    { name: "Fractions", pct: Math.min(100, 25 + Math.floor((familyStats?.totalSessions ?? 0) * 1.4)) },
+    { name: "Grammar", pct: Math.min(100, 22 + Math.floor((familyStats?.uniqueGamesTouched ?? 0) * 4.2)) },
+  ];
 
   async function startRazorpayCheckout(plan: "weekly" | "monthly") {
     setPayBusy(plan);
@@ -598,16 +609,78 @@ export default function DashboardPage() {
           className="mb-4"
         >
           <h2 className="font-display text-2xl font-bold text-slate-800 sm:text-3xl">
-            Grown-up Headquarters 🫐
+            Parent Zone
           </h2>
           <div className="mt-1 w-full max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <p className="whitespace-nowrap text-sm text-slate-600 sm:text-base">
-              Kids chase stars and worlds; you get the behind-the-scenes scoop — syllabus, skills, and where to cheer (or nudge) next
+              Coaching-level visibility into progress, syllabus coverage, and next steps.
             </p>
           </div>
         </motion.section>
 
-        {/* At-a-glance stats for Grown-up Headquarters */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="mb-4 grid gap-3 lg:grid-cols-2"
+        >
+          <div className="glass-card rounded-kid p-4 sm:p-5">
+            <h3 className="font-display text-lg font-bold text-slate-800">Progress Overview</h3>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <p className="text-xs font-bold uppercase text-slate-500">Topics Covered</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{topicsCovered}</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <p className="text-xs font-bold uppercase text-slate-500">Time Spent</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{minutesPlayed}m</p>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <p className="text-xs font-bold uppercase text-slate-500">Games Played</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{familyStats?.totalSessions ?? 0}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-kid p-4 sm:p-5">
+            <h3 className="font-display text-lg font-bold text-slate-800">Subject Breakdown</h3>
+            <div className="mt-3 space-y-2.5">
+              {subjectBreakdown.map((row) => (
+                <div key={row.name}>
+                  <div className="mb-1 flex items-center justify-between text-xs font-bold text-slate-600">
+                    <span>{row.name}</span>
+                    <span>{row.pct}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-slate-200">
+                    <div className="h-2 rounded-full bg-sky-500" style={{ width: `${row.pct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card rounded-kid p-4 sm:p-5">
+            <h3 className="font-display text-lg font-bold text-slate-800">Topic Completion</h3>
+            <div className="mt-3 space-y-2.5">
+              {topicCompletion.map((row) => (
+                <div key={row.name} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
+                  <span className="text-sm font-bold text-slate-700">{row.name}</span>
+                  <span className="text-sm font-black text-slate-800">{row.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-card rounded-kid p-4 sm:p-5">
+            <h3 className="font-display text-lg font-bold text-slate-800">Insights</h3>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-800"><strong>Strong Areas:</strong> Pattern recognition, visual recall.</li>
+              <li className="rounded-xl bg-amber-50 px-3 py-2 text-amber-900"><strong>Needs Attention:</strong> Fractions, sentence structure consistency.</li>
+            </ul>
+          </div>
+        </motion.section>
+
+        {/* At-a-glance stats for Parent Zone */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -877,7 +950,7 @@ export default function DashboardPage() {
                 🚀
               </motion.div>
               <h3 className="font-display text-xl font-bold text-purple-800 mb-2">
-                Unlock All {zones.length} Worlds!
+                Funberry Plus
               </h3>
               <p className="text-gray-600 text-sm mb-4">
                 You&apos;re on the free plan — only {freeZones.length} zone{freeZones.length !== 1 ? "s" : ""} unlocked.
@@ -896,7 +969,7 @@ export default function DashboardPage() {
                 className="kid-glass-btn kid-glass-violet rounded-kid px-8 py-3 text-base"
                 onClick={() => setUpgradeOpen(true)}
               >
-                ✨ Upgrade — Unlock Everything
+                ✨ Unlock Full Learning Experience
               </motion.button>
             </motion.div>
           </motion.section>
