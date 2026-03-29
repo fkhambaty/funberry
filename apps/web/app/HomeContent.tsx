@@ -39,7 +39,7 @@ export default function HomeContent() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <main className="min-h-screen bg-[#fafbfc] text-slate-800 antialiased">
+    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-fuchsia-50/40 to-cyan-50 text-slate-800 antialiased">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-slate-900 focus:px-4 focus:py-2 focus:text-sm focus:text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
@@ -73,7 +73,7 @@ export default function HomeContent() {
       {/* Hero — airy mesh, editorial type, restrained motion */}
       <section
         id="main"
-        className="relative flex min-h-[100dvh] flex-col justify-center px-4 pb-24 pt-[5.5rem] sm:px-6 sm:pb-32 sm:pt-24"
+        className="relative flex min-h-[88dvh] flex-col justify-center px-4 pb-14 pt-[5.2rem] sm:px-6 sm:pb-20 sm:pt-20"
       >
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <div className="absolute -left-[20%] top-0 h-[70vh] w-[70vw] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(236,72,153,0.07),transparent_68%)]" />
@@ -171,7 +171,7 @@ export default function HomeContent() {
       </section>
 
       {/* Zones — bento-style, readable hierarchy */}
-      <section id="zones" className="border-t border-slate-200/80 bg-white px-4 py-20 sm:px-6 sm:py-28">
+      <section id="zones" className="border-t border-slate-200/70 bg-gradient-to-b from-white to-sky-50/50 px-4 py-14 sm:px-6 sm:py-18">
         <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp} className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -234,7 +234,7 @@ export default function HomeContent() {
       </section>
 
       {/* Game types — calm cards, accent bar */}
-      <section className="border-t border-slate-200/80 bg-[#f6f7f9] px-4 py-20 sm:px-6 sm:py-28">
+      <section className="border-t border-slate-200/70 bg-gradient-to-b from-fuchsia-50/50 via-white to-cyan-50/60 px-4 py-14 sm:px-6 sm:py-18">
         <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp} className="mx-auto max-w-2xl text-center">
             <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -268,90 +268,64 @@ export default function HomeContent() {
         </div>
       </section>
 
-      {/* Pricing — INR-forward, clear comparison */}
-      <section className="border-t border-slate-200/80 bg-white px-4 py-20 sm:px-6 sm:py-28">
-        <div className="mx-auto max-w-5xl">
+      {/* Pricing — INR-forward, separate weekly and monthly cards */}
+      <section className="border-t border-slate-200/70 bg-gradient-to-b from-white to-rose-50/50 px-4 py-14 sm:px-6 sm:py-18">
+        <div className="mx-auto max-w-6xl">
           <motion.div {...fadeUp} className="text-center">
             <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Simple, honest pricing
+              Pick the plan that fits your family
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-slate-600">
-              Start free. When you&apos;re ready, unlock everything with a subscription in INR.
+            <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+              Start free, then choose weekly or monthly premium. These are separate plans.
             </p>
           </motion.div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-2 lg:gap-8">
-            <motion.div
-              {...fadeUp}
-              className="rounded-3xl border border-slate-200 bg-slate-50/80 p-8 sm:p-10"
-            >
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            <motion.div {...fadeUp} className="rounded-3xl border border-slate-200 bg-white/90 p-7 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">{pricing.free.name}</p>
               <p className="mt-2 font-display text-4xl font-bold text-slate-900">₹0</p>
               <p className="mt-1 text-sm text-slate-600">Forever — try the magic first.</p>
-              <ul className="mt-8 space-y-3 text-sm text-slate-700">
+              <ul className="mt-6 space-y-2.5 text-sm text-slate-700">
                 {pricing.free.features.map((f) => (
-                  <li key={f} className="flex gap-2">
-                    <span className="text-emerald-600" aria-hidden>
-                      ✓
-                    </span>
-                    {f}
-                  </li>
+                  <li key={f} className="flex gap-2"><span className="text-emerald-600" aria-hidden>✓</span>{f}</li>
                 ))}
               </ul>
-              <a
-                href="/signup"
-                className="mt-8 inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-              >
-                Create free account
-              </a>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50">Create free account</a>
             </motion.div>
 
-            <motion.div
-              {...fadeUp}
-              transition={{ ...fadeUp.transition, delay: 0.08 }}
-              className="relative overflow-hidden rounded-3xl border border-rose-200/80 bg-gradient-to-br from-rose-50 via-white to-violet-50 p-8 shadow-lg shadow-rose-500/10 sm:p-10"
-            >
-              <span className="absolute right-6 top-6 rounded-full bg-slate-900 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
-                Full access
-              </span>
-              <p className="text-xs font-bold uppercase tracking-wider text-rose-700">Premium</p>
-              <p className="mt-2 font-display text-4xl font-bold text-slate-900">
-                ₹{pricing.premiumMonthlyInr.priceInr}
-                <span className="text-lg font-semibold text-slate-600">/month</span>
-              </p>
-              <p className="mt-1 text-sm text-slate-600">
-                or <span className="font-semibold text-slate-800">₹{pricing.premiumWeeklyInr.priceInr}/week</span>{" "}
-                auto-renew · cancel anytime
-              </p>
-              <ul className="mt-8 space-y-3 text-sm text-slate-800">
-                {pricing.premiumMonthlyInr.features.map((f) => (
-                  <li key={f} className="flex gap-2">
-                    <span className="text-rose-600" aria-hidden>
-                      ✓
-                    </span>
-                    {f}
-                  </li>
+            <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.06 }} className="relative rounded-3xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-rose-50 p-7 shadow-lg shadow-fuchsia-500/10">
+              <span className="absolute right-5 top-5 rounded-full bg-fuchsia-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Weekly</span>
+              <p className="text-xs font-bold uppercase tracking-wider text-fuchsia-700">Premium Weekly</p>
+              <p className="mt-2 font-display text-4xl font-bold text-slate-900">₹{pricing.premiumWeeklyInr.priceInr}<span className="text-base font-semibold text-slate-600">/week</span></p>
+              <p className="mt-1 text-sm text-slate-600">Flexible plan · auto-renews weekly</p>
+              <ul className="mt-6 space-y-2.5 text-sm text-slate-800">
+                {pricing.premiumWeeklyInr.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-fuchsia-600" aria-hidden>✓</span>{f}</li>
                 ))}
-                <li className="flex gap-2">
-                  <span className="text-rose-600" aria-hidden>
-                    ✓
-                  </span>
-                  Up to 4 child profiles · Parent timer
-                </li>
+                <li className="flex gap-2"><span className="text-fuchsia-600" aria-hidden>✓</span>Up to 4 child profiles · Parent timer</li>
               </ul>
-              <a
-                href="/signup"
-                className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-slate-900 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"
-              >
-                Get started — upgrade in app
-              </a>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-fuchsia-600 py-3.5 text-sm font-bold text-white transition hover:bg-fuchsia-500">Start weekly plan</a>
+            </motion.div>
+
+            <motion.div {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.12 }} className="relative rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-indigo-50 p-7 shadow-lg shadow-sky-500/10">
+              <span className="absolute right-5 top-5 rounded-full bg-sky-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Most popular</span>
+              <p className="text-xs font-bold uppercase tracking-wider text-sky-700">Premium Monthly</p>
+              <p className="mt-2 font-display text-4xl font-bold text-slate-900">₹{pricing.premiumMonthlyInr.priceInr}<span className="text-base font-semibold text-slate-600">/month</span></p>
+              <p className="mt-1 text-sm text-slate-600">Best steady value · auto-renews monthly</p>
+              <ul className="mt-6 space-y-2.5 text-sm text-slate-800">
+                {pricing.premiumMonthlyInr.features.map((f) => (
+                  <li key={f} className="flex gap-2"><span className="text-sky-600" aria-hidden>✓</span>{f}</li>
+                ))}
+                <li className="flex gap-2"><span className="text-sky-600" aria-hidden>✓</span>Up to 4 child profiles · Parent timer</li>
+              </ul>
+              <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-sky-600 py-3.5 text-sm font-bold text-white transition hover:bg-sky-500">Start monthly plan</a>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Footer — quiet, confident */}
-      <footer className="border-t border-slate-800 bg-slate-950 px-4 py-16 text-slate-400 sm:px-6">
+      <footer className="border-t border-slate-800 bg-slate-950 px-4 py-12 text-slate-400 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:justify-between">
             <div className="text-center sm:text-left">

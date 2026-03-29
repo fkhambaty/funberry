@@ -1,100 +1,61 @@
 "use client";
 
-import { brand } from "@funberry/config";
-import { pricing } from "@funberry/config/src/pricing";
+import { brand, pricing } from "@funberry/config";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-sky-50 to-white px-6 py-16">
-      <div className="mx-auto max-w-4xl">
-        <div className="text-center mb-12">
+    <main className="min-h-screen bg-gradient-to-b from-sky-50 via-fuchsia-50/40 to-cyan-50 px-4 py-10 sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 text-center sm:mb-10">
           <div className="flex justify-center">
-            <FunBerryLogo size="xl" />
+            <FunBerryLogo size="xl" variant="editorial" />
           </div>
-          <h1 className="font-display text-4xl font-bold text-sky-900 mt-4">
-            {brand.name} Pricing
-          </h1>
-          <p className="text-gray-500 mt-2 text-lg">
-            Start free, upgrade anytime!
-          </p>
+          <h1 className="font-display mt-3 text-3xl font-bold text-slate-900 sm:text-4xl">{brand.name} Pricing</h1>
+          <p className="mt-2 text-base text-slate-600 sm:text-lg">Weekly and monthly plans are separate. Pick what fits best.</p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-3">
-          {/* Free */}
-          <div className="kid-glass-panel rounded-kid border-2 border-gray-200/80 bg-white/90 p-8">
-            <h3 className="font-display text-2xl font-bold text-gray-900">
-              {pricing.free.name}
-            </h3>
-            <p className="mt-2 text-4xl font-bold text-gray-900">
-              $0
-            </p>
-            <p className="text-sm text-gray-400 mt-1">Forever free</p>
-            <ul className="mt-6 space-y-3 text-gray-600 text-sm">
+        <div className="grid gap-5 lg:grid-cols-3">
+          <section className="rounded-3xl border border-slate-200 bg-white/95 p-7 shadow-sm">
+            <h3 className="font-display text-xl font-bold text-slate-900">{pricing.free.name}</h3>
+            <p className="mt-2 text-4xl font-bold text-slate-900">₹0</p>
+            <p className="mt-1 text-sm text-slate-600">Forever free</p>
+            <ul className="mt-6 space-y-2.5 text-sm text-slate-700">
               {pricing.free.features.map((f) => (
-                <li key={f}>&#10003; {f}</li>
+                <li key={f} className="flex gap-2"><span className="text-emerald-600">✓</span>{f}</li>
               ))}
             </ul>
-            <a
-              href="/signup"
-              className="kid-glass-btn kid-glass-muted mt-6 block w-full rounded-kid py-3 text-center"
-            >
-              Get Started
-            </a>
-          </div>
+            <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white py-3 font-bold text-slate-800 transition hover:bg-slate-50">Create free account</a>
+          </section>
 
-          {/* Monthly */}
-          <div className="kid-glass-panel relative rounded-kid border-2 border-berry-300 bg-berry-50/95 p-8">
-            <span className="absolute -top-3 right-6 rounded-full bg-berry-500 px-4 py-1 text-xs font-bold text-white">
-              POPULAR
-            </span>
-            <h3 className="font-display text-2xl font-bold text-berry-900">
-              {pricing.premiumMonthly.name}
-            </h3>
-            <p className="mt-2 text-4xl font-bold text-berry-900">
-              ${pricing.premiumMonthly.price}
-              <span className="text-base font-normal text-berry-600">/mo</span>
-            </p>
-            <p className="text-sm text-berry-400 mt-1">Cancel anytime</p>
-            <ul className="mt-6 space-y-3 text-berry-800 text-sm">
-              {pricing.premiumMonthly.features.map((f) => (
-                <li key={f}>&#10003; {f}</li>
+          <section className="relative rounded-3xl border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-rose-50 p-7 shadow-lg shadow-fuchsia-500/10">
+            <span className="absolute right-5 top-5 rounded-full bg-fuchsia-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Weekly</span>
+            <h3 className="font-display text-xl font-bold text-fuchsia-900">Premium Weekly</h3>
+            <p className="mt-2 text-4xl font-bold text-slate-900">₹{pricing.premiumWeeklyInr.priceInr}<span className="text-base font-semibold text-slate-600">/week</span></p>
+            <p className="mt-1 text-sm text-slate-600">Auto-renews weekly · cancel anytime</p>
+            <ul className="mt-6 space-y-2.5 text-sm text-slate-800">
+              {pricing.premiumWeeklyInr.features.map((f) => (
+                <li key={f} className="flex gap-2"><span className="text-fuchsia-600">✓</span>{f}</li>
               ))}
+              <li className="flex gap-2"><span className="text-fuchsia-600">✓</span>Up to 4 child profiles</li>
             </ul>
-            <button type="button" className="kid-glass-btn kid-glass-berry mt-6 block w-full rounded-kid py-3 text-center">
-              Subscribe Monthly
-            </button>
-          </div>
+            <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-fuchsia-600 py-3 font-bold text-white transition hover:bg-fuchsia-500">Start weekly plan</a>
+          </section>
 
-          {/* Yearly */}
-          <div className="kid-glass-panel relative rounded-kid border-2 border-leaf-300 bg-leaf-50/95 p-8">
-            <span className="absolute -top-3 right-6 rounded-full bg-leaf-500 px-4 py-1 text-xs font-bold text-white">
-              BEST VALUE
-            </span>
-            <h3 className="font-display text-2xl font-bold text-leaf-900">
-              {pricing.premiumYearly.name}
-            </h3>
-            <p className="mt-2 text-4xl font-bold text-leaf-900">
-              ${pricing.premiumYearly.price}
-              <span className="text-base font-normal text-leaf-600">/yr</span>
-            </p>
-            <p className="text-sm text-leaf-400 mt-1">
-              ${(pricing.premiumYearly.price / 12).toFixed(2)}/mo — save 33%
-            </p>
-            <ul className="mt-6 space-y-3 text-leaf-800 text-sm">
-              {pricing.premiumYearly.features.map((f) => (
-                <li key={f}>&#10003; {f}</li>
+          <section className="relative rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 via-white to-indigo-50 p-7 shadow-lg shadow-sky-500/10">
+            <span className="absolute right-5 top-5 rounded-full bg-sky-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">Most popular</span>
+            <h3 className="font-display text-xl font-bold text-sky-900">Premium Monthly</h3>
+            <p className="mt-2 text-4xl font-bold text-slate-900">₹{pricing.premiumMonthlyInr.priceInr}<span className="text-base font-semibold text-slate-600">/month</span></p>
+            <p className="mt-1 text-sm text-slate-600">Auto-renews monthly · cancel anytime</p>
+            <ul className="mt-6 space-y-2.5 text-sm text-slate-800">
+              {pricing.premiumMonthlyInr.features.map((f) => (
+                <li key={f} className="flex gap-2"><span className="text-sky-600">✓</span>{f}</li>
               ))}
+              <li className="flex gap-2"><span className="text-sky-600">✓</span>Up to 4 child profiles</li>
             </ul>
-            <button type="button" className="kid-glass-btn kid-glass-leaf mt-6 block w-full rounded-kid py-3 text-center">
-              Subscribe Yearly
-            </button>
-          </div>
+            <a href="/signup" className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-sky-600 py-3 font-bold text-white transition hover:bg-sky-500">Start monthly plan</a>
+          </section>
         </div>
-
-        <p className="text-center text-gray-400 text-sm mt-8">
-          Payments secured by Stripe. Cancel anytime from your dashboard.
-        </p>
       </div>
     </main>
   );

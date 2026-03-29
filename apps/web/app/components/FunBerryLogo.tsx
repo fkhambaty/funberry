@@ -5,22 +5,22 @@ import { motion } from "framer-motion";
 
 type LogoSize = "xs" | "sm" | "md" | "lg" | "xl" | "hero";
 
-const VB_W = 560;
-const VB_H = 164;
+const VB_W = 620;
+const VB_H = 182;
 const WORDMARK = "FunBerryKids";
 
 const heights: Record<LogoSize, number> = {
-  xs: 26,
-  sm: 32,
-  md: 42,
-  lg: 58,
-  xl: 78,
-  hero: 136,
+  xs: 28,
+  sm: 36,
+  md: 48,
+  lg: 64,
+  xl: 86,
+  hero: 148,
 };
 
 /**
- * default: premium glass pill + high-contrast lettering (auth and utility screens).
- * editorial: cinematic transparent lockup with richer depth (homepage and marketing).
+ * default: playful glass lockup for auth and utility screens.
+ * editorial: vibrant hero lockup with stronger depth and glow.
  */
 export function FunBerryLogo({
   size = "md",
@@ -40,13 +40,13 @@ export function FunBerryLogo({
 
   const textProps = {
     x: VB_W / 2,
-    y: variant === "editorial" ? 70 : 67,
+    y: variant === "editorial" ? 84 : 80,
     textAnchor: "middle" as const,
     dominantBaseline: "middle" as const,
     fontFamily: "Fredoka, system-ui, sans-serif",
     fontWeight: "800" as const,
-    fontSize: variant === "editorial" ? 58 : 52,
-    letterSpacing: "0.02em",
+    fontSize: variant === "editorial" ? 67 : 61,
+    letterSpacing: "0.012em",
     style: { paintOrder: "stroke fill" as const },
   };
 
@@ -64,165 +64,160 @@ export function FunBerryLogo({
       overflow="visible"
     >
       <defs>
-        <radialGradient id={`${id}-bgGlow`} cx="50%" cy="46%" r="58%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.92" />
-          <stop offset="70%" stopColor="#eef2ff" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#dbeafe" stopOpacity="0" />
+        <radialGradient id={`${id}-bgGlow`} cx="50%" cy="42%" r="66%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+          <stop offset="62%" stopColor="#dbeafe" stopOpacity="0.62" />
+          <stop offset="100%" stopColor="#c7d2fe" stopOpacity="0" />
         </radialGradient>
 
-        <linearGradient id={`${id}-berryPink`} x1="0" y1="0" x2="0.9" y2="1">
-          <stop offset="0%" stopColor="#ffd7e5" />
-          <stop offset="35%" stopColor="#ff4b8f" />
-          <stop offset="100%" stopColor="#b10d50" />
-        </linearGradient>
-        <linearGradient id={`${id}-berryBlue`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#d6e9ff" />
-          <stop offset="42%" stopColor="#2b79ff" />
-          <stop offset="100%" stopColor="#1843b8" />
-        </linearGradient>
-        <linearGradient id={`${id}-berryViolet`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#eadcff" />
-          <stop offset="44%" stopColor="#8a39ff" />
-          <stop offset="100%" stopColor="#4f16a6" />
-        </linearGradient>
+        <radialGradient id={`${id}-berryPink`} cx="32%" cy="26%" r="75%">
+          <stop offset="0%" stopColor="#ffd2e8" />
+          <stop offset="45%" stopColor="#ff3d8a" />
+          <stop offset="100%" stopColor="#b4004b" />
+        </radialGradient>
+        <radialGradient id={`${id}-berryBlue`} cx="30%" cy="26%" r="75%">
+          <stop offset="0%" stopColor="#d7edff" />
+          <stop offset="45%" stopColor="#2f7dff" />
+          <stop offset="100%" stopColor="#193db6" />
+        </radialGradient>
+        <radialGradient id={`${id}-berryPurple`} cx="30%" cy="26%" r="75%">
+          <stop offset="0%" stopColor="#ecd9ff" />
+          <stop offset="45%" stopColor="#8d3dff" />
+          <stop offset="100%" stopColor="#5216b5" />
+        </radialGradient>
         <linearGradient id={`${id}-berryLeaf`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#59e6a5" />
-          <stop offset="100%" stopColor="#128a4e" />
+          <stop offset="0%" stopColor="#63ebb0" />
+          <stop offset="100%" stopColor="#149354" />
         </linearGradient>
 
-        <linearGradient id={`${id}-plateGlass`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={`${id}-glassPlate`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.98" />
-          <stop offset="28%" stopColor="#f8fbff" stopOpacity="0.94" />
-          <stop offset="70%" stopColor="#ecf3ff" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#d7e4ff" stopOpacity="0.88" />
+          <stop offset="35%" stopColor="#f8fbff" stopOpacity="0.96" />
+          <stop offset="100%" stopColor="#d7e7ff" stopOpacity="0.86" />
         </linearGradient>
-        <linearGradient id={`${id}-plateShine`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="48%" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="100%" stopColor="#93c5fd" stopOpacity="0.22" />
-        </linearGradient>
-
-        <linearGradient id={`${id}-letter`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="#f3f8ff" />
-          <stop offset="100%" stopColor="#dbe8ff" />
-        </linearGradient>
-        <linearGradient id={`${id}-editorialText`} x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#f43f5e" />
-          <stop offset="25%" stopColor="#ef2f8f" />
-          <stop offset="53%" stopColor="#7c3aed" />
-          <stop offset="77%" stopColor="#2563eb" />
-          <stop offset="100%" stopColor="#0ea5e9" />
+        <linearGradient id={`${id}-glassShine`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.96" />
+          <stop offset="50%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="100%" stopColor="#7dd3fc" stopOpacity="0.25" />
         </linearGradient>
 
-        <filter id={`${id}-berryShadow`} x="-40%" y="-40%" width="180%" height="200%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2.8" result="blur" />
+        <linearGradient id={`${id}-wordFill`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ff3f84" />
+          <stop offset="26%" stopColor="#f51ab1" />
+          <stop offset="52%" stopColor="#8b3dff" />
+          <stop offset="76%" stopColor="#2f7dff" />
+          <stop offset="100%" stopColor="#00b5ff" />
+        </linearGradient>
+        <linearGradient id={`${id}-wordFillSoft`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ff5d9a" />
+          <stop offset="30%" stopColor="#e53ff7" />
+          <stop offset="58%" stopColor="#6b4dff" />
+          <stop offset="100%" stopColor="#35b6ff" />
+        </linearGradient>
+
+        <filter id={`${id}-berryShadow`} x="-42%" y="-42%" width="184%" height="210%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2.9" result="blur" />
           <feOffset in="blur" dy="4" result="offset" />
           <feColorMatrix
             in="offset"
             type="matrix"
-            values="0 0 0 0 0.11 0 0 0 0 0.11 0 0 0 0 0.29 0 0 0 0.26 0"
+            values="0 0 0 0 0.06 0 0 0 0 0.12 0 0 0 0 0.35 0 0 0 0.3 0"
           />
         </filter>
-        <filter id={`${id}-wordShadow`} x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#0f172a" floodOpacity="0.3" />
+
+        <filter id={`${id}-wordShadow`} x="-22%" y="-22%" width="144%" height="150%">
+          <feDropShadow dx="0" dy="2" stdDeviation="1.8" floodColor="#172554" floodOpacity="0.38" />
+          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#0f172a" floodOpacity="0.16" />
         </filter>
       </defs>
 
       {variant === "editorial" && (
         <>
-          <ellipse cx={VB_W / 2} cy={88} rx={245} ry={56} fill={`url(#${id}-bgGlow)`} />
-          <ellipse cx={VB_W / 2} cy={130} rx={232} ry={24} fill="#1e1b4b" opacity="0.08" />
+          <ellipse cx={VB_W / 2} cy={100} rx={292} ry={67} fill={`url(#${id}-bgGlow)`} />
+          <ellipse cx={VB_W / 2} cy={146} rx={264} ry={25} fill="#1e1b4b" opacity="0.1" />
         </>
       )}
 
       {variant === "default" && (
         <>
-          <rect x="12" y="16" width={VB_W - 24} height={130} rx="44" fill="transparent" />
-          <ellipse cx={VB_W / 2} cy={132} rx={235} ry={22} fill="#1e1b4b" opacity="0.08" />
+          <ellipse cx={VB_W / 2} cy={144} rx={258} ry={22} fill="#1e1b4b" opacity="0.1" />
+          <rect
+            x="60"
+            y="26"
+            width={VB_W - 120}
+            height="84"
+            rx="42"
+            fill={`url(#${id}-glassPlate)`}
+            stroke="rgba(255,255,255,0.95)"
+            strokeWidth="1.4"
+          />
+          <rect x="60" y="26" width={VB_W - 120} height="84" rx="42" fill={`url(#${id}-glassShine)`} />
         </>
       )}
 
       <g filter={`url(#${id}-berryShadow)`}>
-        {/* left strawberry */}
-        <g transform="translate(68 118)">
+        <g transform="translate(84 132)">
           <path
-            d="M0 -52 C24 -52 38 -29 38 -4 C38 25 20 47 0 58 C-20 47 -38 25 -38 -4 C-38 -29 -24 -52 0 -52 Z"
+            d="M0 -55 C25 -55 40 -31 40 -5 C40 26 21 49 0 61 C-21 49 -40 26 -40 -5 C-40 -31 -25 -55 0 -55 Z"
             fill={`url(#${id}-berryPink)`}
           />
-          <path d="M-24 -45 L-28 -60 L-12 -51 L0 -63 L12 -51 L28 -60 L24 -45 L0 -50 Z" fill={`url(#${id}-berryLeaf)`} />
-          {[[-9, -18], [6, -12], [14, 2], [-12, 8], [2, 16], [-7, 27], [12, 25]].map(([x, y], i) => (
-            <ellipse key={i} cx={x} cy={y} rx="2.2" ry="2.8" fill="#fff3cc" opacity="0.9" />
+          <path d="M-25 -46 L-30 -63 L-12 -53 L0 -66 L12 -53 L30 -63 L25 -46 L0 -51 Z" fill={`url(#${id}-berryLeaf)`} />
+          {[[-10, -18], [6, -12], [14, 4], [-12, 10], [2, 18], [-8, 30], [11, 28]].map(([x, y], i) => (
+            <ellipse key={`sl-${i}`} cx={x} cy={y} rx="2.2" ry="2.8" fill="#fff3cc" opacity="0.9" />
           ))}
+          <ellipse cx="-12" cy="-18" rx="18" ry="12" fill="#fff" opacity="0.28" />
         </g>
 
-        {/* blue glass berry */}
-        <g transform="translate(176 103)">
-          <circle cx="0" cy="0" r="32" fill={`url(#${id}-berryBlue)`} />
-          <ellipse cx="-10" cy="-10" rx="15" ry="11" fill="#ffffff" opacity="0.35" />
-          <path d="M-13 -24 L-8 -35 L-2 -27 L0 -40 L2 -27 L8 -35 L13 -24 Q0 -28 -13 -24 Z" fill="#1640a8" />
+        <g transform="translate(196 115)">
+          <circle cx="0" cy="0" r="34" fill={`url(#${id}-berryBlue)`} />
+          <ellipse cx="-11" cy="-12" rx="16" ry="12" fill="#fff" opacity="0.34" />
+          <path d="M-14 -26 L-9 -38 L-2 -30 L0 -43 L2 -30 L9 -38 L14 -26 Q0 -30 -14 -26 Z" fill="#1e3a8a" />
         </g>
 
-        {/* center raspberry */}
-        <g transform="translate(280 108)">
+        <g transform="translate(308 121)">
           {[-22, -10, 2, 14].map((x, i) => (
-            <circle key={`r1-${i}`} cx={x} cy={-16} r="9" fill={`url(#${id}-berryPink)`} />
+            <circle key={`r1-${i}`} cx={x} cy={-17} r="9.2" fill={`url(#${id}-berryPink)`} />
           ))}
           {[-28, -16, -4, 8, 20].map((x, i) => (
-            <circle key={`r2-${i}`} cx={x} cy={-2} r="9" fill={`url(#${id}-berryPink)`} />
+            <circle key={`r2-${i}`} cx={x} cy={-3} r="9.2" fill={`url(#${id}-berryPink)`} />
           ))}
           {[-22, -10, 2, 14].map((x, i) => (
-            <circle key={`r3-${i}`} cx={x} cy={12} r="9" fill={`url(#${id}-berryPink)`} />
+            <circle key={`r3-${i}`} cx={x} cy={11} r="9.2" fill={`url(#${id}-berryPink)`} />
           ))}
+          <ellipse cx="-12" cy="-18" rx="16" ry="10" fill="#fff" opacity="0.21" />
         </g>
 
-        {/* center-right blackberry */}
-        <g transform="translate(382 108)">
+        <g transform="translate(420 121)">
           {[-18, -6, 6, 18].map((x, i) => (
-            <circle key={`b1-${i}`} cx={x} cy={-16} r="9" fill={`url(#${id}-berryViolet)`} />
+            <circle key={`b1-${i}`} cx={x} cy={-17} r="9.2" fill={`url(#${id}-berryPurple)`} />
           ))}
           {[-24, -12, 0, 12, 24].map((x, i) => (
-            <circle key={`b2-${i}`} cx={x} cy={-2} r="9" fill={`url(#${id}-berryViolet)`} />
+            <circle key={`b2-${i}`} cx={x} cy={-3} r="9.2" fill={`url(#${id}-berryPurple)`} />
           ))}
           {[-18, -6, 6, 18].map((x, i) => (
-            <circle key={`b3-${i}`} cx={x} cy={12} r="9" fill={`url(#${id}-berryViolet)`} />
+            <circle key={`b3-${i}`} cx={x} cy={11} r="9.2" fill={`url(#${id}-berryPurple)`} />
           ))}
+          <ellipse cx="-10" cy="-18" rx="15" ry="10" fill="#fff" opacity="0.2" />
         </g>
 
-        {/* right strawberry */}
-        <g transform="translate(494 118)">
+        <g transform="translate(532 132)">
           <path
-            d="M0 -52 C24 -52 38 -29 38 -4 C38 25 20 47 0 58 C-20 47 -38 25 -38 -4 C-38 -29 -24 -52 0 -52 Z"
+            d="M0 -55 C25 -55 40 -31 40 -5 C40 26 21 49 0 61 C-21 49 -40 26 -40 -5 C-40 -31 -25 -55 0 -55 Z"
             fill={`url(#${id}-berryPink)`}
           />
-          <path d="M-24 -45 L-28 -60 L-12 -51 L0 -63 L12 -51 L28 -60 L24 -45 L0 -50 Z" fill={`url(#${id}-berryLeaf)`} />
-          {[[-9, -18], [6, -12], [14, 2], [-12, 8], [2, 16], [-7, 27], [12, 25]].map(([x, y], i) => (
-            <ellipse key={i} cx={x} cy={y} rx="2.2" ry="2.8" fill="#fff3cc" opacity="0.9" />
+          <path d="M-25 -46 L-30 -63 L-12 -53 L0 -66 L12 -53 L30 -63 L25 -46 L0 -51 Z" fill={`url(#${id}-berryLeaf)`} />
+          {[[-10, -18], [6, -12], [14, 4], [-12, 10], [2, 18], [-8, 30], [11, 28]].map(([x, y], i) => (
+            <ellipse key={`sr-${i}`} cx={x} cy={y} rx="2.2" ry="2.8" fill="#fff3cc" opacity="0.9" />
           ))}
+          <ellipse cx="-12" cy="-18" rx="18" ry="12" fill="#fff" opacity="0.28" />
         </g>
       </g>
-
-      {variant === "default" && (
-        <>
-          <rect
-            x="40"
-            y="18"
-            width={VB_W - 80}
-            height="74"
-            rx="37"
-            fill={`url(#${id}-plateGlass)`}
-            stroke="rgba(255,255,255,0.9)"
-            strokeWidth="1.5"
-          />
-          <rect x="40" y="18" width={VB_W - 80} height="74" rx="37" fill={`url(#${id}-plateShine)`} />
-        </>
-      )}
 
       <text
         {...textProps}
         fill="none"
-        stroke={variant === "editorial" ? "rgba(255,255,255,0.94)" : "#0f172a"}
-        strokeWidth={variant === "editorial" ? 3.4 : 4.2}
+        stroke={variant === "editorial" ? "rgba(255,255,255,0.98)" : "rgba(15,23,42,0.92)"}
+        strokeWidth={variant === "editorial" ? 3.9 : 4.4}
         strokeLinejoin="round"
         filter={`url(#${id}-wordShadow)`}
       >
@@ -230,9 +225,9 @@ export function FunBerryLogo({
       </text>
       <text
         {...textProps}
-        fill={variant === "editorial" ? `url(#${id}-editorialText)` : `url(#${id}-letter)`}
-        stroke={variant === "editorial" ? "rgba(15,23,42,0.2)" : "#25427d"}
-        strokeWidth={variant === "editorial" ? 1.2 : 1}
+        fill={variant === "editorial" ? `url(#${id}-wordFill)` : `url(#${id}-wordFillSoft)`}
+        stroke={variant === "editorial" ? "rgba(15,23,42,0.16)" : "rgba(255,255,255,0.35)"}
+        strokeWidth={variant === "editorial" ? 1.1 : 0.8}
       >
         {WORDMARK}
       </text>
@@ -243,8 +238,8 @@ export function FunBerryLogo({
     return (
       <motion.div
         className="shrink-0 leading-none"
-        animate={variant === "editorial" ? { y: [0, -3, 0] } : { y: [0, -2, 0] }}
-        transition={{ repeat: Infinity, duration: variant === "editorial" ? 4.8 : 3.6, ease: "easeInOut" }}
+        animate={variant === "editorial" ? { y: [0, -4, 0] } : { y: [0, -2, 0] }}
+        transition={{ repeat: Infinity, duration: variant === "editorial" ? 4.4 : 3.2, ease: "easeInOut" }}
         style={{ height: h, width: w }}
       >
         {svg}
