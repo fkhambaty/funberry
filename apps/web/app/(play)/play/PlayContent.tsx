@@ -490,6 +490,17 @@ export default function PlayContent() {
   if (view === "who") {
     return (
       <main className="min-h-screen bg-gradient-to-b from-sky-50 via-purple-50 to-white p-6">
+        <AnimatePresence>
+          {showParentGate && (
+            <PinGateModal
+              onSuccess={() => {
+                setShowParentGate(false);
+                router.push("/dashboard");
+              }}
+              onCancel={() => setShowParentGate(false)}
+            />
+          )}
+        </AnimatePresence>
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center justify-between mb-8">
             <motion.a

@@ -93,9 +93,9 @@ export default function HomeContent() {
             transition={{ duration: 0.52, delay: 0.05 }}
             className="font-display mx-auto max-w-4xl text-[2rem] font-extrabold leading-[1.12] tracking-tight text-slate-900 [text-shadow:0_2px_0_#fff] sm:text-5xl md:text-6xl"
           >
-            Kids play exciting game adventures.
+            Kids think they&apos;re winning levels.
             <span className="block text-violet-700 [text-shadow:0_2px_0_rgba(255,255,255,0.95)]">
-              Parents see real progress and stronger skills.
+              Parents know they&apos;re winning report cards.
             </span>
           </motion.h1>
 
