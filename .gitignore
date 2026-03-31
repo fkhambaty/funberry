@@ -18,3 +18,4 @@ android/
 # Syllabus camera photos (~100MB+); sync locally: node scripts/sync-syllabus-photos.mjs
 apps/web/public/syllabus-photos/*.jpg
 apps/web/public/syllabus-photos/*.jpeg
+.vercel
