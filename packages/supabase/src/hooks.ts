@@ -34,7 +34,7 @@ export async function signUp(
 ) {
   const defaultSite =
     (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
-    "https://funberrykids-web.vercel.app";
+    "https://funberrykids.in";
   const emailRedirectTo =
     options?.emailRedirectTo ?? `${defaultSite.replace(/\/$/, "")}/auth/confirm-email`;
 
@@ -77,7 +77,7 @@ export async function signUp(
 export async function resendSignupConfirmation(email: string, redirectTo?: string) {
   const defaultSite =
     (typeof process !== "undefined" && process.env.NEXT_PUBLIC_SITE_URL) ||
-    "https://funberrykids-web.vercel.app";
+    "https://funberrykids.in";
   const emailRedirectTo =
     redirectTo ?? `${defaultSite.replace(/\/$/, "")}/auth/confirm-email`;
   const { error } = await supabase.auth.resend({

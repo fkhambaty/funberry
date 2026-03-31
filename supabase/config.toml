@@ -150,9 +150,10 @@ max_indexes = 5
 [auth]
 enabled = true
 # Production site (used in auth emails and redirect allow-list base). Override locally via supabase start if needed.
-site_url = "https://funberrykids-web.vercel.app"
+site_url = "https://funberrykids.in"
 # Wildcards: must cover signUp emailRedirectTo (e.g. .../auth/confirm-email) + previews + local dev.
 additional_redirect_urls = [
+  "https://funberrykids.in/**",
   "https://funberrykids-web.vercel.app/**",
   "https://funberry-web.vercel.app/**",
   "https://*.vercel.app/**",
