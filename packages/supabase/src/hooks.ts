@@ -102,6 +102,21 @@ export async function trySendWelcomeEmailAfterAuth(
   }
 }
 
+/**
+ * Verify the 6-digit signup code emailed to the parent. On success the account's
+ * email is confirmed (a DB trigger flips parents.email_verified to true) and a
+ * short-lived session is returned by Supabase.
+ */
+export async function verifyEmailOtp(email: string, token: string) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token: token.trim(),
+    type: "signup",
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;

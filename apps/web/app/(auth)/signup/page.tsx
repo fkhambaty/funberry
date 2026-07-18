@@ -1,18 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
-import { signUp, resendSignupConfirmation } from "@funberry/supabase";
+import {
+  signUp,
+  verifyEmailOtp,
+  resendSignupConfirmation,
+  signOut,
+} from "@funberry/supabase";
+
+type Step = "form" | "code";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("form");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
+
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
   const [resendBusy, setResendBusy] = useState(false);
   const [resendOk, setResendOk] = useState(false);
 
@@ -29,12 +41,8 @@ export default function SignupPage() {
     }
     setLoading(true);
     try {
-      const origin =
-        typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "";
-      await signUp(email, password, name, pin, {
-        ...(origin ? { emailRedirectTo: `${origin}/auth/confirm-email` } : {}),
-      });
-      setEmailSent(true);
+      await signUp(email, password, name, pin);
+      setStep("code");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
@@ -42,7 +50,49 @@ export default function SignupPage() {
     }
   }
 
-  if (emailSent) {
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!/^\d{6}$/.test(code)) {
+      setError("Enter the 6-digit code from your email");
+      return;
+    }
+    setVerifying(true);
+    try {
+      await verifyEmailOtp(email, code);
+      // Confirmed. Sign out so the parent explicitly logs in on the next screen.
+      try {
+        await signOut();
+      } catch {
+        // Non-fatal: proceed to login regardless.
+      }
+      router.push("/login?verified=1");
+    } catch (err: unknown) {
+      if (err instanceof Error && /expired|invalid|token/i.test(err.message)) {
+        setError("That code is wrong or expired. Check the latest email or resend a new code.");
+      } else {
+        setError(err instanceof Error ? err.message : "Verification failed");
+      }
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function handleResend() {
+    setResendOk(false);
+    setError("");
+    setResendBusy(true);
+    try {
+      await resendSignupConfirmation(email);
+      setResendOk(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Could not resend the code");
+    } finally {
+      setResendBusy(false);
+    }
+  }
+
+  if (step === "code") {
     return (
       <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-emerald-50/40 p-6">
         <AnimatePresence>
@@ -56,77 +106,80 @@ export default function SignupPage() {
               <motion.div
                 animate={{ y: [0, -14, 0], rotate: [0, -8, 8, 0] }}
                 transition={{ repeat: Infinity, duration: 2.5 }}
-                className="text-7xl mb-6"
+                className="mb-6 text-7xl"
               >
-                📧
+                📬
               </motion.div>
-              <h2 className="font-display text-3xl font-bold text-sky-900 mb-3">
-                Check your email! 🎉
+              <h2 className="font-display mb-3 text-3xl font-bold text-sky-900">
+                Enter your code 🔐
               </h2>
-              <p className="text-gray-600 text-lg mb-2">
-                We sent a confirmation link to
+              <p className="mb-1 text-lg text-gray-600">
+                We emailed a 6-digit verification code to
               </p>
-              <p className="font-bold text-sky-700 text-xl mb-6 break-all">{email}</p>
-              <div className="bg-sky-50 rounded-2xl p-5 mb-6 text-left space-y-3">
-                <p className="font-bold text-sky-800 text-sm">Here&apos;s what to do next:</p>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">1️⃣</span>
-                  <p className="text-gray-600 text-sm">Open your email inbox (check spam too!)</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">2️⃣</span>
-                  <p className="text-gray-600 text-sm">Click the <strong>&ldquo;Confirm your signup&rdquo;</strong> link in the email</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">3️⃣</span>
-                  <p className="text-gray-600 text-sm">
-                    After you confirm, you&apos;ll go to the sign-in page to log in with your email and password.
-                  </p>
-                </div>
-              </div>
-              <motion.a
-                href="/login"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="kid-glass-btn kid-glass-sky inline-block rounded-kid px-8 py-4 text-lg"
-              >
-                Already confirmed? Sign In →
-              </motion.a>
-              <div className="mt-5 space-y-3">
+              <p className="mb-6 break-all text-xl font-bold text-sky-700">{email}</p>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleVerify} className="space-y-5">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full rounded-2xl border-2 border-gray-200 px-4 py-4 text-center font-mono text-3xl tracking-[0.6em] outline-none transition focus:border-sky-400"
+                  placeholder="••••••"
+                  autoFocus
+                  required
+                />
+                <motion.button
+                  type="submit"
+                  disabled={verifying}
+                  whileHover={!verifying ? { scale: 1.03, y: -2 } : {}}
+                  whileTap={!verifying ? { scale: 0.97 } : {}}
+                  className="kid-glass-btn kid-glass-leaf w-full rounded-kid py-4 text-lg disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {verifying ? "Verifying..." : "✅ Verify & Continue"}
+                </motion.button>
+              </form>
+
+              <div className="mt-6 space-y-3">
+                <p className="text-sm text-gray-500">Didn&apos;t get it? Check your spam folder.</p>
                 <motion.button
                   type="button"
                   disabled={resendBusy}
                   whileHover={!resendBusy ? { scale: 1.02 } : {}}
                   whileTap={!resendBusy ? { scale: 0.98 } : {}}
-                  onClick={async () => {
-                    setResendOk(false);
-                    setError("");
-                    setResendBusy(true);
-                    try {
-                      const origin =
-                        typeof window !== "undefined"
-                          ? window.location.origin.replace(/\/$/, "")
-                          : "";
-                      await resendSignupConfirmation(
-                        email,
-                        origin ? `${origin}/auth/confirm-email` : undefined
-                      );
-                      setResendOk(true);
-                    } catch (err: unknown) {
-                      setError(err instanceof Error ? err.message : "Could not resend email");
-                    } finally {
-                      setResendBusy(false);
-                    }
-                  }}
+                  onClick={handleResend}
                   className="w-full rounded-kid border-2 border-sky-200 bg-white py-3 text-sm font-bold text-sky-800 shadow-sm disabled:opacity-50"
                 >
-                  {resendBusy ? "Sending…" : "Resend confirmation email"}
+                  {resendBusy ? "Sending…" : "Resend code"}
                 </motion.button>
                 {resendOk && (
                   <p className="text-center text-xs font-semibold text-emerald-600">
-                    Another message is on its way — check spam and wait a minute.
+                    A new code is on its way — check your inbox in a minute.
                   </p>
                 )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("form");
+                    setCode("");
+                    setError("");
+                  }}
+                  className="text-sm font-bold text-gray-400 hover:text-gray-600"
+                >
+                  ← Use a different email
+                </button>
               </div>
             </div>
           </motion.div>
