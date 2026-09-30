@@ -2,6 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd ../.. && npm ci",
   "buildCommand": "cd ../.. && npx turbo run build --filter=@funberry/web",
+  "crons": [
+    {
+      "path": "/api/cron/keepalive",
+      "schedule": "0 3 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
