@@ -8,7 +8,7 @@ export default function TermsPage() {
       <article>
         <h1 className="font-display text-sky-900">Terms of Service</h1>
         <p className="fb-updated">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: 13 October 2026
         </p>
 
         <h2>1. Acceptance of Terms</h2>
@@ -33,8 +33,8 @@ export default function TermsPage() {
             the billing period.
           </li>
           <li>
-            Refunds follow the policies of the platform where you subscribed
-            (App Store, Google Play, or Stripe).
+            Website subscriptions are billed in INR through Razorpay and renew
+            until you cancel. Refunds follow Razorpay and the plan you chose.
           </li>
         </ul>
 

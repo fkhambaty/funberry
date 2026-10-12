@@ -260,6 +260,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
               value={newPin}
               onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="New PIN"
+              aria-label="New PIN"
               style={{
                 width: 130,
                 padding: "10px 14px",
@@ -279,6 +280,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
               value={confirmPin}
               onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
               placeholder="Confirm"
+              aria-label="Confirm new PIN"
               style={{
                 width: 130,
                 padding: "10px 14px",
@@ -440,6 +442,7 @@ export default function DashboardPage() {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [payBusy, setPayBusy] = useState<string | null>(null);
+  const [payError, setPayError] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -525,7 +528,11 @@ export default function DashboardPage() {
       });
       const json = (await res.json()) as { error?: string; freeDays?: number };
       if (!res.ok) {
-        setCouponMsg({ text: json.error ?? "Could not redeem this code.", ok: false });
+        const raw = json.error ?? "Could not redeem this code.";
+        setCouponMsg({
+          text: res.status === 503 ? "Coupons are not available right now. Please try again later." : raw,
+          ok: false,
+        });
       } else {
         setCouponMsg({ text: `Success! ${json.freeDays ?? 0} days of Premium unlocked. 🎉`, ok: true });
         setCouponCode("");
@@ -559,26 +566,26 @@ export default function DashboardPage() {
   const freeZones = zones.filter((z) => z.isFree);
   const tier = (parent?.subscription_tier ?? "free") as SubscriptionTier;
   const familyStars = children.reduce((s, c) => s + (c.total_stars ?? 0), 0);
-  const topicsCovered = Math.max(1, Math.round((familyStats?.uniqueGamesTouched ?? 0) * 1.8));
-  const minutesPlayed = Math.max(0, (familyStats?.totalSessions ?? 0) * 6);
-  const subjectBreakdown = [
-    { name: "Math", pct: Math.min(100, 38 + (familyStats?.uniqueGamesTouched ?? 0) * 2) },
-    { name: "Science", pct: Math.min(100, 34 + Math.floor((familyStats?.totalSessions ?? 0) / 2)) },
-    { name: "English", pct: Math.min(100, 30 + Math.floor((children.length || 1) * 6)) },
-  ];
-  const topicCompletion = [
-    { name: "Fractions", pct: Math.min(100, 25 + Math.floor((familyStats?.totalSessions ?? 0) * 1.4)) },
-    { name: "Grammar", pct: Math.min(100, 22 + Math.floor((familyStats?.uniqueGamesTouched ?? 0) * 4.2)) },
-  ];
+  const gamesPlayed = familyStats?.totalSessions ?? 0;
+  const gamesExplored = familyStats?.uniqueGamesTouched ?? 0;
+
+  function parentPaymentError(message: string): string {
+    if (/not configured|service role|supabase/i.test(message)) {
+      return "Checkout is not available right now. Please try again later.";
+    }
+    return message || "Payment could not start. Try again.";
+  }
 
   async function startRazorpayCheckout(plan: "weekly" | "monthly") {
     setPayBusy(plan);
+    setPayError("");
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session?.access_token) {
-        alert("Please sign in again.");
+        setPayBusy(null);
+        setPayError("Please sign in again.");
         return;
       }
       const res = await fetch("/api/razorpay/subscription", {
@@ -624,7 +631,7 @@ export default function DashboardPage() {
       rzp.open();
     } catch (e: unknown) {
       setPayBusy(null);
-      alert(e instanceof Error ? e.message : "Payment could not start. Try again.");
+      setPayError(parentPaymentError(e instanceof Error ? e.message : ""));
     }
   }
 
@@ -706,55 +713,35 @@ export default function DashboardPage() {
             <h3 className="font-display text-lg font-bold text-slate-800">Progress Overview</h3>
             <div className="mt-3 grid grid-cols-3 gap-2">
               <div className="fb-metric">
-                <p className="text-xs font-bold uppercase text-slate-500">Topics Covered</p>
-                <p className="mt-1 font-display text-xl font-black text-slate-800">{topicsCovered}</p>
+                <p className="text-xs font-bold uppercase text-slate-500">Games explored</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{gamesExplored}</p>
               </div>
               <div className="fb-metric">
-                <p className="text-xs font-bold uppercase text-slate-500">Time Spent</p>
-                <p className="mt-1 font-display text-xl font-black text-slate-800">{minutesPlayed}m</p>
+                <p className="text-xs font-bold uppercase text-slate-500">Play sessions</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{gamesPlayed}</p>
               </div>
               <div className="fb-metric">
-                <p className="text-xs font-bold uppercase text-slate-500">Games Played</p>
-                <p className="mt-1 font-display text-xl font-black text-slate-800">{familyStats?.totalSessions ?? 0}</p>
+                <p className="text-xs font-bold uppercase text-slate-500">Stars earned</p>
+                <p className="mt-1 font-display text-xl font-black text-slate-800">{familyStars}</p>
               </div>
             </div>
           </div>
 
           <div className="glass-card rounded-kid p-4 sm:p-5">
-            <h3 className="font-display text-lg font-bold text-slate-800">Subject Breakdown</h3>
-            <div className="mt-3 space-y-2.5">
-              {subjectBreakdown.map((row) => (
-                <div key={row.name}>
-                  <div className="mb-1 flex items-center justify-between text-xs font-bold text-slate-600">
-                    <span>{row.name}</span>
-                    <span>{row.pct}%</span>
-                  </div>
-                  <div className="fb-meter h-2 bg-slate-200">
-                    <div className="h-2 rounded-full bg-sky-500" style={{ width: `${row.pct}%` }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="glass-card rounded-kid p-4 sm:p-5">
-            <h3 className="font-display text-lg font-bold text-slate-800">Topic Completion</h3>
-            <div className="mt-3 space-y-2.5">
-              {topicCompletion.map((row) => (
-                <div key={row.name} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
-                  <span className="text-sm font-bold text-slate-700">{row.name}</span>
-                  <span className="text-sm font-black text-slate-800">{row.pct}%</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="glass-card rounded-kid p-4 sm:p-5">
-            <h3 className="font-display text-lg font-bold text-slate-800">Insights</h3>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-800"><strong>Strong Areas:</strong> Pattern recognition, visual recall.</li>
-              <li className="rounded-xl bg-amber-50 px-3 py-2 text-amber-900"><strong>Needs Attention:</strong> Fractions, sentence structure consistency.</li>
-            </ul>
+            <h3 className="font-display text-lg font-bold text-slate-800">What the games show</h3>
+            {gamesPlayed === 0 ? (
+              <p className="mt-3 text-sm font-semibold text-slate-600">
+                No games played yet. Skill notes appear in the growth report after your child finishes a game.
+              </p>
+            ) : (
+              <p className="mt-3 text-sm font-semibold text-slate-600">
+                {gamesExplored} game{gamesExplored === 1 ? "" : "s"} explored across {gamesPlayed} session{gamesPlayed === 1 ? "" : "s"}.
+                The growth report turns those plays into skill notes.
+              </p>
+            )}
+            <a href="/dashboard/progress" className="mt-4 inline-flex font-bold text-sky-700 hover:underline">
+              Open the growth report
+            </a>
           </div>
         </motion.section>
 
@@ -1148,7 +1135,7 @@ export default function DashboardPage() {
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className="kid-glass-btn kid-glass-violet rounded-kid px-8 py-3 text-base"
-                onClick={() => setUpgradeOpen(true)}
+                onClick={() => { setPayError(""); setUpgradeOpen(true); }}
               >
                 ✨ Unlock Full Learning Experience
               </motion.button>
@@ -1218,6 +1205,11 @@ export default function DashboardPage() {
               or subscribe
               <span className="h-px flex-1 bg-gray-200" />
             </div>
+            {payError && (
+              <p className="mb-3 rounded-xl bg-rose-50 px-3 py-2 text-center text-sm font-bold text-rose-700" role="alert">
+                {payError}
+              </p>
+            )}
 
             <div className="space-y-3">
               <motion.button

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     if (!process.env.STRIPE_SECRET_KEY) {
       return NextResponse.json(
         { error: "Stripe not configured. Set STRIPE_SECRET_KEY in .env" },
-        { status: 500 }
+        { status: 503 }
       );
     }
 

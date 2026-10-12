@@ -8,7 +8,7 @@ export default function PrivacyPage() {
       <article>
         <h1 className="font-display text-sky-900">Privacy Policy</h1>
         <p className="fb-updated">
-          Last updated: {new Date().toLocaleDateString()}
+          Last updated: 13 October 2026
         </p>
 
         <h2>Children&apos;s Privacy (COPPA Compliance)</h2>
@@ -36,8 +36,8 @@ export default function PrivacyPage() {
             account and add child profiles.
           </li>
           <li>
-            <strong>Parental gate.</strong> All settings, purchases, and external
-            links are protected by a parental gate (math problem).
+            <strong>Parent PIN.</strong> Settings, purchases, and the way back to
+            the parent dashboard ask for the parent&apos;s 4-digit PIN.
           </li>
         </ul>
 
@@ -47,39 +47,39 @@ export default function PrivacyPage() {
             <strong>Parent account:</strong> Email, name (for account management)
           </li>
           <li>
-            <strong>Child profiles:</strong> First name, age, avatar selection
-            (no last names, no photos)
+            <strong>Child profiles:</strong> First name, age, an avatar, and an
+            optional photo the parent chooses. We do not ask the child for an
+            email address.
           </li>
           <li>
             <strong>Game data:</strong> Scores, stars earned, time spent,
             completion status
           </li>
           <li>
-            <strong>Subscription data:</strong> Plan type, billing dates (payment
-            details handled by Stripe/App Store/Play Store)
+            <strong>Subscription data:</strong> Plan type and billing dates.
+            Website payments are handled by Razorpay. We do not store card
+            numbers.
           </li>
         </ul>
 
         <h2>What We Do NOT Collect</h2>
         <ul>
           <li>Location data</li>
-          <li>Photos, videos, or audio recordings</li>
+          <li>Video or audio recordings. A child photo is stored only when a parent adds one.</li>
           <li>Contact lists or social media information</li>
           <li>Device identifiers for advertising purposes</li>
         </ul>
 
         <h2>Data Security</h2>
         <p>
-          All data is encrypted in transit (TLS) and at rest. We use Supabase
-          with Row-Level Security to ensure parents can only access their own
-          family&apos;s data.
+          Data is encrypted in transit (TLS). A signed-in parent can open only
+          their own children&apos;s profiles.
         </p>
 
         <h2>Data Deletion</h2>
         <p>
-          Parents can delete their account and all associated child data at any
-          time from the Settings page. All data is permanently removed within 30
-          days.
+          To delete a parent account and its child profiles, email{" "}
+          <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.
         </p>
 
         <h2>Contact Us</h2>

@@ -183,7 +183,11 @@ export default function SignupPage() {
               )}
 
               <form onSubmit={handleVerify} className="space-y-5">
+                <label className="fb-label" htmlFor="verify-code">
+                  6-digit code
+                </label>
                 <input
+                  id="verify-code"
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"

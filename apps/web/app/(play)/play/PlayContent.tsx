@@ -13,7 +13,7 @@ import {
   RankProvider,
 } from "@funberry/game-engine";
 import type { GameConfig, GameResult } from "@funberry/game-engine";
-import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank, getAssignedPacksForChild, getParent, getChildProgress } from "@funberry/supabase";
+import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank, getAssignedPacksForChild, getParent, getChildProgress, getCurrentUser } from "@funberry/supabase";
 import type { Child, LearningPack, Parent, Progress } from "@funberry/supabase";
 import { LeaderboardModal } from "../../components/Leaderboard";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
@@ -520,34 +520,41 @@ export default function PlayContent() {
       setLoadingChildren(false);
       setLibraryUnreachable(true);
     }, 8000);
-    Promise.all([
-      getChildren().then(
-        (kids) => ({ kids, failed: false as const }),
-        () => ({ kids: [] as Child[], failed: true as const }),
-      ),
-      getParent().catch(() => null),
-    ])
-      .then(([kidsResult, parent]) => {
+    void (async () => {
+      const user = await getCurrentUser();
+      if (cancelled) return;
+      if (!user) {
+        window.clearTimeout(slow);
+        router.replace("/login");
+        return;
+      }
+      try {
+        const [kids, parent] = await Promise.all([
+          getChildren(),
+          getParent().catch(() => null),
+        ]);
         if (cancelled) return;
         window.clearTimeout(slow);
-        setChildren(kidsResult.kids);
-        setLibraryUnreachable(kidsResult.failed);
+        setChildren(kids);
+        setLibraryUnreachable(false);
         setIsPaid(computeIsPaid(parent));
-        if (!kidsResult.failed && kidsResult.kids.length === 1) {
-          setSelectedChild(kidsResult.kids[0]);
-          loadProgress(kidsResult.kids[0].id);
-          loadPacks(kidsResult.kids[0].id);
+        if (kids.length === 1) {
+          setSelectedChild(kids[0]);
+          loadProgress(kids[0].id);
+          loadPacks(kids[0].id);
           setView("zones");
         }
-      })
-      .finally(() => {
+      } catch {
+        if (!cancelled) setLibraryUnreachable(true);
+      } finally {
         if (!cancelled) setLoadingChildren(false);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
       window.clearTimeout(slow);
     };
-  }, [loadProgress, loadPacks, libraryAttempt]);
+  }, [loadProgress, loadPacks, libraryAttempt, router]);
 
   const zoneGames = useMemo(
     () => (selectedZone ? getGamesForZone(selectedZone) : []),
