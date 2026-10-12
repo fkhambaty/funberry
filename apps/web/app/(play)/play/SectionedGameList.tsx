@@ -71,7 +71,7 @@ export function SectionedGameList<TSection extends CurriculumSection>({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: sectionIndex * 0.04 }}
-            className="overflow-hidden rounded-[24px] border-2 border-white/80 bg-white/85 shadow-[0_12px_28px_-18px_rgba(30,41,59,0.45)] backdrop-blur"
+            className="fb-folder overflow-hidden backdrop-blur"
           >
             <button
               id={buttonId}

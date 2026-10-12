@@ -69,6 +69,7 @@ export function LockScreen() {
 
   return (
     <div
+      className="fb-lock"
       style={{
         position: "fixed",
         inset: 0,
@@ -76,9 +77,8 @@ export function LockScreen() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        backgroundColor: "rgba(15, 23, 42, 0.82)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
       }}
     >
       <AnimatePresence mode="wait">

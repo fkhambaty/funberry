@@ -2,22 +2,20 @@ import { FunBerryLogo } from "./components/FunBerryLogo";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-50 via-white to-purple-50/40">
-      <div className="text-center">
+    <div className="fb-empty">
+      <div className="fb-empty-card glass-card">
         <div className="mb-4 flex justify-center">
           <FunBerryLogo size="xl" />
         </div>
-        <h1 className="font-display text-3xl font-bold text-sky-900 mb-2">
-          Page Not Found
+        <p className="fb-kicker">Lost a berry</p>
+        <h1 className="font-display mb-2 text-3xl font-bold text-sky-900">
+          Page not found
         </h1>
-        <p className="text-gray-500 mb-6">
-          Oops! This page doesn&apos;t exist.
+        <p className="mb-6 font-semibold text-ink-500">
+          This path is not part of FunBerry. Head back to the village.
         </p>
-        <a
-          href="/"
-          className="kid-glass-btn kid-glass-sky inline-block rounded-kid px-6 py-3"
-        >
-          Go Home
+        <a href="/" className="fb-cta fb-cta-sky px-6">
+          Go home
         </a>
       </div>
     </div>

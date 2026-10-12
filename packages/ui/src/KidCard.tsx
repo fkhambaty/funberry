@@ -12,11 +12,11 @@ export interface KidCardProps {
 }
 
 const bgColors: Record<string, string> = {
-  berry: "bg-[#fff0f3] border-[#ffc6d6]",
-  leaf: "bg-[#edfcf2] border-[#aceec2]",
-  sky: "bg-[#eff8ff] border-[#bee4ff]",
-  sunshine: "bg-[#fffbeb] border-[#ffe588]",
-  white: "bg-white border-gray-200",
+  berry: "bg-berry-50 border-berry-200",
+  leaf: "bg-leaf-50 border-leaf-200",
+  sky: "bg-sky-50 border-sky-200",
+  sunshine: "bg-sunshine-50 border-sunshine-200",
+  white: "bg-paper border-white",
 };
 
 const paddings: Record<string, string> = {
@@ -38,10 +38,10 @@ export function KidCard({
     <Tag
       onClick={onClick}
       className={`
-        rounded-[1.25rem] border-2 transition-all duration-200
+        kid-glass-panel text-left
         ${bgColors[colorKey]}
         ${paddings[padding]}
-        ${hoverable || onClick ? "hover:scale-[1.03] hover:shadow-lg cursor-pointer" : ""}
+        ${hoverable || onClick ? "cursor-pointer" : ""}
         ${className}
       `}
     >

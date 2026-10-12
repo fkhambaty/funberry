@@ -42,7 +42,11 @@ export function ProgressBar({
   return (
     <div className="w-full">
       <div
-        className={`w-full rounded-full overflow-hidden ${trackColors[colorKey]} ${heights[height]}`}
+        className={`fb-meter w-full overflow-hidden ${trackColors[colorKey]} ${heights[height]}`}
+        role="progressbar"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={max}
       >
         <div
           className={`${heights[height]} rounded-full transition-all duration-500 ease-out ${barColors[colorKey]}`}

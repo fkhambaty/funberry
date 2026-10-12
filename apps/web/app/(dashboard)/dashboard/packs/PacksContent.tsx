@@ -65,7 +65,7 @@ export default function PacksContent() {
   }, [loadAll]);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#eef2ff_0,#faf5ff_45%,#ecfeff_100%)] px-4 py-6 sm:px-6">
+    <main className="fb-parent px-4 py-6 sm:px-6">
       <div className="mx-auto max-w-3xl">
         <header className="mb-5 flex items-center justify-between gap-3">
           <div>

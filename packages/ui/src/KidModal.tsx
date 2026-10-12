@@ -44,19 +44,21 @@ export function KidModal({
       />
       <div
         className={`
-          relative w-full ${sizeClasses[size]}
-          bg-white rounded-[1.5rem] shadow-2xl
-          p-6 animate-[bounceIn_0.3s_ease-out]
+          fb-modal relative w-full ${sizeClasses[size]}
+          p-6 animate-pop-in
         `}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
       >
         {title && (
-          <h2 className="text-center font-[Fredoka,sans-serif] text-2xl font-bold text-[#1c498c] mb-4">
+          <h2 className="text-center font-display text-2xl font-bold text-sky-900 mb-4">
             {title}
           </h2>
         )}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-xl font-bold transition"
+          className="absolute top-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-sky-50 text-xl font-bold text-sky-900 transition hover:bg-sky-100"
           aria-label="Close"
         >
           &times;

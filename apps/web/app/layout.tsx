@@ -34,7 +34,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#7c3aed",
+  themeColor: "#379df9",
 };
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${nunito.variable} ${fredoka.variable} ${baloo.variable}`}>
-      <body className="min-h-screen bg-gradient-to-br from-sky-100/80 via-fuchsia-50/40 to-amber-50/50">
+      <body className="fb-app min-h-screen">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

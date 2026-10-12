@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
 import { signIn } from "@funberry/supabase";
+import { AuthStage, Notice, TextField } from "@funberry/ui";
 
 function LoginForm() {
   const router = useRouter();
@@ -43,16 +44,17 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-fuchsia-50/40 p-6">
+    <AuthStage>
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <div className="mx-auto flex justify-center drop-shadow-[0_8px_24px_rgba(255,45,106,0.25)]">
             <FunBerryLogo size="xl" />
           </div>
-          <h1 className="font-display mt-2 text-2xl font-bold text-sky-900 sm:text-3xl">
+          <p className="fb-kicker mt-3">Parent sign in</p>
+          <h1 className="font-display mt-1 text-2xl font-bold text-sky-900 sm:text-3xl">
             Welcome back
           </h1>
-          <p className="text-gray-500 mt-1">Sign in to manage your kids&apos; learning</p>
+          <p className="mt-1 font-semibold text-ink-500">Sign in to manage your kids&apos; learning</p>
         </div>
 
         <form
@@ -60,51 +62,42 @@ function LoginForm() {
           className="glass-card space-y-5 rounded-kid p-8"
         >
           {justVerified && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-sm">
+            <Notice tone="ok">
               Email verified! Sign in with the email and password you chose.
-            </div>
+            </Notice>
           )}
 
           {justReset && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-sm">
+            <Notice tone="ok">
               Password changed. Sign in with your new password.
-            </div>
+            </Notice>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
-              {error}
-            </div>
+            <Notice tone="bad">{error}</Notice>
           )}
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">
-              Email or username
-            </label>
-            <input
-              type="text"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
-              placeholder="parent@email.com"
-              required
-            />
-          </div>
+          <TextField
+            label="Email or username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="parent@email.com"
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
 
           <button
             type="submit"
@@ -115,21 +108,21 @@ function LoginForm() {
           </button>
 
           <p className="text-center text-sm">
-            <a href="/forgot-password" className="text-sky-600 font-bold hover:underline">
+            <a href="/forgot-password" className="font-bold text-sky-700 hover:underline">
               Forgot password?
             </a>
           </p>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm font-semibold text-ink-500">
             Don&apos;t have an account?{" "}
-            <a href="/signup" className="text-sky-600 font-bold hover:underline">
+            <a href="/signup" className="font-bold text-sky-700 hover:underline">
               Sign up free
             </a>
           </p>
         </form>
 
       </div>
-    </main>
+    </AuthStage>
   );
 }
 
@@ -137,9 +130,9 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-fuchsia-50/40 p-6">
-          <p className="text-gray-500">Loading…</p>
-        </main>
+        <AuthStage>
+          <p className="font-display text-lg font-bold text-sky-900">Loading…</p>
+        </AuthStage>
       }
     >
       <LoginForm />

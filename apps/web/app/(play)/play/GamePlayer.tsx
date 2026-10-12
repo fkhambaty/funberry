@@ -45,7 +45,7 @@ export function GamePlayer({ game, accentColor, onComplete, onNextGame }: GamePl
   if (!Template) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-violet-200 border-t-violet-600" />
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-sky-100 border-t-berry-500" />
         <p className="mt-4 font-display text-base font-bold text-slate-600">Getting the game ready…</p>
       </div>
     );

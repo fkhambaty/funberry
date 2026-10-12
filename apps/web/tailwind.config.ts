@@ -58,6 +58,15 @@ const config: Config = {
           800: "#943e0c",
           900: "#7a340d",
         },
+        ink: {
+          50: "#f4f7fb",
+          100: "#e6edf6",
+          500: "#4b6284",
+          700: "#1c3358",
+          900: "#10192c",
+        },
+        cream: "#fff8ef",
+        paper: "#fffdf8",
       },
       fontFamily: {
         display: ["var(--font-fredoka)", "ui-rounded", "sans-serif"],
@@ -65,6 +74,11 @@ const config: Config = {
       },
       borderRadius: {
         kid: "1.25rem",
+        "kid-lg": "1.75rem",
+      },
+      minHeight: {
+        tap: "48px",
+        "tap-kid": "64px",
       },
       animation: {
         "bounce-in": "bounce-in 0.5s ease-out forwards",

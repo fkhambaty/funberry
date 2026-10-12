@@ -26,6 +26,7 @@ export function StreakCounter({ count }: StreakCounterProps) {
         animate={{ scale: 1, rotate: 0 }}
         exit={{ scale: 0, rotate: 15 }}
         transition={{ type: "spring", stiffness: 500, damping: 15 }}
+        className="fb-streak"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -37,7 +38,7 @@ export function StreakCounter({ count }: StreakCounterProps) {
           fontWeight: 800,
           fontFamily: "Fredoka, sans-serif",
           fontSize: 16 + Math.min(count, 6),
-          boxShadow: `0 4px 15px ${bgColor}66`,
+          boxShadow: `0 4px 0 color-mix(in srgb, ${bgColor} 62%, #111), 0 10px 16px ${bgColor}55`,
         }}
       >
         <span>{count}x</span>

@@ -4,10 +4,10 @@ import { brand } from "@funberry/config";
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-white px-6 py-16">
-      <div className="mx-auto max-w-3xl prose prose-sky">
+    <main className="fb-legal">
+      <article>
         <h1 className="font-display text-sky-900">Privacy Policy</h1>
-        <p className="text-sm text-gray-400">
+        <p className="fb-updated">
           Last updated: {new Date().toLocaleDateString()}
         </p>
 
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
           If you have questions about our privacy practices, please contact us at{" "}
           <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.
         </p>
-      </div>
+      </article>
     </main>
   );
 }

@@ -11,7 +11,7 @@ function barTone(pct: number) {
 
 export function StrandMasteryChart({ report }: { report: ParentCoachingReport }) {
   return (
-    <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm sm:p-5">
+    <div className="fb-report-card p-4 sm:p-5">
       <h2 className="font-display text-lg font-bold text-slate-800">Learning themes — mastery map</h2>
       <p className="mb-4 text-xs text-slate-500">Each bar = stars vs max for games touched in that theme.</p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -45,7 +45,7 @@ export function StrandMasteryChart({ report }: { report: ParentCoachingReport })
 
 export function SkillsBarGrid({ report }: { report: ParentCoachingReport }) {
   return (
-    <div className="rounded-2xl border border-violet-200/80 bg-gradient-to-br from-violet-50/60 to-white p-4 sm:p-5">
+    <div className="fb-report-card border-violet-200/80 bg-gradient-to-br from-violet-50/70 to-paper p-4 sm:p-5">
       <h2 className="font-display text-lg font-bold text-violet-950">Skills behind the games</h2>
       <p className="mb-3 text-xs text-violet-900/70">How strongly each habit shows up in play (from stars × game type).</p>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -88,7 +88,7 @@ const BEHAVIOR_WIDTH: Record<string, number> = {
 export function BehaviorMeters({ report }: { report: ParentCoachingReport }) {
   if (!report.learningBehaviors?.length) return null;
   return (
-    <div className="rounded-2xl border border-sky-200/80 bg-sky-50/40 p-4 sm:p-5">
+    <div className="fb-report-card border-sky-200/80 bg-sky-50/50 p-4 sm:p-5">
       <h2 className="font-display text-lg font-bold text-sky-950">Learning habits</h2>
       <p className="mb-3 text-xs text-sky-900/75">Practice shape — not grades.</p>
       <div className="space-y-3">
@@ -115,7 +115,7 @@ export function BehaviorMeters({ report }: { report: ParentCoachingReport }) {
 export function CapabilityBars({ report }: { report: ParentCoachingReport }) {
   if (!report.coreCapabilityInsights?.length) return null;
   return (
-    <div className="rounded-2xl border border-fuchsia-200/80 bg-fuchsia-50/30 p-4 sm:p-5">
+    <div className="fb-report-card border-fuchsia-200/80 bg-fuchsia-50/40 p-4 sm:p-5">
       <h2 className="font-display text-lg font-bold text-fuchsia-950">Core capabilities</h2>
       <p className="mb-3 text-xs text-fuchsia-900/75">Tap a row below for tips; bars = model strength from play.</p>
       <div className="space-y-2">

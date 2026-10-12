@@ -68,12 +68,12 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85, y: 30 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="kid-glass-panel"
+          className="kid-glass-panel fb-modal"
           style={{
-            background: "linear-gradient(135deg, #fdf4ff, #ffffff)",
+            background: "linear-gradient(180deg, #fffdf8 0%, #ffffff 42%, #f4f9ff 100%)",
             borderRadius: 28, padding: 28,
             width: "100%", maxWidth: 440,
-            borderColor: "rgba(168,85,247,0.35)",
+            borderColor: "rgba(55, 157, 249, 0.28)",
             maxHeight: "90vh", overflowY: "auto",
           }}
         >

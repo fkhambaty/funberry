@@ -47,6 +47,15 @@ export const colors = {
     800: "#943e0c",
     900: "#7a340d",
   },
+  ink: {
+    50: "#f4f7fb",
+    100: "#e6edf6",
+    500: "#4b6284",
+    700: "#1c3358",
+    900: "#10192c",
+  },
+  cream: "#fff8ef",
+  paper: "#fffdf8",
   white: "#ffffff",
   black: "#111827",
   gray: {

@@ -24,3 +24,5 @@ export type { ZoneCardProps } from "./ZoneCard";
 
 export { GameResultScreen } from "./GameResultScreen";
 export type { GameResultScreenProps } from "./GameResultScreen";
+
+export { AuthStage, Notice, TextField } from "./surfaces";

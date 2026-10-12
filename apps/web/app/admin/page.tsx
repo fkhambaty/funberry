@@ -232,7 +232,7 @@ export default function AdminPage() {
   // ── Loading ──
   if (phase === "loading") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-900 text-slate-400">
+      <main className="fb-admin flex items-center justify-center text-slate-400">
         <p>Checking access…</p>
       </main>
     );
@@ -241,8 +241,8 @@ export default function AdminPage() {
   // ── Config error ──
   if (phase === "config") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-900 p-6">
-        <div className="max-w-md rounded-2xl border border-amber-700 bg-slate-800 p-8 text-center">
+      <main className="fb-admin flex items-center justify-center p-6">
+        <div className="fb-admin-card max-w-md p-8 text-center">
           <div className="mb-3 text-4xl">⚙️</div>
           <h1 className="mb-2 text-lg font-bold text-amber-300">Admin not configured</h1>
           <p className="text-sm text-slate-300">{configError}</p>
@@ -263,10 +263,10 @@ export default function AdminPage() {
   // ── Login / denied ──
   if (phase === "login" || phase === "denied") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-900 p-6">
+      <main className="fb-admin flex items-center justify-center p-6">
         <form
           onSubmit={handleLogin}
-          className="w-full max-w-xs rounded-2xl border border-slate-700 bg-slate-800 p-8 text-center shadow-2xl"
+          className="fb-admin-card w-full max-w-xs p-8 text-center"
         >
           <div className="mb-4 text-4xl">🔐</div>
           <h1 className="mb-1 text-lg font-bold text-slate-100">Admin access</h1>
@@ -298,7 +298,7 @@ export default function AdminPage() {
           <button
             type="submit"
             disabled={loginBusy}
-            className="mt-5 w-full rounded-lg bg-violet-600 py-3 font-bold text-white transition hover:bg-violet-500 disabled:opacity-50"
+            className="fb-cta fb-cta-berry mt-5 w-full"
           >
             {loginBusy ? "Signing in…" : "Sign in"}
           </button>
@@ -325,7 +325,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-900 p-4 text-slate-100 sm:p-8">
+    <main className="fb-admin p-4 sm:p-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-6 flex items-center justify-between">
           <div>
@@ -351,8 +351,8 @@ export default function AdminPage() {
         {/* Metrics */}
         <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {statCards.map((s) => (
-            <div key={s.label} className="rounded-xl border border-slate-700 bg-slate-800 p-4">
-              <p className="text-3xl font-black text-violet-300">{s.value ?? "—"}</p>
+            <div key={s.label} className="fb-admin-card p-4">
+              <p className="fb-stat-num">{s.value ?? "—"}</p>
               <p className="mt-1 text-xs font-semibold text-slate-400">{s.label}</p>
             </div>
           ))}
@@ -365,7 +365,7 @@ export default function AdminPage() {
         )}
 
         {/* Users */}
-        <section className="mb-8 rounded-xl border border-slate-700 bg-slate-800 p-5">
+        <section className="fb-admin-card mb-8 p-5">
           <h2 className="mb-4 text-lg font-bold">Users ({users.length})</h2>
           {users.length === 0 ? (
             <p className="text-sm text-slate-400">No users yet.</p>
@@ -439,7 +439,7 @@ export default function AdminPage() {
         </section>
 
         {/* Recent logins */}
-        <section className="mb-8 rounded-xl border border-slate-700 bg-slate-800 p-5">
+        <section className="fb-admin-card mb-8 p-5">
           <h2 className="mb-4 text-lg font-bold">Recent logins</h2>
           {recentLogins.length === 0 ? (
             <p className="text-sm text-slate-400">No logins recorded yet.</p>
@@ -459,7 +459,7 @@ export default function AdminPage() {
         </section>
 
         {/* Create coupon */}
-        <section className="mb-8 rounded-xl border border-slate-700 bg-slate-800 p-5">
+        <section className="fb-admin-card mb-8 p-5">
           <h2 className="mb-4 text-lg font-bold">Create a coupon</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <label className="text-xs font-bold text-slate-400">
@@ -487,13 +487,13 @@ export default function AdminPage() {
               <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Launch promo" className="mt-1 w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-violet-400" />
             </label>
           </div>
-          <button onClick={createCoupon} disabled={creating || !code} className="mt-4 rounded-lg bg-violet-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-violet-500 disabled:opacity-50">
+          <button onClick={createCoupon} disabled={creating || !code} className="fb-cta fb-cta-berry mt-4 px-6 text-sm disabled:opacity-50">
             {creating ? "Creating…" : "+ Create coupon"}
           </button>
         </section>
 
         {/* Coupon list */}
-        <section className="rounded-xl border border-slate-700 bg-slate-800 p-5">
+        <section className="fb-admin-card p-5">
           <h2 className="mb-4 text-lg font-bold">Coupons ({coupons.length})</h2>
           {coupons.length === 0 ? (
             <p className="text-sm text-slate-400">No coupons yet.</p>

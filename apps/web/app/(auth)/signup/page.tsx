@@ -10,6 +10,7 @@ import {
   resendSignupConfirmation,
   signOut,
 } from "@funberry/supabase";
+import { AuthStage, Notice, TextField } from "@funberry/ui";
 
 type Step = "form" | "code" | "success";
 
@@ -103,7 +104,7 @@ export default function SignupPage() {
 
   if (step === "success") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50/90 via-white to-sky-50/50 p-6">
+      <AuthStage tone="leaf">
         <motion.div
           initial={{ opacity: 0, scale: 0.85, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -141,13 +142,13 @@ export default function SignupPage() {
             </p>
           </div>
         </motion.div>
-      </main>
+      </AuthStage>
     );
   }
 
   if (step === "code") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-emerald-50/40 p-6">
+      <AuthStage>
         <AnimatePresence>
           <motion.div
             initial={{ opacity: 0, scale: 0.85, y: 30 }}
@@ -175,9 +176,9 @@ export default function SignupPage() {
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                  className="mb-5"
                 >
-                  {error}
+                  <Notice tone="bad">{error}</Notice>
                 </motion.div>
               )}
 
@@ -189,7 +190,7 @@ export default function SignupPage() {
                   maxLength={6}
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-full rounded-2xl border-2 border-gray-200 px-4 py-4 text-center font-mono text-3xl tracking-[0.6em] outline-none transition focus:border-sky-400"
+                  className="fb-field text-center font-mono text-3xl tracking-[0.6em]"
                   placeholder="••••••"
                   autoFocus
                   required
@@ -237,12 +238,12 @@ export default function SignupPage() {
             </div>
           </motion.div>
         </AnimatePresence>
-      </main>
+      </AuthStage>
     );
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-emerald-50/40 p-6">
+    <AuthStage tone="leaf">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <motion.div
@@ -252,10 +253,11 @@ export default function SignupPage() {
           >
             <FunBerryLogo size="xl" />
           </motion.div>
-          <h1 className="font-display mt-2 text-2xl font-bold text-sky-900 sm:text-3xl">
+          <p className="fb-kicker mt-3">Free parent account</p>
+          <h1 className="font-display mt-1 text-2xl font-bold text-sky-900 sm:text-3xl">
             Create your account
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="mt-1 font-semibold text-ink-500">
             Create a free account to start your child&apos;s learning adventure
           </p>
         </div>
@@ -264,67 +266,53 @@ export default function SignupPage() {
           onSubmit={handleSignup}
           className="glass-card space-y-5 rounded-kid p-8"
         >
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm"
-            >
-              {error}
-            </motion.div>
-          )}
+          {error && <Notice tone="bad">{error}</Notice>}
 
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Your Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
-              placeholder="Parent Name"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
-              placeholder="parent@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
-              placeholder="At least 6 characters"
-              required
-              minLength={6}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">4-Digit Parent PIN</label>
-            <p className="text-xs text-gray-400 mb-2">Used to unlock the app after timer expires</p>
-            <input
-              type="password"
-              inputMode="numeric"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg text-center tracking-[0.5em] font-mono"
-              placeholder="• • • •"
-              required
-            />
-          </div>
+          <TextField
+            label="Your Name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Parent Name"
+            required
+          />
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="parent@email.com"
+            required
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
+            required
+            minLength={6}
+          />
+          <TextField
+            label="4-Digit Parent PIN"
+            hint="Used to unlock the app after the timer expires"
+            name="pin"
+            type="password"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            value={pin}
+            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+            className="text-center font-mono tracking-[0.5em]"
+            placeholder="• • • •"
+            required
+          />
 
           <motion.button
             type="submit"
@@ -342,6 +330,6 @@ export default function SignupPage() {
           </p>
         </form>
       </div>
-    </main>
+    </AuthStage>
   );
 }

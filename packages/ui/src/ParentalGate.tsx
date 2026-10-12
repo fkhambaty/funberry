@@ -29,13 +29,13 @@ export function ParentalGate({ onSuccess, onCancel }: ParentalGateProps) {
 
   return (
     <div className="text-center space-y-4 p-4">
-      <p className="text-lg font-bold text-gray-700">
+      <p className="font-display text-lg font-bold text-ink-700">
         Parents Only
       </p>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm font-semibold text-ink-500">
         Solve this to continue. This keeps kids safe!
       </p>
-      <p className="text-3xl font-bold text-[#1c498c] font-[Fredoka,sans-serif]">
+      <p className="font-display text-3xl font-bold text-sky-900">
         {a} + {b} = ?
       </p>
       <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
@@ -46,31 +46,23 @@ export function ParentalGate({ onSuccess, onCancel }: ParentalGateProps) {
             setAnswer(e.target.value);
             setError(false);
           }}
-          className={`w-32 text-center text-2xl font-bold p-3 rounded-2xl border-2 outline-none transition ${
-            error
-              ? "border-red-400 bg-red-50"
-              : "border-gray-300 focus:border-[#379df9]"
+          className={`fb-field w-32 text-center text-2xl font-bold ${
+            error ? "border-red-400 bg-red-50" : ""
           }`}
           autoFocus
           placeholder="?"
+          inputMode="numeric"
         />
         {error && (
-          <p className="text-sm text-red-500 font-semibold">
+          <p className="text-sm font-semibold text-red-600" role="alert">
             That&apos;s not right. Try again!
           </p>
         )}
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-2 rounded-2xl bg-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-300 transition"
-          >
+          <button type="button" onClick={onCancel} className="kid-glass-btn kid-glass-muted rounded-kid px-6 py-2 text-sm">
             Cancel
           </button>
-          <button
-            type="submit"
-            className="px-6 py-2 rounded-2xl bg-[#379df9] text-white font-bold text-sm hover:bg-[#2180ee] transition"
-          >
+          <button type="submit" className="kid-glass-btn kid-glass-sky rounded-kid px-6 py-2 text-sm">
             Continue
           </button>
         </div>

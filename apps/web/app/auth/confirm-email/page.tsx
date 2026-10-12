@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { supabase, trySendWelcomeEmailAfterAuth } from "@funberry/supabase";
+import { AuthStage } from "@funberry/ui";
 
 function hashHasAccessToken(): boolean {
   if (typeof window === "undefined") return false;
@@ -84,8 +85,11 @@ export default function ConfirmEmailPage() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100/90 via-white to-fuchsia-50/40 p-6">
-      <p className="text-center text-lg font-semibold text-sky-900">Verifying your email…</p>
-    </main>
+    <AuthStage>
+      <div className="glass-card rounded-kid px-8 py-10 text-center">
+        <p className="fb-kicker">One moment</p>
+        <p className="font-display text-lg font-bold text-sky-900">Verifying your email…</p>
+      </div>
+    </AuthStage>
   );
 }

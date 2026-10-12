@@ -23,6 +23,7 @@ export function TimerBadge() {
 
   return (
     <motion.div
+      className="fb-timer"
       initial={{ opacity: 0, y: 20 }}
       animate={{
         opacity: 1,

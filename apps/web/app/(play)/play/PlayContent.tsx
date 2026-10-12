@@ -109,19 +109,7 @@ function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) 
       whileHover={{ scale: 1.06, y: -6 }}
       whileTap={{ scale: 0.94 }}
       onClick={onSelect}
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 12,
-        padding: "24px 20px",
-        borderRadius: 28,
-        border: "3px solid rgba(255,255,255,0.6)",
-        background: "linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7))",
-        cursor: "pointer",
-        boxShadow: "0 8px 30px rgba(0,0,0,0.08)",
-        minWidth: 130,
-      }}
+      className="fb-picker-card"
     >
       {/* Avatar */}
       <motion.div
@@ -707,7 +695,7 @@ export default function PlayContent() {
   /* ── Who's Playing? ── */
   if (view === "who") {
     return (
-      <main className="min-h-screen bg-gradient-to-b from-sky-50 via-purple-50 to-white p-6">
+      <main className="fb-kid-who">
         <AnimatePresence>
           {showParentGate && (
             <PinGateModal
@@ -864,7 +852,7 @@ export default function PlayContent() {
   /* ── Kid World Browser (default experience) ── */
   if (view === "zones") {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#7B61FF_0%,#00C2FF_36%,#FFD93D_78%,#FF6B6B_120%)] px-4 py-4 sm:px-5 sm:py-5">
+      <main className="fb-kid-world sm:px-5 sm:py-5">
         <AnimatePresence>
           {showParentGate && (
             <PinGateModal
@@ -936,7 +924,7 @@ export default function PlayContent() {
           <motion.section
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-5 rounded-[28px] border-[3px] border-white/60 bg-white/25 p-4 text-center backdrop-blur-md shadow-[0_20px_44px_rgba(30,41,59,0.28)] sm:p-6"
+            className="fb-kid-hero mb-5 sm:p-6"
           >
             <div className="text-6xl sm:text-7xl">🎮</div>
             <h1 className="mt-1 font-display text-3xl font-black text-white [text-shadow:0_3px_0_rgba(55,65,81,0.35)] sm:text-5xl">
@@ -1098,7 +1086,7 @@ export default function PlayContent() {
     };
 
     return (
-      <main className="min-h-screen px-4 py-4 sm:px-5 sm:py-5" style={{ background: theme.bgGradient }}>
+      <main className="fb-kid-zone min-h-screen px-4 py-4 sm:px-5 sm:py-5" style={{ background: theme.bgGradient }}>
         {/* Parent Gate Modal */}
         <AnimatePresence>
           {showParentGate && (
@@ -1124,7 +1112,7 @@ export default function PlayContent() {
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.85, y: 24 }}
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-sm rounded-kid bg-white p-7 text-center shadow-2xl"
+                className="fb-modal w-full max-w-sm p-7 text-center"
               >
                 <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-5xl">🔒</div>
                 <h3 className="font-display text-2xl font-black text-slate-800">Premium game!</h3>
@@ -1389,7 +1377,7 @@ export default function PlayContent() {
       : selectedPack.theme === "dino" ? "🦕"
       : "🌴";
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#6366f1_0%,#8b5cf6_40%,#06b6d4_100%)] px-4 py-4 sm:px-5 sm:py-5">
+      <main className="fb-kid-pack sm:px-5 sm:py-5">
         <div className="mx-auto max-w-2xl">
           <div className="mb-3 flex items-center gap-2">
             <motion.button

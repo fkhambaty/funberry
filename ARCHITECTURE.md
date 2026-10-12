@@ -98,6 +98,25 @@ npm run build --workspace=@funberry/web
 
 Never commit `.env`, `.env.local`, or a service-role key.
 
+## Design system
+
+The look is a berry-and-sky meadow with tactile press controls, sized for ages 5–8. Change the palette in one place and let the surfaces inherit it.
+
+| Piece | Where | What it owns |
+|-------|--------|----------------|
+| Color ramps | `packages/config/src/colors.ts` | Berry, leaf, sky, sunshine, ink, cream, paper. Brand hex values live here. |
+| Tailwind names | `apps/web/tailwind.config.ts` | The same ramps as utility classes (`bg-berry-500`, `text-ink-700`, `min-h-tap`). |
+| Tokens and chrome | `apps/web/app/globals.css` | CSS variables, focus rings, reduced motion, page washes (`.fb-app`, `.fb-marketing`, `.fb-auth`, `.fb-parent`, `.fb-kid-who`, `.fb-kid-world`, `.fb-admin`), tactile buttons (`.fb-cta`, `.kid-glass-btn`), cards (`.glass-card`, `.fb-plan`, `.fb-modal`), fields (`.fb-field`), and the game frame (`.fb-play-canvas`, `.fb-track`). |
+| Shared controls | `packages/ui/src` | `KidButton`, `KidCard`, `KidModal`, `ZoneCard`, `GameResultScreen`, `ProgressBar`, `StarRating`, `ParentalGate`, `AvatarPicker`, plus presentational `AuthStage`, `Notice`, and `TextField`. These do not own account state. |
+| Game chrome | `packages/game-engine/src/components/GameShell.tsx` | Header, star chip, progress track, and the shared play frame around every template. Templates keep their own logic and load through `loadGameTemplate()`. |
+
+Rules for a visual edit:
+
+- Keep the mascot and the berry/sky/leaf/sunshine palette. Do not introduce a second brand color as the primary.
+- Kid tap targets stay at least 48px, and primary kid actions aim for 64px. Focus rings stay visible. `prefers-reduced-motion` already collapses animation.
+- Do not move PIN checks, timers, star writes, pack generation, premium gates, or Razorpay into a presentation component.
+- Parent copy can be precise. Kid copy stays short and kind. Do not add user counts, school logos, or claims about Stripe, offline play, or an AI that writes lessons.
+
 ## What not to get wrong
 
 - Do not invent user counts, school logos, or city claims.

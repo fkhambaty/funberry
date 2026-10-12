@@ -30,16 +30,16 @@ export function ZoneCard({
       onClick={unlocked ? onClick : undefined}
       disabled={!unlocked}
       className={`
-        relative w-full p-5 rounded-[1.25rem] border-2 transition-all duration-200 text-left
-        ${unlocked ? colorBg[zone.colorKey] : "bg-gray-100 border-gray-200"}
-        ${unlocked ? "hover:scale-[1.03] hover:shadow-lg cursor-pointer" : "opacity-60 cursor-not-allowed"}
+        kid-glass-panel relative w-full min-h-tap-kid p-5 text-left
+        ${unlocked ? colorBg[zone.colorKey] : "bg-slate-100 border-slate-200"}
+        ${unlocked ? "cursor-pointer" : "opacity-60 cursor-not-allowed"}
       `}
     >
       {!unlocked && (
         <div className="absolute top-3 right-3 text-xl">🔒</div>
       )}
       <div className="text-3xl mb-2">{zone.emoji}</div>
-      <h3 className="font-[Fredoka,sans-serif] font-bold text-lg text-gray-800">
+      <h3 className="font-display font-bold text-lg text-ink-700">
         {zone.name}
       </h3>
       <p className="text-xs text-gray-500 mt-1 line-clamp-2">

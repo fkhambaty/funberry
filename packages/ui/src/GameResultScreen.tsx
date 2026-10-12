@@ -30,34 +30,25 @@ export function GameResultScreen({
   const msg = messages[Math.min(stars, 3)];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
-      <div className="text-7xl mb-4 animate-bounce">{msg.emoji}</div>
-      <h2 className="font-[Fredoka,sans-serif] text-3xl font-bold text-[#1c498c] mb-2">
+    <div className="fb-result flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
+      <div className="mb-4 text-7xl animate-bounce">{msg.emoji}</div>
+      <h2 className="font-display mb-2 text-3xl font-bold text-sky-900">
         {msg.text}
       </h2>
-      <p className="text-gray-500 mb-6">
+      <p className="mb-6 font-semibold text-ink-500">
         Score: {score}/{maxScore}
       </p>
       <div className="mb-8">
         <StarRating stars={stars} size="lg" />
       </div>
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <button
-          onClick={onReplay}
-          className="w-full py-4 rounded-2xl bg-[#379df9] text-white font-bold text-lg shadow-[0_4px_0_#1969db] active:translate-y-[2px] active:shadow-none transition-all"
-        >
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <button onClick={onReplay} className="kid-glass-btn kid-glass-sky w-full rounded-kid py-4 text-lg">
           Play Again
         </button>
-        <button
-          onClick={onNext}
-          className="w-full py-4 rounded-2xl bg-[#18b05a] text-white font-bold text-lg shadow-[0_4px_0_#0a713b] active:translate-y-[2px] active:shadow-none transition-all"
-        >
+        <button onClick={onNext} className="kid-glass-btn kid-glass-leaf w-full rounded-kid py-4 text-lg">
           Next Game
         </button>
-        <button
-          onClick={onBack}
-          className="w-full py-3 rounded-2xl bg-gray-200 text-gray-600 font-bold text-sm hover:bg-gray-300 transition"
-        >
+        <button onClick={onBack} className="kid-glass-btn kid-glass-muted w-full rounded-kid py-3 text-sm">
           Back to Zone
         </button>
       </div>

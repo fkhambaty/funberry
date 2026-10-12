@@ -544,7 +544,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-100 via-white to-berry-50/40">
+      <main className="fb-parent flex min-h-screen items-center justify-center">
         <motion.div
           animate={{ opacity: [0.55, 1, 0.55] }}
           transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
@@ -640,7 +640,7 @@ export default function DashboardPage() {
 
   return (
     <>
-    <main className="min-h-screen bg-gradient-to-b from-sky-100/90 via-white to-purple-50/30">
+    <main className="fb-parent">
       {/* Header — colorful wordmark, no logo asset */}
       <div className="kid-header-bar sticky top-0 z-20 px-3 sm:px-5">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
@@ -705,15 +705,15 @@ export default function DashboardPage() {
           <div className="glass-card rounded-kid p-4 sm:p-5">
             <h3 className="font-display text-lg font-bold text-slate-800">Progress Overview</h3>
             <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="rounded-xl bg-slate-50 p-3 text-center">
+              <div className="fb-metric">
                 <p className="text-xs font-bold uppercase text-slate-500">Topics Covered</p>
                 <p className="mt-1 font-display text-xl font-black text-slate-800">{topicsCovered}</p>
               </div>
-              <div className="rounded-xl bg-slate-50 p-3 text-center">
+              <div className="fb-metric">
                 <p className="text-xs font-bold uppercase text-slate-500">Time Spent</p>
                 <p className="mt-1 font-display text-xl font-black text-slate-800">{minutesPlayed}m</p>
               </div>
-              <div className="rounded-xl bg-slate-50 p-3 text-center">
+              <div className="fb-metric">
                 <p className="text-xs font-bold uppercase text-slate-500">Games Played</p>
                 <p className="mt-1 font-display text-xl font-black text-slate-800">{familyStats?.totalSessions ?? 0}</p>
               </div>
@@ -729,7 +729,7 @@ export default function DashboardPage() {
                     <span>{row.name}</span>
                     <span>{row.pct}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-200">
+                  <div className="fb-meter h-2 bg-slate-200">
                     <div className="h-2 rounded-full bg-sky-500" style={{ width: `${row.pct}%` }} />
                   </div>
                 </div>

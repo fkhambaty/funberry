@@ -46,6 +46,7 @@ export function GameShell({
 
   return (
     <div
+      className="fb-game-shell"
       style={{
         minHeight: "100vh",
         background: theme.bgGradient,
@@ -190,6 +191,7 @@ export function GameShell({
               key={score}
               initial={{ scale: 1.4 }}
               animate={{ scale: 1 }}
+              className="fb-score-chip"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -272,14 +274,7 @@ export function GameShell({
           <img
             src={bookPageSrc}
             alt=""
-            style={{
-              width: "100%",
-              maxHeight: 120,
-              objectFit: "contain",
-              borderRadius: 12,
-              border: "2px solid rgba(255,255,255,0.85)",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-            }}
+            className="fb-book"
           />
           <p
             style={{
@@ -303,15 +298,7 @@ export function GameShell({
 
       {progress > 0 && (
         <div style={{ position: "relative", zIndex: 10, padding: "0 16px" }}>
-          <div
-            style={{
-              height: 8,
-              backgroundColor: "rgba(0,0,0,0.07)",
-              borderRadius: 4,
-              overflow: "hidden",
-              marginTop: 6,
-            }}
-          >
+          <div className="fb-track" style={{ marginTop: 6 }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(progress * 100, 100)}%` }}
@@ -328,10 +315,11 @@ export function GameShell({
       )}
 
       <div
+        className="fb-play-canvas"
         style={{
           position: "relative",
           zIndex: 5,
-          padding: "16px 0",
+          padding: "16px 12px",
           paddingBottom: onNextGame ? 88 : 20,
         }}
       >

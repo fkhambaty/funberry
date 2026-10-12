@@ -20,7 +20,7 @@ export function StarRating({
   size = "md",
 }: StarRatingProps) {
   return (
-    <div className="flex gap-1" role="img" aria-label={`${stars} of ${maxStars} stars`}>
+    <div className="fb-stars flex gap-1" role="img" aria-label={`${stars} of ${maxStars} stars`}>
       {Array.from({ length: maxStars }, (_, i) => (
         <span
           key={i}

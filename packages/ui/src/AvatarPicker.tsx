@@ -41,7 +41,7 @@ export function AvatarPicker({ onSelect, initialConfig }: AvatarPickerProps) {
       {/* Avatar Preview */}
       <div className="flex justify-center">
         <div
-          className="w-28 h-28 rounded-full flex items-center justify-center text-6xl border-4"
+          className="flex h-28 w-28 items-center justify-center rounded-full border-4 text-6xl shadow-kid"
           style={{ borderColor: selected.color, backgroundColor: selected.color + "22" }}
         >
           {selected.body}
@@ -58,10 +58,10 @@ export function AvatarPicker({ onSelect, initialConfig }: AvatarPickerProps) {
             <button
               key={emoji}
               onClick={() => update({ body: emoji })}
-              className={`w-14 h-14 rounded-2xl text-3xl flex items-center justify-center transition-all ${
+              className={`fb-avatar-option flex items-center justify-center rounded-2xl text-3xl transition-all ${
                 selected.body === emoji
-                  ? "bg-[#daf0ff] border-2 border-[#379df9] scale-110"
-                  : "bg-gray-100 border-2 border-transparent hover:bg-gray-200"
+                  ? "scale-110 border-2 border-sky-500 bg-sky-100"
+                  : "border-2 border-transparent bg-sky-50 hover:bg-sky-100"
               }`}
             >
               {emoji}
@@ -80,10 +80,10 @@ export function AvatarPicker({ onSelect, initialConfig }: AvatarPickerProps) {
             <button
               key={color}
               onClick={() => update({ color })}
-              className={`w-10 h-10 rounded-full border-3 transition-all ${
+              className={`h-12 w-12 rounded-full border-4 transition-all ${
                 selected.color === color
-                  ? "scale-125 border-gray-800"
-                  : "border-transparent hover:scale-110"
+                  ? "scale-110 border-ink-700"
+                  : "border-white hover:scale-105"
               }`}
               style={{ backgroundColor: color }}
               aria-label={`Color ${color}`}

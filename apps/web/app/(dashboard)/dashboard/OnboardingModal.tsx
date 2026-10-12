@@ -61,7 +61,7 @@ export function OnboardingModal({
         initial={{ scale: 0.9, y: 24, opacity: 0 }}
         animate={{ scale: 1, y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 22 }}
-        className="relative w-full max-w-md overflow-hidden rounded-kid bg-white p-7 shadow-2xl"
+        className="fb-modal relative w-full max-w-md overflow-hidden p-7"
       >
         {/* Skip is always available */}
         <button

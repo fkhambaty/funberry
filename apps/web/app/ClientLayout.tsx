@@ -79,7 +79,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         <Link
           href={homeHref}
           aria-label={isParentSurface ? "Go to parent home" : "Go to play home"}
-          className="fixed left-4 top-20 z-[60] inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_8px_18px_-10px_rgba(15,23,42,0.45)] backdrop-blur transition hover:-translate-y-0.5 hover:bg-white"
+          className="fb-float-home"
         >
           <span aria-hidden>🏠</span>
           Home

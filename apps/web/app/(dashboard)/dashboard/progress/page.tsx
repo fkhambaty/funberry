@@ -63,14 +63,14 @@ export default function ProgressPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 to-white">
+      <div className="fb-parent flex min-h-screen items-center justify-center">
         <p className="text-sm font-semibold text-slate-500">Loading your growth report…</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-sky-50/30 p-4 sm:p-6">
+    <main className="fb-parent p-4 sm:p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
           <motion.a

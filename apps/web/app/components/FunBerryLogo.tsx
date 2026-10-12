@@ -168,7 +168,7 @@ export function FunBerryLogo({
     >
       <svg
         width={responsive ? "100%" : w}
-        height={responsive ? "auto" : h}
+        height={responsive ? undefined : h}
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

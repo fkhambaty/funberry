@@ -125,11 +125,12 @@ export function StarReveal({
         initial={{ opacity: 0, scale: 0.7 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 14 }}
+        className="fb-result"
         style={{
           textAlign: "center",
           padding: "32px 24px",
           maxWidth: 460,
-          margin: "0 auto",
+          margin: "12px auto",
           position: "relative",
           zIndex: 10,
         }}
