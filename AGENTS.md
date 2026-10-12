@@ -19,7 +19,7 @@ The brand name and tagline live in [`packages/config/src/brand.ts`](packages/con
 - Not Okavo / FORMA / a software marketplace. That repo is unrelated even if the same human owns it.
 - Not a school SIS. No attendance, no teacher gradebook, no “AI tutor that chats with the child.”
 - Not a claim that we copied any publisher’s textbook. Games are **theme-aligned**; see [`docs/SYLLABUS_ALIGNMENT.md`](docs/SYLLABUS_ALIGNMENT.md).
-- Stripe / RevenueCat copy in `packages/config` is **placeholder**. **Live web payments are Razorpay INR** (₹99/week, ₹349/month).
+- Stripe / RevenueCat copy in `packages/config` is **placeholder**. **Live web payments are Razorpay INR** (₹99/week, ₹349/month) on the Cloudflare worker. Checkout shows the name FKTech because FunBerry, Data For Dummies, and Okavo share one Razorpay account.
 
 ## Who uses which UI
 
@@ -27,7 +27,7 @@ The brand name and tagline live in [`packages/config/src/brand.ts`](packages/con
 |----------|--------|----------------|
 | **Child** | `/play` | Worlds, games, stars, kid-facing copy. No billing, no email, no PIN digits in the game UI. |
 | **Parent** | `/login`, `/signup`, `/dashboard`, `/dashboard/progress`, `/dashboard/packs`, `/pricing` | Children, reports, coupons, Razorpay upgrade, PIN lock / timer. |
-| **Admin** | `/admin` | Allowlisted emails (`ADMIN_EMAILS`, default owner). Bearer session + service role APIs. |
+| **Admin** | `/admin` | Owner emails only: fakhruddinkhambaty@gmail.com and fktiindia@gmail.com. The worker promotes those emails on signup, verify, and sign-in. |
 | **Anonymous** | `/`, `/pricing`, `/privacy`, `/terms` | Marketing. Home is SSR; play/dashboard are client-heavy. |
 
 Kid “Home” on `/play` stays inside the play SPA (worlds or child picker). The parent home is `/dashboard`. Do not send a child to the dashboard without a parent PIN gate.
@@ -59,29 +59,21 @@ Game UIs load **on demand** via `loadGameTemplate()` so PixiJS is not in the pla
 
 | Environment | Notes |
 |-------------|--------|
-| **Production** | Cloudflare D1 database `funberry`. Site `www.funberrykids.in`. Accounts started fresh on 12 Oct 2026. |
+| **Production** | Cloudflare D1 database `funberry`. Site `www.funberrykids.in`. Accounts, coupons, and Razorpay state live there. |
 | **Local web** | `npm run dev:web` → `http://localhost:3000`. Copy [`apps/web/.env.example`](apps/web/.env.example) to `apps/web/.env.local`. |
 | **Local mobile** | `npm run dev:mobile`. Uses `EXPO_PUBLIC_SUPABASE_*`. |
 
 Never commit `.env`, `.env.local`, or service-role keys. The browser client **must not** hardcode a fallback anon JWT; URL + anon key come from env.
 
-API keys dashboard: <https://supabase.com/dashboard/project/tkuakihsswzhrcrqcqel/settings/api>
-
-| Variable | Where |
-|----------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Web client + server |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Web client (public) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server only (admin APIs, webhooks, coupons) |
-| `RAZORPAY_*` | Subscription create + webhook |
-| `ADMIN_EMAILS` | Comma-separated allowlist for `/admin` |
+The website does not use a Supabase URL or service-role key. Razorpay secrets live on the worker, not in the Next.js app.
 
 ## Auth, PIN, and money
 
 - Web session is a bearer token in `localStorage` key `funberry_session`. The worker checks ownership. There is no row-level security.
 - Parent **PIN** is stored on `parents.pin` and compared in the client for lock screen / parent gate. Do not print PINs in logs or kid UI.
 - **Stars:** `POST /v1/progress` adds the stars for that round only when the child belongs to the signed-in parent. Never add a client-only star counter as source of truth.
-- **Payments:** amounts and plan IDs live on the server / Razorpay plans. The browser must not tell the server “charge ₹X.” Webhook HMAC is required. Stripe webhook routes are stubs — do not market Stripe as live.
-- **Coupons:** no client RLS policies; redeem only through the service-role API.
+- **Payments:** amounts and plan IDs live on the worker. The browser must not tell the server “charge ₹X.” Checkout signature and webhook HMAC are checked on the worker. The dummy account must never open a real charge. Stripe webhook routes are stubs — do not market Stripe as live.
+- **Coupons:** create, list, and redeem only through the worker. One redemption per account. A code can expire and can have a redemption cap.
 
 ## Data you must not leak
 
@@ -127,9 +119,4 @@ If you add a Postgres function or policy, add a migration under `supabase/migrat
 
 ## Checking permissions
 
-RLS is the contract. The UI hiding a button is not security. When testing access, compare:
-
-1. What the signed-in parent can read with the **anon key + user JWT**.
-2. What is actually in the table (service role / SQL editor).
-
-If those differ, you have a leak or a broken query — fix the policy or the RPC, not only the React tree.
+The worker checks that the signed-in parent owns the child, and that admin routes belong to an owner email. Hiding a button is not security. Compare what that session can read with what is in D1. If those differ, fix the worker, not only the React tree.

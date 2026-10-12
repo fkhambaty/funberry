@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     // switch (event.type) {
     //   case "checkout.session.completed":
-    //     // Update parent's subscription_tier in Supabase
+    //     // Update the parent's subscription tier
     //     break;
     //   case "customer.subscription.deleted":
     //     // Downgrade to free tier

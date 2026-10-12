@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase, signIn, signOut } from "@funberry/supabase";
+import { FUNBERRY_API, supabase, signIn, signOut } from "@funberry/supabase";
 
 interface Coupon {
   id: string;
@@ -26,6 +26,34 @@ interface Stats {
   activeCoupons: number;
   totalRedemptions: number;
   recentUsers: { email: string; name: string; subscription_tier: string; created_at: string }[];
+}
+
+interface AdminChild {
+  id: string;
+  name: string;
+  age: number;
+  total_stars: number;
+  created_at: string;
+  parent_email: string;
+}
+
+interface AdminSubscription {
+  subscription_id: string;
+  plan: string;
+  status: string;
+  created_at: string;
+  email: string;
+  subscription_tier: string;
+  subscription_expires_at: string | null;
+}
+
+interface Revenue {
+  currency: string;
+  weekly: { accounts: number; priceInr: number; listedInr: number };
+  monthly: { accounts: number; priceInr: number; listedInr: number };
+  listedRecurringInr: number;
+  couponPremiumAccounts: number;
+  note: string;
 }
 
 interface AdminUser {
@@ -61,6 +89,9 @@ export default function AdminPage() {
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [children, setChildren] = useState<AdminChild[]>([]);
+  const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
+  const [revenue, setRevenue] = useState<Revenue | null>(null);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null);
   const [busyUser, setBusyUser] = useState<string | null>(null);
@@ -78,7 +109,7 @@ export default function AdminPage() {
       data: { session },
     } = await supabase.auth.getSession();
     const token = session?.access_token;
-    return fetch(path, {
+    return fetch(`${FUNBERRY_API}${path}`, {
       ...init,
       headers: {
         ...(init?.headers ?? {}),
@@ -89,28 +120,41 @@ export default function AdminPage() {
   }, []);
 
   const loadAll = useCallback(async (): Promise<Phase> => {
-    const [s, u, c] = await Promise.all([
-      authedFetch("/api/admin/stats"),
-      authedFetch("/api/admin/users"),
-      authedFetch("/api/admin/coupons"),
+    const [s, u, c, kids, subs, money] = await Promise.all([
+      authedFetch("/v1/admin/stats"),
+      authedFetch("/v1/admin/users"),
+      authedFetch("/v1/admin/coupons"),
+      authedFetch("/v1/admin/children"),
+      authedFetch("/v1/admin/subscriptions"),
+      authedFetch("/v1/admin/revenue"),
     ]);
-    if ([s, u, c].some((r) => r.status === 503)) {
+    const responses = [s, u, c, kids, subs, money];
+    if (responses.some((r) => r.status === 503)) {
       const j = (await s.json().catch(() => ({}))) as { error?: string };
       setConfigError(j.error ?? "Server not configured.");
       return "config";
     }
-    if ([s, u, c].some((r) => r.status === 401)) return "denied";
+    if (responses.some((r) => r.status === 401 || r.status === 403)) return "denied";
 
     const errs: string[] = [];
     const sj = await s.json();
     const uj = await u.json();
     const cj = await c.json();
+    const kj = await kids.json();
+    const subj = await subs.json();
+    const rj = await money.json();
     if (s.ok) setStats(sj as Stats);
     else errs.push(sj.error ?? "stats error");
     if (u.ok) setUsers((uj.users as AdminUser[]) ?? []);
     else errs.push(uj.error ?? "users error");
     if (c.ok) setCoupons((cj.coupons as Coupon[]) ?? []);
     else errs.push(cj.error ?? "coupons error");
+    if (kids.ok) setChildren((kj.children as AdminChild[]) ?? []);
+    else errs.push(kj.error ?? "children error");
+    if (subs.ok) setSubscriptions((subj.subscriptions as AdminSubscription[]) ?? []);
+    else errs.push(subj.error ?? "subscriptions error");
+    if (money.ok) setRevenue(rj as Revenue);
+    else errs.push(rj.error ?? "revenue error");
     setLoadError(errs.length ? errs.join(" · ") : null);
     return "ready";
   }, [authedFetch]);
@@ -167,7 +211,7 @@ export default function AdminPage() {
     setCreating(true);
     setMsg(null);
     try {
-      const res = await authedFetch("/api/admin/coupons", {
+      const res = await authedFetch("/v1/admin/coupons", {
         method: "POST",
         body: JSON.stringify({
           code,
@@ -194,12 +238,12 @@ export default function AdminPage() {
   }
 
   async function toggleCoupon(c: Coupon) {
-    await authedFetch("/api/admin/coupons", { method: "PATCH", body: JSON.stringify({ id: c.id, active: !c.active }) });
+    await authedFetch("/v1/admin/coupons", { method: "PATCH", body: JSON.stringify({ id: c.id, active: !c.active }) });
     await refresh();
   }
   async function deleteCoupon(c: Coupon) {
     if (!confirm(`Delete coupon ${c.code}?`)) return;
-    await authedFetch("/api/admin/coupons", { method: "DELETE", body: JSON.stringify({ id: c.id }) });
+    await authedFetch("/v1/admin/coupons", { method: "DELETE", body: JSON.stringify({ id: c.id }) });
     await refresh();
   }
 
@@ -207,7 +251,7 @@ export default function AdminPage() {
     if (action === "revoke" && !confirm(`Revoke premium for ${u.email}?`)) return;
     setBusyUser(u.id);
     try {
-      await authedFetch("/api/admin/users", {
+      await authedFetch("/v1/admin/users", {
         method: "PATCH",
         body: JSON.stringify({ userId: u.id, action, days }),
       });
@@ -247,7 +291,7 @@ export default function AdminPage() {
           <h1 className="mb-2 text-lg font-bold text-amber-300">Admin not configured</h1>
           <p className="text-sm text-slate-300">{configError}</p>
           <p className="mt-3 text-xs text-slate-500">
-            Set the environment variables in Vercel and run migration 018, then reload.
+            The account service did not accept the admin request. Reload and try again.
           </p>
           <button
             onClick={() => location.reload()}
@@ -277,7 +321,7 @@ export default function AdminPage() {
             </p>
           )}
           <input
-            type="email"
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="admin email"
@@ -322,6 +366,8 @@ export default function AdminPage() {
     { label: "Learning packs", value: stats?.totalPacks },
     { label: "Active coupons", value: stats?.activeCoupons },
     { label: "Coupon redemptions", value: stats?.totalRedemptions },
+    { label: "Listed weekly value", value: revenue ? `₹${revenue.weekly.listedInr}` : "—" },
+    { label: "Listed monthly value", value: revenue ? `₹${revenue.monthly.listedInr}` : "—" },
   ];
 
   return (
@@ -454,6 +500,76 @@ export default function AdminPage() {
                   <span className="shrink-0 text-xs text-slate-500">{fmtDateTime(u.lastSignInAt)}</span>
                 </div>
               ))}
+            </div>
+          )}
+        </section>
+
+        <section className="fb-admin-card mb-8 p-5">
+          <h2 className="mb-2 text-lg font-bold">Revenue</h2>
+          <p className="mb-3 text-sm text-slate-400">{revenue?.note}</p>
+          <p className="text-sm text-slate-200">
+            Listed recurring value: <strong>₹{revenue?.listedRecurringInr ?? "—"}</strong> {revenue?.currency || "INR"}
+            {" · "}
+            Coupon premium accounts: {revenue?.couponPremiumAccounts ?? "—"}
+          </p>
+        </section>
+
+        <section className="fb-admin-card mb-8 p-5">
+          <h2 className="mb-4 text-lg font-bold">Children ({children.length})</h2>
+          {children.length === 0 ? (
+            <p className="text-sm text-slate-400">No children yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="text-xs uppercase text-slate-500">
+                  <tr>
+                    <th className="py-2 pr-3">Child</th>
+                    <th className="py-2 pr-3">Age</th>
+                    <th className="py-2 pr-3">Stars</th>
+                    <th className="py-2 pr-3">Parent</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {children.map((child) => (
+                    <tr key={child.id} className="border-t border-slate-700">
+                      <td className="py-2 pr-3">{child.name}</td>
+                      <td className="py-2 pr-3">{child.age}</td>
+                      <td className="py-2 pr-3">{child.total_stars}</td>
+                      <td className="py-2 pr-3 text-xs text-slate-400">{child.parent_email}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        <section className="fb-admin-card mb-8 p-5">
+          <h2 className="mb-4 text-lg font-bold">Subscriptions ({subscriptions.length})</h2>
+          {subscriptions.length === 0 ? (
+            <p className="text-sm text-slate-400">No Razorpay subscriptions yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="text-xs uppercase text-slate-500">
+                  <tr>
+                    <th className="py-2 pr-3">Parent</th>
+                    <th className="py-2 pr-3">Plan</th>
+                    <th className="py-2 pr-3">Status</th>
+                    <th className="py-2 pr-3">Expires</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscriptions.map((sub) => (
+                    <tr key={sub.subscription_id} className="border-t border-slate-700">
+                      <td className="py-2 pr-3 text-xs text-slate-300">{sub.email}</td>
+                      <td className="py-2 pr-3">{sub.plan}</td>
+                      <td className="py-2 pr-3">{sub.status}</td>
+                      <td className="py-2 pr-3 text-xs text-slate-400">{fmtDate(sub.subscription_expires_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </section>

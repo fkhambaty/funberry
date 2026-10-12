@@ -1,3 +1,7 @@
+import { handleAdmin, handleCouponRedeem } from "./admin.js";
+import { handleRazorpayAuthed, handleRazorpayWebhook, syncParentBilling } from "./payments.js";
+import { roleForEmail } from "./owners.js";
+
 const ALLOWED_ORIGINS = new Set([
   "https://funberrykids.in",
   "https://www.funberrykids.in",
@@ -28,7 +32,7 @@ function json(body, status, origin) {
   if (origin) {
     headers["access-control-allow-origin"] = origin;
     headers["access-control-allow-headers"] = "authorization, content-type";
-    headers["access-control-allow-methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+    headers["access-control-allow-methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
     headers.vary = "Origin";
   }
   return new Response(status === 204 ? null : JSON.stringify(body), { status, headers });
@@ -88,6 +92,7 @@ function parentOut(row) {
     welcome_email_sent_at: row.welcome_email_sent_at || null,
     razorpay_subscription_id: row.razorpay_subscription_id || null,
     razorpay_customer_id: row.razorpay_customer_id || null,
+    subscription_cancel_at_period_end: row.subscription_cancel_at_period_end ? 1 : 0,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -282,19 +287,20 @@ export default {
         const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
         const passwordHash = await hashPassword(password, salt);
         const now = nowIso();
+        const role = roleForEmail(email);
         if (existing) {
           await db
-            .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, name = ?, pin = ?, updated_at = ? WHERE id = ?")
-            .bind(passwordHash, salt, name, pin || null, now, existing.id)
+            .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, name = ?, pin = ?, role = ?, updated_at = ? WHERE id = ?")
+            .bind(passwordHash, salt, name, pin || null, role, now, existing.id)
             .run();
         } else {
           await db
             .prepare(
               `INSERT INTO parents
-               (id, email, password_hash, password_salt, name, pin, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+               (id, email, password_hash, password_salt, name, pin, role, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             )
-            .bind(crypto.randomUUID(), email, passwordHash, salt, name, pin || null, now)
+            .bind(crypto.randomUUID(), email, passwordHash, salt, name, pin || null, role, now)
             .run();
         }
         await db.prepare("DELETE FROM email_codes WHERE email = ? AND purpose = 'verify'").bind(email).run();
@@ -312,7 +318,12 @@ export default {
           return json({ error: "That code is wrong or expired. Check the latest email or resend a new code." }, 400, origin);
         }
         const now = nowIso();
-        await db.prepare("UPDATE parents SET email_verified_at = ?, updated_at = ? WHERE id = ?").bind(now, now, parent.id).run();
+        const role = roleForEmail(email);
+        await db
+          .prepare("UPDATE parents SET email_verified_at = ?, role = ?, updated_at = ? WHERE id = ?")
+          .bind(now, role, now, parent.id)
+          .run();
+        parent.role = role;
         const token = await createSession(db, parent.id);
         return json(sessionBody(parent, token), 200, origin);
       }
@@ -368,6 +379,14 @@ export default {
         if (!parent) return json({ error: "Invalid login credentials" }, 401, origin);
         const passwordHash = await hashPassword(password, parent.password_salt);
         if (passwordHash !== parent.password_hash) return json({ error: "Invalid login credentials" }, 401, origin);
+        const signedInAt = nowIso();
+        const role = roleForEmail(parent.email);
+        await db
+          .prepare("UPDATE parents SET last_sign_in_at = ?, role = ?, updated_at = ? WHERE id = ?")
+          .bind(signedInAt, role, signedInAt, parent.id)
+          .run();
+        parent.role = role;
+        parent.last_sign_in_at = signedInAt;
         if (!parent.email_verified_at) {
           if (emailReady(env)) await issueCode(db, env, parent.email, "verify");
           return json(
@@ -390,15 +409,27 @@ export default {
         return json({ ok: true }, 200, origin);
       }
 
+      if (request.method === "POST" && path === "/v1/payments/razorpay/webhook") {
+        return handleRazorpayWebhook(request, env, db, origin);
+      }
+
       const parent = await requireParent(request, db);
       if (!parent) return json({ error: "Not authenticated" }, 401, origin);
+
+      const billing = await handleRazorpayAuthed(request, env, db, parent, origin, path);
+      if (billing) return billing;
+      const coupon = await handleCouponRedeem(request, db, parent, origin, path);
+      if (coupon) return coupon;
+      const adminResponse = await handleAdmin(request, db, parent, origin, path);
+      if (adminResponse) return adminResponse;
 
       if (request.method === "GET" && path === "/v1/session") {
         return json({ user: { id: parent.id, email: parent.email }, parent: parentOut(parent) }, 200, origin);
       }
 
       if (request.method === "GET" && path === "/v1/parent") {
-        return json({ parent: parentOut(parent) }, 200, origin);
+        const fresh = await syncParentBilling(env, db, parent);
+        return json({ parent: parentOut(fresh) }, 200, origin);
       }
 
       if (request.method === "PUT" && path === "/v1/parent") {

@@ -40,7 +40,7 @@ function computeIsPaid(parent: Parent | null): boolean {
   return new Date(expiry).getTime() > Date.now();
 }
 
-/** Kid-facing copy: web records each completed round to Supabase for stars + parent coaching reports. */
+/** Kid-facing copy: web records each completed round for stars and parent coaching reports. */
 const KID_SAVED_PROGRESS_WHO =
   "Your stars save when you play. Grown-ups have their own screen to cheer you on!";
 const KID_SAVED_PROGRESS_ZONES =

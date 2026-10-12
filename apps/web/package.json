@@ -14,11 +14,9 @@
     "@funberry/game-engine": "*",
     "@funberry/supabase": "*",
     "@funberry/ui": "*",
-    "@supabase/supabase-js": "^2.49.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.0.0",
     "next": "^15.2.0",
-    "razorpay": "^2.9.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tesseract.js": "^5.1.1"

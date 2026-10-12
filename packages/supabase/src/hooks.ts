@@ -95,6 +95,35 @@ export async function getParent(): Promise<Parent | null> {
   }
 }
 
+export async function createRazorpaySubscription(plan: "weekly" | "monthly") {
+  return accountRequest<{ subscription_id: string; key_id: string; short_url?: string | null }>(
+    "/v1/payments/razorpay/subscription",
+    { method: "POST", body: { plan } },
+  );
+}
+
+export async function confirmRazorpaySubscription(body: {
+  razorpay_payment_id: string;
+  razorpay_subscription_id: string;
+  razorpay_signature: string;
+}) {
+  return accountRequest<{ ok: boolean }>("/v1/payments/razorpay/confirm", { method: "POST", body });
+}
+
+export async function cancelRazorpaySubscription() {
+  return accountRequest<{ ok: boolean; subscription_expires_at?: string | null }>("/v1/payments/razorpay/cancel", {
+    method: "POST",
+    body: {},
+  });
+}
+
+export async function redeemCouponCode(code: string) {
+  return accountRequest<{ ok: boolean; freeDays: number; expiresAt: string }>("/v1/coupons/redeem", {
+    method: "POST",
+    body: { code },
+  });
+}
+
 export async function updateParentPin(pin: string) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Not authenticated");

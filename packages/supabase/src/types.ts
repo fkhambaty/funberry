@@ -13,6 +13,7 @@ export interface Database {
           welcome_email_sent_at: string | null;
           razorpay_subscription_id: string | null;
           razorpay_customer_id: string | null;
+          subscription_cancel_at_period_end: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export interface Database {
           welcome_email_sent_at?: string | null;
           razorpay_subscription_id?: string | null;
           razorpay_customer_id?: string | null;
+          subscription_cancel_at_period_end?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["parents"]["Insert"]>;
       };

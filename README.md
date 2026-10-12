@@ -13,8 +13,8 @@ An educational games platform for kids aged 5-8, aligned with the ICSE Class 2 s
 | Monorepo | Turborepo |
 | Website | Next.js 15, Tailwind CSS, Framer Motion |
 | Mobile App | React Native, Expo |
-| Backend | Supabase (Auth, PostgreSQL, Storage) |
-| Payments | Razorpay INR subscriptions (web); mobile billing is not live |
+| Backend | Cloudflare Worker + D1 |
+| Payments | Razorpay INR subscriptions on the shared FKTech account (web); mobile billing is not live |
 | Language | TypeScript |
 
 ## Learning Packs
@@ -52,7 +52,7 @@ funberry/
 - Node.js 20+
 - npm 10+
 - Expo CLI (for mobile)
-- Supabase account (for backend)
+- Cloudflare account for the worker (accounts and payments)
 
 ### Setup
 
@@ -64,11 +64,12 @@ npm install
 # 2. Copy environment variables
 cp .env.example .env
 
-# 3. Edit .env with your Supabase credentials
-# Get these from: https://supabase.com/dashboard
+# 3. Accounts and payments run on the deployed Cloudflare worker.
+#    Local web uses https://funberry-api.fkhambaty.workers.dev unless
+#    NEXT_PUBLIC_FUNBERRY_API is set.
 
-# 4. Run database migrations
-# Apply files in supabase/migrations/ to your Supabase project
+# 4. Database changes for that worker belong in cloudflare/d1/ and are
+#    applied with wrangler d1 execute --remote.
 
 # 5. Start development
 npm run dev:web      # Website at http://localhost:3000

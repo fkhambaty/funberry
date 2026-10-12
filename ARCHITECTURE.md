@@ -28,11 +28,10 @@ Browser
   → Vercel (Next.js 15 app in apps/web)
       → marketing pages are server-rendered
       → /play and /dashboard are client-heavy
-      → /api/razorpay/* still expects the old Supabase session
   → Cloudflare Worker https://funberry-api.fkhambaty.workers.dev
       → D1 database funberry (e0bf4f89-c29d-4c0d-9674-b5977847e7d1)
-      → parent accounts, children, stars, packs
-  → Razorpay for INR subscriptions is not moved yet
+      → parent accounts, children, stars, packs, coupons, admin
+      → Razorpay subscriptions on the shared FKTech account
 ```
 
 Mobile (`apps/mobile`, Expo) has auth and a home screen. The in-app game player is not the live product. Do not promise it.
@@ -61,10 +60,10 @@ Zones children see come from `packages/config`. Games they play come from `packa
 | Anyone | `/`, `/pricing`, `/privacy`, `/terms` |
 | Parent | `/login`, `/signup`, `/dashboard`, `/dashboard/progress`, `/dashboard/packs` |
 | Child | `/play` |
-| Owner | `/admin` (allowlisted emails) |
-| Server | `/api/razorpay/subscription`, `/api/razorpay/webhook`, `/api/cron/keepalive` |
+| Owner | `/admin` (owner emails only) |
+| Worker | `/v1/payments/razorpay/subscription`, `/confirm`, `/cancel`, `/v1/payments/razorpay/webhook`, `/v1/coupons/redeem`, `/v1/admin/*` |
 
-Stripe routes exist and are not the live payment path. Live web payments are Razorpay, in INR.
+Stripe route stubs exist and are not the live payment path. Live web payments are Razorpay, in INR, on the worker.
 
 ## Data and auth
 
@@ -78,13 +77,22 @@ Test login: username `dummy`, password `dummy`, parent PIN `1234`, one child "Te
 
 The parent PIN is still compared in the browser. Do not log it.
 
-Old Supabase project ref `tkuakihsswzhrcrqcqel` is no longer the account database. Do not point new login code back at it. Razorpay checkout, coupons, and the admin pages still call Supabase and will fail until those routes move to the worker. That move needs the Razorpay secret, which is not in the repo.
+Old Supabase project ref `tkuakihsswzhrcrqcqel` is no longer the account database. Do not point new login, coupon, admin, or payment code back at it. The website does not call that host.
 
 Zones children see come from `packages/config`. Games they play come from `packages/game-engine`. There is no zones or games table in D1.
 
 ## Payments
 
-Amounts and plan ids are decided on the server. The browser must not say "charge this many rupees." The Razorpay webhook must verify the signature. Prices live in `packages/config/src/pricing.ts`.
+FunBerry, Data For Dummies, and Okavo share one FKTech Razorpay account. FunBerry only acts on subscriptions whose notes say `product: funberry`. Plan ids and the publishable key id are worker vars. The key secret and the FunBerry webhook secret are worker secrets. Prices live in `packages/config/src/pricing.ts`. The browser must not say "charge this many rupees."
+
+1. A signed-in parent asks the worker for `weekly` (52 cycles, ₹99) or `monthly` (12 cycles, ₹349). The worker reuses a still-`created` subscription for that parent and plan from the last 15 minutes. It refuses when premium is already active, and the dummy account never reaches Razorpay.
+2. Checkout.js opens with `name: FKTech` so the payer sees FKTech. The description says FunBerry Kids Premium and the price. If Razorpay reports a website mismatch, the parent is sent to that subscription's hosted `short_url`. Coming back to the dashboard makes the worker re-read the subscription and grant premium only when Razorpay says `active` or `authenticated` and the subscription belongs to that parent.
+3. The confirm call checks `HMAC_SHA256(key_secret, payment_id + '|' + subscription_id)` before that grant. It is safe to repeat.
+4. When `/v1/parent` sees a stored Razorpay subscription whose expiry has passed, it fetches the subscription again and either extends premium or sets the account back to free for `cancelled`, `halted`, `completed`, or `expired`.
+5. Parents can turn off auto-renew from the dashboard. That calls Razorpay cancel with `cancel_at_cycle_end: 1`. Premium stays until the period already paid.
+6. `POST /v1/payments/razorpay/webhook` is a backup. Register `https://funberry-api.fkhambaty.workers.dev/v1/payments/razorpay/webhook` in the Razorpay dashboard for this FunBerry webhook secret, with events `subscription.activated`, `subscription.charged`, `subscription.cancelled`, `subscription.halted`, and `subscription.completed`. Delivery is ignored when the event id was already stored.
+
+Coupons and `/admin` also live on the worker. Owner emails `fakhruddinkhambaty@gmail.com` and `fktiindia@gmail.com` are promoted to admin when they sign up, verify, or sign in. Coupon codes grant premium days, with an optional expiry, a redemption cap, and one redemption per account.
 
 ## Local run
 
@@ -121,5 +129,5 @@ Rules for a visual edit:
 
 - Do not invent user counts, school logos, or city claims.
 - Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Read `docs/LEARNING_PACKS.md` before changing that pipeline.
-- A daily Vercel cron (`/api/cron/keepalive`) was added to poke Supabase. Supabase's free tier still pauses or removes idle projects, and a cron cannot revive a deleted project. The replacement database is a separate decision, recorded in the owner's notes, not something to start inside a random edit.
+- The old Vercel cron that poked Supabase is gone. Accounts live on D1, so that ping had nothing left to keep awake.
 - Resume headers and job-search files do not belong in this repo.

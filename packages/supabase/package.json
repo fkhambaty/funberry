@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "@funberry/config": "*",
-    "@funberry/game-engine": "*",
-    "@supabase/supabase-js": "^2.49.0"
+    "@funberry/game-engine": "*"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

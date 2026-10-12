@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { zones, isPremium as tierIsPremium, pricing } from "@funberry/config";
 import type { SubscriptionTier } from "@funberry/config";
-import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword, trySendWelcomeEmailAfterAuth, supabase } from "@funberry/supabase";
+import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword, trySendWelcomeEmailAfterAuth, redeemCouponCode, createRazorpaySubscription, confirmRazorpaySubscription, cancelRazorpaySubscription } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
 import { TimerSetup } from "../../components/TimerSetup";
 import { useTimer } from "../../components/TimerProvider";
@@ -382,6 +382,19 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
   );
 }
 
+function isWebsiteMismatchMessage(value: unknown): boolean {
+  const text = typeof value === "string" ? value : JSON.stringify(value ?? "");
+  return /website|domain|mismatch|not registered|unregistered|not whitelisted|whitelist/i.test(text);
+}
+
+function razorpayFrameOpen(): boolean {
+  return Array.from(document.querySelectorAll("iframe")).some((frame) => {
+    const src = `${frame.getAttribute("src") || ""} ${frame.src || ""}`;
+    const rect = frame.getBoundingClientRect();
+    return src.includes("razorpay") && rect.width > 40 && rect.height > 40;
+  });
+}
+
 function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined") {
@@ -443,6 +456,7 @@ export default function DashboardPage() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [payBusy, setPayBusy] = useState<string | null>(null);
   const [payError, setPayError] = useState("");
+  const [cancelMsg, setCancelMsg] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponMsg, setCouponMsg] = useState<{ text: string; ok: boolean } | null>(null);
@@ -467,6 +481,22 @@ export default function DashboardPage() {
         if (p) {
           setParent(p);
           if (p.pin) setParentPin(p.pin);
+          let pending = "";
+          try {
+            pending = window.sessionStorage.getItem("funberry_pending_sub") || "";
+            if (pending) window.sessionStorage.removeItem("funberry_pending_sub");
+          } catch {
+            pending = "";
+          }
+          if (pending) {
+            const stillPaid =
+              tierIsPremium(p.subscription_tier) &&
+              (!p.subscription_expires_at || new Date(p.subscription_expires_at).getTime() > Date.now());
+            if (!stillPaid) {
+              setPayError("If the payment succeeded, Premium unlocks as soon as Razorpay confirms it. If it failed, you have not been charged.");
+              setUpgradeOpen(true);
+            }
+          }
         }
         const kids = await getChildren();
         setChildrenState(kids);
@@ -514,36 +544,16 @@ export default function DashboardPage() {
     setCouponBusy(true);
     setCouponMsg(null);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setCouponMsg({ text: "Please sign in again.", ok: false });
-        return;
+      const json = await redeemCouponCode(code);
+      setCouponMsg({ text: `Success! ${json.freeDays ?? 0} days of Premium unlocked.`, ok: true });
+      setCouponCode("");
+      const p = await getParent();
+      if (p) {
+        setParent(p);
+        if (p.pin) setParentPin(p.pin);
       }
-      const res = await fetch("/api/coupons/redeem", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ code }),
-      });
-      const json = (await res.json()) as { error?: string; freeDays?: number };
-      if (!res.ok) {
-        const raw = json.error ?? "Could not redeem this code.";
-        setCouponMsg({
-          text: res.status === 503 ? "Coupons are not available right now. Please try again later." : raw,
-          ok: false,
-        });
-      } else {
-        setCouponMsg({ text: `Success! ${json.freeDays ?? 0} days of Premium unlocked. 🎉`, ok: true });
-        setCouponCode("");
-        const p = await getParent();
-        if (p) {
-          setParent(p);
-          if (p.pin) setParentPin(p.pin);
-        }
-      }
-    } catch {
-      setCouponMsg({ text: "Something went wrong. Try again.", ok: false });
+    } catch (err) {
+      setCouponMsg({ text: err instanceof Error ? err.message : "Something went wrong. Try again.", ok: false });
     } finally {
       setCouponBusy(false);
     }
@@ -576,58 +586,132 @@ export default function DashboardPage() {
     return message || "Payment could not start. Try again.";
   }
 
+  async function cancelAutoRenew() {
+    if (!window.confirm("Stop auto-renew? Premium stays until the end of the period already paid.")) return;
+    setPayBusy("cancel");
+    setPayError("");
+    setCancelMsg("");
+    try {
+      await cancelRazorpaySubscription();
+      const p = await getParent();
+      if (p) setParent(p);
+      setCancelMsg("Auto-renew is off. Premium stays until the date you already paid for.");
+    } catch (err) {
+      setPayError(err instanceof Error ? err.message : "Could not cancel auto-renew. Try again.");
+    } finally {
+      setPayBusy(null);
+    }
+  }
+
   async function startRazorpayCheckout(plan: "weekly" | "monthly") {
     setPayBusy(plan);
     setPayError("");
+    if ((parent?.username || "").trim().toLowerCase() === "dummy") {
+      setPayBusy(null);
+      setPayError("Demo account: no charge");
+      return;
+    }
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        setPayBusy(null);
-        setPayError("Please sign in again.");
-        return;
-      }
-      const res = await fetch("/api/razorpay/subscription", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ plan }),
-      });
-      const json = (await res.json()) as {
-        error?: string;
-        subscriptionId?: string;
-        keyId?: string;
-        planLabel?: string;
-      };
-      if (!res.ok) throw new Error(json.error || "Could not start checkout");
-
+      const created = await createRazorpaySubscription(plan);
       await loadRazorpayScript();
-      type RazorpayInstance = { open: () => void };
+      type CheckoutResponse = {
+        razorpay_payment_id?: string;
+        razorpay_subscription_id?: string;
+        razorpay_signature?: string;
+      };
+      type RazorpayInstance = {
+        open: () => void;
+        close?: () => void;
+        on?: (event: string, handler: (response: unknown) => void) => void;
+      };
       type RazorpayCtor = new (opts: Record<string, unknown>) => RazorpayInstance;
       const RazorpayClass = (window as unknown as { Razorpay?: RazorpayCtor }).Razorpay;
       if (!RazorpayClass) throw new Error("Razorpay failed to load");
 
+      const description =
+        plan === "weekly"
+          ? `FunBerry Kids Premium — ₹${pricing.premiumWeeklyInr.priceInr}/week`
+          : `FunBerry Kids Premium — ₹${pricing.premiumMonthlyInr.priceInr}/month`;
+      let settled = false;
+      let poll = 0;
+      let watchdog = 0;
+      const clearTimers = () => {
+        window.clearInterval(poll);
+        window.clearTimeout(watchdog);
+      };
       const rzp = new RazorpayClass({
-        key: json.keyId,
-        subscription_id: json.subscriptionId,
-        name: "FunBerry Kids",
-        description: json.planLabel ?? "Premium",
-        handler: async () => {
-          setPayBusy(null);
-          setUpgradeOpen(false);
-          await new Promise((r) => setTimeout(r, 2000));
-          const p = await getParent();
-          if (p) setParent(p);
-        },
+        key: created.key_id,
+        subscription_id: created.subscription_id,
+        name: "FKTech",
+        description,
         prefill: { email: userEmail ?? "", name: parent?.name ?? "" },
         theme: { color: "#7c3aed" },
+        handler: async (response: CheckoutResponse) => {
+          if (settled) return;
+          settled = true;
+          clearTimers();
+          try {
+            await confirmRazorpaySubscription({
+              razorpay_payment_id: response?.razorpay_payment_id || "",
+              razorpay_subscription_id: response?.razorpay_subscription_id || created.subscription_id,
+              razorpay_signature: response?.razorpay_signature || "",
+            });
+            const p = await getParent();
+            if (p) setParent(p);
+            setPayBusy(null);
+            setUpgradeOpen(false);
+          } catch (err) {
+            setPayBusy(null);
+            setPayError(err instanceof Error ? err.message : "Payment is not active yet.");
+          }
+        },
         modal: {
-          ondismiss: () => setPayBusy(null),
+          ondismiss: () => {
+            if (settled) return;
+            settled = true;
+            clearTimers();
+            setPayBusy(null);
+            setPayError("Checkout closed. You have not been charged.");
+          },
         },
       });
+      const fail = (message: string) => {
+        if (settled) return;
+        settled = true;
+        clearTimers();
+        try {
+          rzp.close?.();
+        } catch {
+          // The modal may already be gone.
+        }
+        setPayBusy(null);
+        setPayError(message);
+      };
+      rzp.on?.("payment.failed", (response: unknown) => {
+        if (isWebsiteMismatchMessage(response) && created.short_url) {
+          if (settled) return;
+          settled = true;
+          clearTimers();
+          try {
+            window.sessionStorage.setItem("funberry_pending_sub", created.subscription_id);
+          } catch {
+            // The return visit still syncs from the stored subscription row.
+          }
+          window.location.assign(created.short_url);
+          return;
+        }
+        fail("Payment did not go through. You have not been charged.");
+      });
+      poll = window.setInterval(() => {
+        if (razorpayFrameOpen()) {
+          window.clearInterval(poll);
+          window.clearTimeout(watchdog);
+        }
+      }, 250);
+      watchdog = window.setTimeout(() => {
+        window.clearInterval(poll);
+        if (!razorpayFrameOpen()) fail("The payment window did not open. You have not been charged.");
+      }, 6000);
       rzp.open();
     } catch (e: unknown) {
       setPayBusy(null);
@@ -1092,6 +1176,36 @@ export default function DashboardPage() {
             <span className="shrink-0 text-slate-400 text-xl">→</span>
           </motion.a>
         </motion.section>
+
+        {parent?.razorpay_subscription_id && tierIsPremium(tier) && (
+          <section className="mb-6">
+            <div className="glass-card rounded-kid p-4 sm:p-5">
+              <h3 className="font-display text-base font-black text-slate-800">Premium auto-renew</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                {parent.subscription_expires_at
+                  ? `Premium is on until ${new Date(parent.subscription_expires_at).toLocaleDateString()}.`
+                  : "Premium is on."}
+              </p>
+              {parent.subscription_cancel_at_period_end || cancelMsg ? (
+                <p className="mt-2 text-sm font-bold text-emerald-700">
+                  {cancelMsg || "Auto-renew is off. Premium stays until the date you already paid for."}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={cancelAutoRenew}
+                  disabled={payBusy === "cancel"}
+                  className="mt-3 rounded-xl border-2 border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 disabled:opacity-50"
+                >
+                  {payBusy === "cancel" ? "Cancelling…" : "Cancel auto-renew"}
+                </button>
+              )}
+              {payError && !upgradeOpen && (
+                <p className="mt-2 text-sm font-bold text-rose-700" role="alert">{payError}</p>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Upgrade CTA — shown only for free users */}
         {!tierIsPremium(tier) && (

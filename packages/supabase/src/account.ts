@@ -226,7 +226,7 @@ export const accountAuth = {
       return { data: { user: null }, error: err instanceof Error ? err : { message: "Could not change the password." } };
     }
   },
-  async exchangeCodeForSession() {
+  async exchangeCodeForSession(_url?: string) {
     return {
       data: { session: null },
       error: { message: "Email confirmation is no longer used. Sign in with your password." },

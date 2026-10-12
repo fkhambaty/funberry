@@ -2,8 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import type { Session } from "@supabase/supabase-js";
 import { supabase, trySendWelcomeEmailAfterAuth } from "@funberry/supabase";
+
+type AuthSession = { access_token?: string } | null;
 import { AuthStage } from "@funberry/ui";
 
 function hashHasAccessToken(): boolean {
@@ -20,7 +21,7 @@ export default function ConfirmEmailPage() {
     let timeoutId: number | undefined;
     let subscription: { unsubscribe: () => void } | null = null;
 
-    const finalize = async (session: Session | null) => {
+    const finalize = async (session: AuthSession) => {
       if (cancelled) return;
       try {
         if (session) {
@@ -33,7 +34,7 @@ export default function ConfirmEmailPage() {
     };
 
     let hashFlowDone = false;
-    const completeHashFlow = async (session: Session | null) => {
+    const completeHashFlow = async (session: AuthSession) => {
       if (hashFlowDone || cancelled) return;
       hashFlowDone = true;
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
