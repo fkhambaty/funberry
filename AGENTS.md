@@ -1,5 +1,7 @@
 # FunBerry Kids — notes for an AI agent working in this repo
 
+Read [`ARCHITECTURE.md`](ARCHITECTURE.md) first if you are on a new computer. It is the map of hosting, DNS, database, payments, and the failures that look like bugs. This file is the editing contract.
+
 FunBerry Kids is an **educational games website (and Expo app)** for children roughly **ages 5–8**. It is **not** a marketplace, LMS, or homework grader. Parents create an account, add child profiles, and kids play short EVS (Environmental Studies) mini-games in themed “worlds.” Live site: <https://funberrykids.in>. Support: `hello@funberrykids.in`.
 
 The brand name and tagline live in [`packages/config/src/brand.ts`](packages/config/src/brand.ts). Change them there, not in random screens.

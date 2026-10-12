@@ -347,6 +347,8 @@ export default function PlayContent() {
   const [view, setView] = useState<ViewMode>("who");
   const [children, setChildren] = useState<Child[]>([]);
   const [loadingChildren, setLoadingChildren] = useState(true);
+  const [libraryAttempt, setLibraryAttempt] = useState(0);
+  const [libraryUnreachable, setLibraryUnreachable] = useState(false);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const [selectedGame, setSelectedGame] = useState<GameConfig | null>(null);
@@ -522,23 +524,42 @@ export default function PlayContent() {
   }
 
   // Load children + parent in parallel (one round trip pair, not a waterfall).
+  // A paused database must not leave the child picker on silent skeletons.
   useEffect(() => {
+    let cancelled = false;
+    const slow = window.setTimeout(() => {
+      if (cancelled) return;
+      setLoadingChildren(false);
+      setLibraryUnreachable(true);
+    }, 8000);
     Promise.all([
-      getChildren().catch(() => [] as Child[]),
+      getChildren().then(
+        (kids) => ({ kids, failed: false as const }),
+        () => ({ kids: [] as Child[], failed: true as const }),
+      ),
       getParent().catch(() => null),
     ])
-      .then(([kids, parent]) => {
-        setChildren(kids);
+      .then(([kidsResult, parent]) => {
+        if (cancelled) return;
+        window.clearTimeout(slow);
+        setChildren(kidsResult.kids);
+        setLibraryUnreachable(kidsResult.failed);
         setIsPaid(computeIsPaid(parent));
-        if (kids.length === 1) {
-          setSelectedChild(kids[0]);
-          loadProgress(kids[0].id);
-          loadPacks(kids[0].id);
+        if (!kidsResult.failed && kidsResult.kids.length === 1) {
+          setSelectedChild(kidsResult.kids[0]);
+          loadProgress(kidsResult.kids[0].id);
+          loadPacks(kidsResult.kids[0].id);
           setView("zones");
         }
       })
-      .finally(() => setLoadingChildren(false));
-  }, [loadProgress, loadPacks]);
+      .finally(() => {
+        if (!cancelled) setLoadingChildren(false);
+      });
+    return () => {
+      cancelled = true;
+      window.clearTimeout(slow);
+    };
+  }, [loadProgress, loadPacks, libraryAttempt]);
 
   const zoneGames = useMemo(
     () => (selectedZone ? getGamesForZone(selectedZone) : []),
@@ -777,6 +798,29 @@ export default function PlayContent() {
                 </div>
               ))}
             </div>
+          ) : libraryUnreachable && children.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center rounded-kid p-10 glass-card"
+            >
+              <p className="text-5xl mb-4">🌙</p>
+              <p className="font-display font-bold text-gray-700 text-xl mb-2">The games are waking up</p>
+              <p className="text-gray-500 text-sm mb-6">The library did not answer. Try again in a moment.</p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  playTap();
+                  setLibraryUnreachable(false);
+                  setLoadingChildren(true);
+                  setLibraryAttempt((attempt) => attempt + 1);
+                }}
+                className="kid-glass-btn kid-glass-violet inline-block rounded-2xl px-8 py-3"
+              >
+                Try again
+              </motion.button>
+            </motion.div>
           ) : children.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
