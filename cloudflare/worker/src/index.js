@@ -31,7 +31,7 @@ function json(body, status, origin) {
     headers["access-control-allow-methods"] = "GET, POST, PUT, DELETE, OPTIONS";
     headers.vary = "Origin";
   }
-  return new Response(JSON.stringify(body), { status, headers });
+  return new Response(status === 204 ? null : JSON.stringify(body), { status, headers });
 }
 
 function bytesToHex(bytes) {
