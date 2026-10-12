@@ -41,15 +41,17 @@ funberry/
 ├── packages/config/       # Brand, zones, pricing (runtime source of truth for zone metadata)
 ├── packages/ui/           # Shared kid UI
 ├── packages/game-engine/  # Templates, EVS game data, lesson rules engine, Pixi labs
-├── packages/supabase/     # Browser client, types, data hooks
-└── supabase/migrations/   # Postgres, RLS, RPCs
+├── packages/supabase/     # Account client. Calls the Cloudflare worker.
+├── cloudflare/worker/     # FunBerry account API
+├── cloudflare/d1/         # SQLite schema for that API
+└── supabase/migrations/   # Old Postgres. Do not apply this for new accounts.
 ```
 
 **Runtime sources of truth (easy to get wrong):**
 
 - Zones kids see come from `@funberry/config` (`packages/config/src/zones.ts`).
 - Games kids play come from `@funberry/game-engine` (`packages/game-engine/src/games/evs/`).
-- Supabase tables `zones` / `games` are seeded but **the play UI does not read them**. `getZones()` / `getGamesByZone()` in hooks are unused. Do not “fix” play by querying those tables unless you intentionally unify the two.
+- Accounts, children, and stars come from the Cloudflare worker `https://funberry-api.fkhambaty.workers.dev`. Read `ARCHITECTURE.md` before changing login.
 
 Game UIs load **on demand** via `loadGameTemplate()` so PixiJS is not in the play-shell bundle. Do not re-export every template from `packages/game-engine/src/index.ts`.
 
@@ -57,7 +59,7 @@ Game UIs load **on demand** via `loadGameTemplate()` so PixiJS is not in the pla
 
 | Environment | Notes |
 |-------------|--------|
-| **Production** | Supabase project ref `tkuakihsswzhrcrqcqel`. Site `funberrykids.in`. Treat as live families. |
+| **Production** | Cloudflare D1 database `funberry`. Site `www.funberrykids.in`. Accounts started fresh on 12 Oct 2026. |
 | **Local web** | `npm run dev:web` → `http://localhost:3000`. Copy [`apps/web/.env.example`](apps/web/.env.example) to `apps/web/.env.local`. |
 | **Local mobile** | `npm run dev:mobile`. Uses `EXPO_PUBLIC_SUPABASE_*`. |
 
@@ -75,17 +77,17 @@ API keys dashboard: <https://supabase.com/dashboard/project/tkuakihsswzhrcrqcqel
 
 ## Auth, PIN, and money
 
-- Web session is **Supabase Auth in the browser** (localStorage). Route guards are client-side; RLS is the real permission layer.
-- Parent **PIN** is stored on `parents.pin` and compared in the client for lock screen / parent gate. Do not print PINs in logs or kid UI. Hashing it is future work; do not “fix” by storing it in localStorage under a new name.
-- **Stars:** `increment_stars` is SECURITY DEFINER and must only credit a child whose `parent_id = auth.uid()` (migration `019_…`). Never add a client-only star counter as source of truth.
+- Web session is a bearer token in `localStorage` key `funberry_session`. The worker checks ownership. There is no row-level security.
+- Parent **PIN** is stored on `parents.pin` and compared in the client for lock screen / parent gate. Do not print PINs in logs or kid UI.
+- **Stars:** `POST /v1/progress` adds the stars for that round only when the child belongs to the signed-in parent. Never add a client-only star counter as source of truth.
 - **Payments:** amounts and plan IDs live on the server / Razorpay plans. The browser must not tell the server “charge ₹X.” Webhook HMAC is required. Stripe webhook routes are stubs — do not market Stripe as live.
 - **Coupons:** no client RLS policies; redeem only through the service-role API.
 
 ## Data you must not leak
 
-- Other families’ children: leaderboard RPCs anonymize everyone except the caller’s kids. Do not add `SELECT` on `children` for “all authenticated users.”
-- Child photos may still be **base64 in `children.photo_url`**. Do not dump those into public pages or logs. Prefer Storage URLs if you change this.
-- Learning-pack uploads live in private Storage (`book-uploads`); path must stay scoped to `auth.uid()`.
+- Other families’ children: the leaderboard route shows “Star learner” for every child except the caller’s own. Do not return other children’s names.
+- Child photos may still be **base64 in `children.photo_url`**. Do not dump those into public pages or logs.
+- Learning-pack page text is stored in D1 for that parent. Page photos are not uploaded.
 
 ## Ground rules (product honesty)
 
@@ -94,7 +96,7 @@ API keys dashboard: <https://supabase.com/dashboard/project/tkuakihsswzhrcrqcqel
 - **Do not expand Learning Packs before measuring their evidence gate.** Run the documented 10-page trust test first; automated OCR/game counts do not prove factual correctness.
 - **Kid copy stays kind and simple.** Parent copy can be more precise. Never show developer jargon (RLS, JWT, RPC) on `/play`.
 - **Prices** live in [`packages/config/src/pricing.ts`](packages/config/src/pricing.ts). Play-side free/premium split is also in `PlayContent` (`FREE_GAME_FRACTION`). If those disagree, fix both; do not hardcode rupees in a random button.
-- Prefer **database + RLS** for anything a hostile parent account could abuse (stars, other kids’ rows, coupons).
+- Prefer a worker check that the child belongs to the signed-in parent for anything a hostile account could abuse (stars, other kids’ rows, coupons).
 
 ## How to run and check work
 

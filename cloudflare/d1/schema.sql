@@ -1,0 +1,118 @@
+-- FunBerry Kids fresh database on Cloudflare D1.
+-- Database name: funberry
+-- Database id: e0bf4f89-c29d-4c0d-9674-b5977847e7d1
+-- Games and zones stay in the repository. These tables hold new accounts only.
+
+CREATE TABLE IF NOT EXISTS parents (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  password_salt TEXT NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  username TEXT,
+  pin TEXT,
+  role TEXT NOT NULL DEFAULT 'parent',
+  subscription_tier TEXT NOT NULL DEFAULT 'free',
+  subscription_expires_at TEXT,
+  welcome_email_sent_at TEXT,
+  razorpay_subscription_id TEXT,
+  razorpay_customer_id TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS children (
+  id TEXT PRIMARY KEY,
+  parent_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  age INTEGER NOT NULL,
+  avatar_config TEXT NOT NULL DEFAULT '{"body":"default","hair":"short","color":"#ff9db6"}',
+  photo_url TEXT,
+  total_stars INTEGER NOT NULL DEFAULT 0,
+  total_coins INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS progress (
+  id TEXT PRIMARY KEY,
+  child_id TEXT NOT NULL,
+  game_id TEXT NOT NULL,
+  stars_earned INTEGER NOT NULL DEFAULT 0,
+  score INTEGER NOT NULL DEFAULT 0,
+  time_spent_seconds INTEGER NOT NULL DEFAULT 0,
+  attempts INTEGER NOT NULL DEFAULT 1,
+  completed INTEGER NOT NULL DEFAULT 0,
+  completed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS unlocks (
+  id TEXT PRIMARY KEY,
+  child_id TEXT NOT NULL,
+  zone_id TEXT NOT NULL,
+  unlocked_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  UNIQUE (child_id, zone_id)
+);
+
+CREATE TABLE IF NOT EXISTS rewards (
+  id TEXT PRIMARY KEY,
+  child_id TEXT NOT NULL,
+  reward_type TEXT NOT NULL,
+  reward_id TEXT NOT NULL,
+  reward_name TEXT NOT NULL DEFAULT '',
+  earned_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  UNIQUE (child_id, reward_type, reward_id)
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  expires_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS learning_packs (
+  id TEXT PRIMARY KEY,
+  parent_id TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  subject TEXT NOT NULL DEFAULT 'General',
+  theme TEXT NOT NULL DEFAULT 'jungle',
+  status TEXT NOT NULL DEFAULT 'ready',
+  source_text TEXT NOT NULL DEFAULT '',
+  generated TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS pack_pages (
+  id TEXT PRIMARY KEY,
+  pack_id TEXT NOT NULL,
+  parent_id TEXT NOT NULL,
+  storage_path TEXT,
+  ocr_text TEXT NOT NULL DEFAULT '',
+  edited_text TEXT NOT NULL DEFAULT '',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+
+CREATE TABLE IF NOT EXISTS pack_assignments (
+  pack_id TEXT NOT NULL,
+  child_id TEXT NOT NULL,
+  parent_id TEXT NOT NULL,
+  PRIMARY KEY (pack_id, child_id)
+);
+
+CREATE TABLE IF NOT EXISTS coaching_reports (
+  child_id TEXT PRIMARY KEY,
+  report TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
+CREATE INDEX IF NOT EXISTS idx_progress_child ON progress(child_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_progress_child_game ON progress(child_id, game_id);
+CREATE INDEX IF NOT EXISTS idx_unlocks_child ON unlocks(child_id);
+CREATE INDEX IF NOT EXISTS idx_rewards_child ON rewards(child_id);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_packs_parent ON learning_packs(parent_id);
+CREATE INDEX IF NOT EXISTS idx_pack_pages_pack ON pack_pages(pack_id);

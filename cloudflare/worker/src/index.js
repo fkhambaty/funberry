@@ -1,0 +1,697 @@
+const ALLOWED_ORIGINS = new Set([
+  "https://funberrykids.in",
+  "https://www.funberrykids.in",
+  "https://funberry-web.vercel.app",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+]);
+
+const DEFAULT_AVATAR = { body: "default", hair: "short", color: "#ff9db6" };
+
+function allowsOrigin(origin) {
+  if (!origin) return "";
+  if (ALLOWED_ORIGINS.has(origin)) return origin;
+  try {
+    const host = new URL(origin).hostname;
+    if (host.endsWith(".vercel.app") && host.includes("funberry")) return origin;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function json(body, status, origin) {
+  const headers = {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store",
+  };
+  if (origin) {
+    headers["access-control-allow-origin"] = origin;
+    headers["access-control-allow-headers"] = "authorization, content-type";
+    headers["access-control-allow-methods"] = "GET, POST, PUT, DELETE, OPTIONS";
+    headers.vary = "Origin";
+  }
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function bytesToHex(bytes) {
+  return [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
+}
+
+async function sha256(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return bytesToHex(new Uint8Array(digest));
+}
+
+async function hashPassword(password, salt) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 100000, hash: "SHA-256" },
+    key,
+    256,
+  );
+  return bytesToHex(new Uint8Array(bits));
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+async function readJson(request) {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+function parseJson(value, fallback) {
+  if (value == null || value === "") return fallback;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function parentOut(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name || "",
+    username: row.username || null,
+    pin: row.pin || null,
+    subscription_tier: row.subscription_tier || "free",
+    subscription_expires_at: row.subscription_expires_at || null,
+    welcome_email_sent_at: row.welcome_email_sent_at || null,
+    razorpay_subscription_id: row.razorpay_subscription_id || null,
+    razorpay_customer_id: row.razorpay_customer_id || null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function childOut(row) {
+  return {
+    id: row.id,
+    parent_id: row.parent_id,
+    name: row.name,
+    age: row.age,
+    avatar_config: parseJson(row.avatar_config, DEFAULT_AVATAR),
+    photo_url: row.photo_url || null,
+    total_stars: row.total_stars || 0,
+    total_coins: row.total_coins || 0,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function progressOut(row) {
+  return {
+    id: row.id,
+    child_id: row.child_id,
+    game_id: row.game_id,
+    stars_earned: row.stars_earned || 0,
+    score: row.score || 0,
+    time_spent_seconds: row.time_spent_seconds || 0,
+    attempts: row.attempts || 0,
+    completed: Boolean(row.completed),
+    completed_at: row.completed_at || null,
+    created_at: row.created_at,
+  };
+}
+
+function packOut(row) {
+  return {
+    id: row.id,
+    parent_id: row.parent_id,
+    title: row.title,
+    subject: row.subject,
+    theme: row.theme,
+    status: row.status,
+    source_text: row.source_text,
+    generated: parseJson(row.generated, {}),
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+async function createSession(db, userId) {
+  const token = bytesToHex(crypto.getRandomValues(new Uint8Array(32)));
+  const tokenHash = await sha256(token);
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString();
+  await db.prepare("INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)").bind(tokenHash, userId, expires).run();
+  return token;
+}
+
+async function parentFromRequest(request, db) {
+  const header = request.headers.get("authorization") || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!token) return null;
+  const tokenHash = await sha256(token);
+  return db
+    .prepare(
+      `SELECT parents.* FROM sessions
+       JOIN parents ON parents.id = sessions.user_id
+       WHERE sessions.token_hash = ? AND sessions.expires_at > ?`,
+    )
+    .bind(tokenHash, nowIso())
+    .first();
+}
+
+async function requireParent(request, db) {
+  const parent = await parentFromRequest(request, db);
+  return parent;
+}
+
+async function ownChild(db, parentId, childId) {
+  return db.prepare("SELECT * FROM children WHERE id = ? AND parent_id = ?").bind(childId, parentId).first();
+}
+
+function sessionBody(parent, token) {
+  return {
+    user: { id: parent.id, email: parent.email },
+    session: { access_token: token, user: { id: parent.id, email: parent.email } },
+    parent: parentOut(parent),
+  };
+}
+
+export default {
+  async fetch(request, env) {
+    const origin = allowsOrigin(request.headers.get("origin"));
+    if (request.method === "OPTIONS") return json({ ok: true }, 204, origin);
+
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const db = env.DB;
+
+    try {
+      if (request.method === "POST" && path === "/v1/signup") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        const password = String(body?.password || "");
+        const name = String(body?.name || "").trim();
+        const pin = String(body?.pin || "").trim();
+        if (!email.includes("@") || password.length < 6) {
+          return json({ error: "Use a valid email and a password of at least 6 characters." }, 400, origin);
+        }
+        if (pin && !/^\d{4}$/.test(pin)) {
+          return json({ error: "PIN must be exactly 4 digits." }, 400, origin);
+        }
+        const existing = await db.prepare("SELECT id FROM parents WHERE email = ?").bind(email).first();
+        if (existing) {
+          return json({ error: "An account with this email already exists. Please sign in instead." }, 409, origin);
+        }
+        const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+        const passwordHash = await hashPassword(password, salt);
+        const id = crypto.randomUUID();
+        const now = nowIso();
+        await db
+          .prepare(
+            `INSERT INTO parents
+             (id, email, password_hash, password_salt, name, pin, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(id, email, passwordHash, salt, name, pin || null, now)
+          .run();
+        const token = await createSession(db, id);
+        const parent = await db.prepare("SELECT * FROM parents WHERE id = ?").bind(id).first();
+        return json(sessionBody(parent, token), 201, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/login") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        const password = String(body?.password || "");
+        const parent = await db.prepare("SELECT * FROM parents WHERE email = ?").bind(email).first();
+        if (!parent) return json({ error: "Invalid login credentials" }, 401, origin);
+        const passwordHash = await hashPassword(password, parent.password_salt);
+        if (passwordHash !== parent.password_hash) return json({ error: "Invalid login credentials" }, 401, origin);
+        const token = await createSession(db, parent.id);
+        return json(sessionBody(parent, token), 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/logout") {
+        const header = request.headers.get("authorization") || "";
+        const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+        if (token) {
+          const tokenHash = await sha256(token);
+          await db.prepare("DELETE FROM sessions WHERE token_hash = ?").bind(tokenHash).run();
+        }
+        return json({ ok: true }, 200, origin);
+      }
+
+      const parent = await requireParent(request, db);
+      if (!parent) return json({ error: "Not authenticated" }, 401, origin);
+
+      if (request.method === "GET" && path === "/v1/session") {
+        return json({ user: { id: parent.id, email: parent.email }, parent: parentOut(parent) }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/parent") {
+        return json({ parent: parentOut(parent) }, 200, origin);
+      }
+
+      if (request.method === "PUT" && path === "/v1/parent") {
+        const body = await readJson(request);
+        const pin = body?.pin == null ? parent.pin : String(body.pin).trim();
+        if (pin && !/^\d{4}$/.test(pin)) return json({ error: "PIN must be exactly 4 digits." }, 400, origin);
+        const name = body?.name == null ? parent.name : String(body.name).trim();
+        await db
+          .prepare("UPDATE parents SET pin = ?, name = ?, updated_at = ? WHERE id = ?")
+          .bind(pin || null, name, nowIso(), parent.id)
+          .run();
+        const next = await db.prepare("SELECT * FROM parents WHERE id = ?").bind(parent.id).first();
+        return json({ parent: parentOut(next) }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/password") {
+        const body = await readJson(request);
+        const password = String(body?.password || "");
+        if (password.length < 6) return json({ error: "Password must be at least 6 characters." }, 400, origin);
+        const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
+        const passwordHash = await hashPassword(password, salt);
+        await db
+          .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, updated_at = ? WHERE id = ?")
+          .bind(passwordHash, salt, nowIso(), parent.id)
+          .run();
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/children") {
+        const rows = await db
+          .prepare("SELECT * FROM children WHERE parent_id = ? ORDER BY created_at ASC")
+          .bind(parent.id)
+          .all();
+        return json({ children: (rows.results || []).map(childOut) }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/children") {
+        const body = await readJson(request);
+        const name = String(body?.name || "").trim();
+        const age = Number(body?.age);
+        const photoUrl = body?.photo_url == null ? null : String(body.photo_url);
+        if (!name) return json({ error: "Please enter a name." }, 400, origin);
+        if (!Number.isInteger(age) || age < 3 || age > 12) {
+          return json({ error: "Age must be between 3 and 12." }, 400, origin);
+        }
+        const id = crypto.randomUUID();
+        const now = nowIso();
+        await db
+          .prepare(
+            `INSERT INTO children (id, parent_id, name, age, photo_url, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(id, parent.id, name, age, photoUrl, now, now)
+          .run();
+        const row = await db.prepare("SELECT * FROM children WHERE id = ?").bind(id).first();
+        return json({ child: childOut(row) }, 201, origin);
+      }
+
+      const childMatch = path.match(/^\/v1\/children\/([^/]+)$/);
+      if (childMatch && request.method === "PUT") {
+        const child = await ownChild(db, parent.id, childMatch[1]);
+        if (!child) return json({ error: "Child not found" }, 404, origin);
+        const body = await readJson(request);
+        const name = body?.name == null ? child.name : String(body.name).trim();
+        const age = body?.age == null ? child.age : Number(body.age);
+        const photoUrl = body?.photo_url === undefined ? child.photo_url : body.photo_url;
+        if (!name) return json({ error: "Please enter a name." }, 400, origin);
+        if (!Number.isInteger(age) || age < 3 || age > 12) {
+          return json({ error: "Age must be between 3 and 12." }, 400, origin);
+        }
+        await db
+          .prepare("UPDATE children SET name = ?, age = ?, photo_url = ?, updated_at = ? WHERE id = ? AND parent_id = ?")
+          .bind(name, age, photoUrl, nowIso(), child.id, parent.id)
+          .run();
+        const row = await db.prepare("SELECT * FROM children WHERE id = ?").bind(child.id).first();
+        return json({ child: childOut(row) }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/progress") {
+        const childId = url.searchParams.get("child_id") || "";
+        const child = await ownChild(db, parent.id, childId);
+        if (!child) return json({ error: "Child not found" }, 404, origin);
+        const rows = await db
+          .prepare("SELECT * FROM progress WHERE child_id = ? ORDER BY created_at DESC")
+          .bind(childId)
+          .all();
+        return json({ progress: (rows.results || []).map(progressOut) }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/progress") {
+        const body = await readJson(request);
+        const childId = String(body?.child_id || "");
+        const gameId = String(body?.game_id || "");
+        const stars = Math.max(0, Math.min(3, Number(body?.stars_earned) || 0));
+        const score = Number(body?.score) || 0;
+        const timeSpent = Math.max(0, Number(body?.time_spent_seconds) || 0);
+        const child = await ownChild(db, parent.id, childId);
+        if (!child) return json({ error: "Child not found" }, 404, origin);
+        if (!gameId) return json({ error: "Missing game." }, 400, origin);
+        const existing = await db
+          .prepare("SELECT * FROM progress WHERE child_id = ? AND game_id = ?")
+          .bind(childId, gameId)
+          .first();
+        const now = nowIso();
+        let row;
+        if (existing) {
+          const best = Math.max(existing.stars_earned || 0, stars);
+          await db
+            .prepare(
+              `UPDATE progress
+               SET stars_earned = ?, score = ?, time_spent_seconds = ?, attempts = ?, completed = ?, completed_at = ?
+               WHERE id = ?`,
+            )
+            .bind(best, score, timeSpent, (existing.attempts || 0) + 1, best > 0 ? 1 : 0, best > 0 ? now : null, existing.id)
+            .run();
+          row = await db.prepare("SELECT * FROM progress WHERE id = ?").bind(existing.id).first();
+        } else {
+          const id = crypto.randomUUID();
+          await db
+            .prepare(
+              `INSERT INTO progress
+               (id, child_id, game_id, stars_earned, score, time_spent_seconds, attempts, completed, completed_at)
+               VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+            )
+            .bind(id, childId, gameId, stars, score, timeSpent, stars > 0 ? 1 : 0, stars > 0 ? now : null)
+            .run();
+          row = await db.prepare("SELECT * FROM progress WHERE id = ?").bind(id).first();
+        }
+        if (stars > 0) {
+          await db
+            .prepare("UPDATE children SET total_stars = total_stars + ?, updated_at = ? WHERE id = ? AND parent_id = ?")
+            .bind(stars, now, childId, parent.id)
+            .run();
+        }
+        return json({ progress: progressOut(row) }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/family-stats") {
+        const row = await db
+          .prepare(
+            `SELECT COUNT(*) AS total_sessions,
+                    COUNT(DISTINCT game_id) AS unique_games,
+                    MAX(COALESCE(completed_at, created_at)) AS last_activity
+             FROM progress
+             WHERE child_id IN (SELECT id FROM children WHERE parent_id = ?)`,
+          )
+          .bind(parent.id)
+          .first();
+        return json(
+          {
+            totalSessions: Number(row?.total_sessions || 0),
+            uniqueGamesTouched: Number(row?.unique_games || 0),
+            lastActivityAt: row?.last_activity || null,
+          },
+          200,
+          origin,
+        );
+      }
+
+      if (request.method === "GET" && path === "/v1/leaderboard") {
+        const limit = Math.max(1, Math.min(100, Number(url.searchParams.get("limit")) || 50));
+        const rows = await db
+          .prepare(
+            `SELECT id, parent_id, name, photo_url, total_stars
+             FROM children
+             WHERE total_stars > 0
+             ORDER BY total_stars DESC, id
+             LIMIT ?`,
+          )
+          .bind(limit)
+          .all();
+        const entries = (rows.results || []).map((row, index) => {
+          const mine = row.parent_id === parent.id;
+          return {
+            child_id: mine ? row.id : null,
+            child_name: mine ? row.name : "Star learner",
+            photo_url: mine ? row.photo_url : null,
+            total_stars: row.total_stars || 0,
+            rank: index + 1,
+          };
+        });
+        return json({ entries }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/rank") {
+        const childId = url.searchParams.get("child_id") || "";
+        const child = await db.prepare("SELECT id, total_stars FROM children WHERE id = ?").bind(childId).first();
+        if (!child) return json({ rank: null }, 200, origin);
+        const higher = await db
+          .prepare("SELECT COUNT(*) AS n FROM children WHERE total_stars > ? OR (total_stars = ? AND id < ?)")
+          .bind(child.total_stars || 0, child.total_stars || 0, child.id)
+          .first();
+        const total = await db.prepare("SELECT COUNT(*) AS n FROM children").first();
+        return json({ rank: Number(higher?.n || 0) + 1, total: Number(total?.n || 0) }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/unlocks") {
+        const childId = url.searchParams.get("child_id") || "";
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        const rows = await db.prepare("SELECT * FROM unlocks WHERE child_id = ?").bind(childId).all();
+        return json({ unlocks: rows.results || [] }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/unlocks") {
+        const body = await readJson(request);
+        const childId = String(body?.child_id || "");
+        const zoneId = String(body?.zone_id || "");
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        if (!zoneId) return json({ error: "Missing zone." }, 400, origin);
+        const existing = await db
+          .prepare("SELECT * FROM unlocks WHERE child_id = ? AND zone_id = ?")
+          .bind(childId, zoneId)
+          .first();
+        if (existing) return json({ unlock: existing }, 200, origin);
+        const id = crypto.randomUUID();
+        const unlockedAt = nowIso();
+        await db
+          .prepare("INSERT INTO unlocks (id, child_id, zone_id, unlocked_at) VALUES (?, ?, ?, ?)")
+          .bind(id, childId, zoneId, unlockedAt)
+          .run();
+        return json({ unlock: { id, child_id: childId, zone_id: zoneId, unlocked_at: unlockedAt } }, 201, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/rewards") {
+        const childId = url.searchParams.get("child_id") || "";
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        const rows = await db
+          .prepare("SELECT * FROM rewards WHERE child_id = ? ORDER BY earned_at DESC")
+          .bind(childId)
+          .all();
+        return json({ rewards: rows.results || [] }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/rewards") {
+        const body = await readJson(request);
+        const childId = String(body?.child_id || "");
+        const rewardType = String(body?.reward_type || "");
+        const rewardId = String(body?.reward_id || "");
+        const rewardName = String(body?.reward_name || "");
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        if (!["sticker", "costume", "badge", "title"].includes(rewardType) || !rewardId) {
+          return json({ error: "That reward could not be saved." }, 400, origin);
+        }
+        const existing = await db
+          .prepare("SELECT * FROM rewards WHERE child_id = ? AND reward_type = ? AND reward_id = ?")
+          .bind(childId, rewardType, rewardId)
+          .first();
+        if (existing) return json({ reward: existing }, 200, origin);
+        const id = crypto.randomUUID();
+        const earnedAt = nowIso();
+        await db
+          .prepare(
+            "INSERT INTO rewards (id, child_id, reward_type, reward_id, reward_name, earned_at) VALUES (?, ?, ?, ?, ?, ?)",
+          )
+          .bind(id, childId, rewardType, rewardId, rewardName, earnedAt)
+          .run();
+        return json(
+          { reward: { id, child_id: childId, reward_type: rewardType, reward_id: rewardId, reward_name: rewardName, earned_at: earnedAt } },
+          201,
+          origin,
+        );
+      }
+
+      if (request.method === "GET" && path === "/v1/packs") {
+        const packs = await db
+          .prepare("SELECT * FROM learning_packs WHERE parent_id = ? ORDER BY created_at DESC")
+          .bind(parent.id)
+          .all();
+        const pages = await db.prepare("SELECT pack_id FROM pack_pages WHERE parent_id = ?").bind(parent.id).all();
+        const assignments = await db
+          .prepare("SELECT pack_id, child_id FROM pack_assignments WHERE parent_id = ?")
+          .bind(parent.id)
+          .all();
+        const pageCounts = new Map();
+        for (const row of pages.results || []) pageCounts.set(row.pack_id, (pageCounts.get(row.pack_id) || 0) + 1);
+        const assignMap = new Map();
+        for (const row of assignments.results || []) {
+          const list = assignMap.get(row.pack_id) || [];
+          list.push(row.child_id);
+          assignMap.set(row.pack_id, list);
+        }
+        const items = (packs.results || []).map((row) => ({
+          ...packOut(row),
+          pageCount: pageCounts.get(row.id) || 0,
+          assignedChildIds: assignMap.get(row.id) || [],
+        }));
+        return json({ packs: items }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/packs") {
+        const body = await readJson(request);
+        const id = crypto.randomUUID();
+        const now = nowIso();
+        const title = String(body?.title || "Untitled pack");
+        const subject = String(body?.subject || "General");
+        const theme = String(body?.theme || "jungle");
+        const status = body?.status === "draft" ? "draft" : "ready";
+        const sourceText = String(body?.source_text || "").slice(0, 100000);
+        const generated = JSON.stringify(body?.generated || {}).slice(0, 500000);
+        const pages = Array.isArray(body?.pages) ? body.pages : [];
+        await db
+          .prepare(
+            `INSERT INTO learning_packs
+             (id, parent_id, title, subject, theme, status, source_text, generated, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          )
+          .bind(id, parent.id, title, subject, theme, status, sourceText, generated, now, now)
+          .run();
+        for (let i = 0; i < pages.length; i += 1) {
+          const page = pages[i] || {};
+          await db
+            .prepare(
+              `INSERT INTO pack_pages (id, pack_id, parent_id, ocr_text, edited_text, order_index, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            )
+            .bind(
+              crypto.randomUUID(),
+              id,
+              parent.id,
+              String(page.ocr_text || "").slice(0, 100000),
+              String(page.edited_text || "").slice(0, 100000),
+              i,
+              now,
+            )
+            .run();
+        }
+        const row = await db.prepare("SELECT * FROM learning_packs WHERE id = ?").bind(id).first();
+        return json({ pack: packOut(row) }, 201, origin);
+      }
+
+      const packPagesMatch = path.match(/^\/v1\/packs\/([^/]+)\/pages$/);
+      if (packPagesMatch && request.method === "GET") {
+        const pack = await db
+          .prepare("SELECT id FROM learning_packs WHERE id = ? AND parent_id = ?")
+          .bind(packPagesMatch[1], parent.id)
+          .first();
+        if (!pack) return json({ error: "Pack not found" }, 404, origin);
+        const rows = await db
+          .prepare("SELECT * FROM pack_pages WHERE pack_id = ? AND parent_id = ? ORDER BY order_index ASC")
+          .bind(pack.id, parent.id)
+          .all();
+        return json({ pages: rows.results || [] }, 200, origin);
+      }
+
+      const packAssignMatch = path.match(/^\/v1\/packs\/([^/]+)\/assignments$/);
+      if (packAssignMatch && request.method === "POST") {
+        const pack = await db
+          .prepare("SELECT id FROM learning_packs WHERE id = ? AND parent_id = ?")
+          .bind(packAssignMatch[1], parent.id)
+          .first();
+        if (!pack) return json({ error: "Pack not found" }, 404, origin);
+        const body = await readJson(request);
+        const childIds = Array.isArray(body?.child_ids) ? body.child_ids.map(String) : [];
+        await db.prepare("DELETE FROM pack_assignments WHERE pack_id = ? AND parent_id = ?").bind(pack.id, parent.id).run();
+        for (const childId of childIds) {
+          const child = await ownChild(db, parent.id, childId);
+          if (!child) continue;
+          await db
+            .prepare("INSERT INTO pack_assignments (pack_id, child_id, parent_id) VALUES (?, ?, ?)")
+            .bind(pack.id, childId, parent.id)
+            .run();
+        }
+        return json({ ok: true }, 200, origin);
+      }
+
+      const packMatch = path.match(/^\/v1\/packs\/([^/]+)$/);
+      if (packMatch && request.method === "PUT") {
+        const pack = await db
+          .prepare("SELECT * FROM learning_packs WHERE id = ? AND parent_id = ?")
+          .bind(packMatch[1], parent.id)
+          .first();
+        if (!pack) return json({ error: "Pack not found" }, 404, origin);
+        const body = await readJson(request);
+        const title = body?.title == null ? pack.title : String(body.title);
+        const subject = body?.subject == null ? pack.subject : String(body.subject);
+        const theme = body?.theme == null ? pack.theme : String(body.theme);
+        const status = body?.status == null ? pack.status : body.status === "draft" ? "draft" : "ready";
+        const sourceText = body?.source_text == null ? pack.source_text : String(body.source_text).slice(0, 100000);
+        const generated = body?.generated == null ? pack.generated : JSON.stringify(body.generated).slice(0, 500000);
+        await db
+          .prepare(
+            `UPDATE learning_packs
+             SET title = ?, subject = ?, theme = ?, status = ?, source_text = ?, generated = ?, updated_at = ?
+             WHERE id = ? AND parent_id = ?`,
+          )
+          .bind(title, subject, theme, status, sourceText, generated, nowIso(), pack.id, parent.id)
+          .run();
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (packMatch && request.method === "DELETE") {
+        const packId = packMatch[1];
+        await db.prepare("DELETE FROM pack_assignments WHERE pack_id = ? AND parent_id = ?").bind(packId, parent.id).run();
+        await db.prepare("DELETE FROM pack_pages WHERE pack_id = ? AND parent_id = ?").bind(packId, parent.id).run();
+        await db.prepare("DELETE FROM learning_packs WHERE id = ? AND parent_id = ?").bind(packId, parent.id).run();
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/assigned-packs") {
+        const childId = url.searchParams.get("child_id") || "";
+        const rows = await db
+          .prepare(
+            `SELECT learning_packs.* FROM pack_assignments
+             JOIN learning_packs ON learning_packs.id = pack_assignments.pack_id
+             WHERE pack_assignments.child_id = ?
+               AND pack_assignments.parent_id = ?
+               AND learning_packs.status = 'ready'
+             ORDER BY learning_packs.created_at DESC`,
+          )
+          .bind(childId, parent.id)
+          .all();
+        return json({ packs: (rows.results || []).map(packOut) }, 200, origin);
+      }
+
+      if (request.method === "PUT" && path === "/v1/coaching-report") {
+        const body = await readJson(request);
+        const childId = String(body?.child_id || "");
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        const report = JSON.stringify(body?.report || {});
+        const updated = nowIso();
+        await db
+          .prepare(
+            `INSERT INTO coaching_reports (child_id, report, updated_at) VALUES (?, ?, ?)
+             ON CONFLICT(child_id) DO UPDATE SET report = excluded.report, updated_at = excluded.updated_at`,
+          )
+          .bind(childId, report, updated)
+          .run();
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/coaching-report") {
+        const childId = url.searchParams.get("child_id") || "";
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        const row = await db.prepare("SELECT report, updated_at FROM coaching_reports WHERE child_id = ?").bind(childId).first();
+        return json({ report: row ? parseJson(row.report, null) : null, updated_at: row?.updated_at || null }, 200, origin);
+      }
+
+      return json({ error: "Not found" }, 404, origin);
+    } catch {
+      return json({ error: "The database did not accept that request." }, 500, origin);
+    }
+  },
+};

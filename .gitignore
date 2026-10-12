@@ -22,5 +22,6 @@ apps/web/public/syllabus-photos/*.jpeg
 apps/web/public/book-pages/*
 .local/learning-pack-evals/
 .vercel
+.wrangler/
 .env*
 !.env.example
