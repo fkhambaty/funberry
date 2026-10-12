@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS parents (
   welcome_email_sent_at TEXT,
   razorpay_subscription_id TEXT,
   razorpay_customer_id TEXT,
+  email_verified_at TEXT,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
@@ -108,6 +109,17 @@ CREATE TABLE IF NOT EXISTS coaching_reports (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS email_codes (
+  email TEXT NOT NULL,
+  purpose TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (email, purpose)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_parents_username ON parents(username);
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_progress_child ON progress(child_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_progress_child_game ON progress(child_id, game_id);

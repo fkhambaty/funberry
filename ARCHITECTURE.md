@@ -70,7 +70,13 @@ Stripe routes exist and are not the live payment path. Live web payments are Raz
 
 Accounts, children, stars, unlocks, rewards, learning-pack text, and coaching reports live in Cloudflare D1 database `funberry` (`e0bf4f89-c29d-4c0d-9674-b5977847e7d1`). The browser calls `https://funberry-api.fkhambaty.workers.dev`. The session token is stored in the browser. Passwords are hashed. The worker checks that a parent only reads their own children.
 
-Signup logs the parent in and opens the dashboard. There is no confirmation email. The parent PIN is still compared in the browser. Do not log it.
+Signup emails a 6-digit code. The parent cannot sign in until `/signup` accepts that code. `/forgot-password` emails a reset code. Codes expire after 15 minutes and allow 5 tries. Email goes through Resend: worker secret `RESEND_API_KEY`, sender `MAIL_FROM` in `cloudflare/worker/wrangler.toml`. Without the secret, signup and reset return 503 on purpose.
+
+The browser may only call servers listed in `connect-src` in `apps/web/vercel.json`. The worker address must stay in that list or every login fails.
+
+Test login: username `dummy`, password `dummy`, parent PIN `1234`, one child "Test Kid". It is an ordinary parent account and is not on the admin list.
+
+The parent PIN is still compared in the browser. Do not log it.
 
 Old Supabase project ref `tkuakihsswzhrcrqcqel` is no longer the account database. Do not point new login code back at it. Razorpay checkout, coupons, and the admin pages still call Supabase and will fail until those routes move to the worker. That move needs the Razorpay secret, which is not in the repo.
 

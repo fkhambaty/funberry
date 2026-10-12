@@ -9,6 +9,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justVerified = searchParams.get("verified") === "1";
+  const justReset = searchParams.get("reset") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,6 +23,11 @@ function LoginForm() {
       await signIn(email, password);
       router.push("/dashboard");
     } catch (err: unknown) {
+      const pending = err as { needsVerification?: boolean; email?: string };
+      if (pending?.needsVerification) {
+        router.push(`/signup?verify=${encodeURIComponent(pending.email ?? email)}`);
+        return;
+      }
       if (err instanceof Error) {
         if (err.message.includes("Invalid login credentials")) {
           setError("Wrong email or password. Please try again.");
@@ -59,6 +65,12 @@ function LoginForm() {
             </div>
           )}
 
+          {justReset && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-sm">
+              Password changed. Sign in with your new password.
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm">
               {error}
@@ -67,10 +79,11 @@ function LoginForm() {
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">
-              Email
+              Email or username
             </label>
             <input
-              type="email"
+              type="text"
+              autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 rounded-2xl border-2 border-gray-200 focus:border-sky-400 outline-none transition text-lg"
@@ -100,6 +113,12 @@ function LoginForm() {
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+
+          <p className="text-center text-sm">
+            <a href="/forgot-password" className="text-sky-600 font-bold hover:underline">
+              Forgot password?
+            </a>
+          </p>
 
           <p className="text-center text-sm text-gray-500">
             Don&apos;t have an account?{" "}

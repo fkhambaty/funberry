@@ -138,6 +138,78 @@ function packOut(row) {
   };
 }
 
+const CODE_MINUTES = 15;
+const MAX_CODE_ATTEMPTS = 5;
+const RESEND_GAP_MS = 60 * 1000;
+
+function newCode() {
+  const value = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+  return String(value).padStart(6, "0");
+}
+
+function emailReady(env) {
+  return Boolean(env.RESEND_API_KEY && env.MAIL_FROM);
+}
+
+async function sendEmail(env, to, subject, text) {
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject, text }),
+  });
+  return response.ok;
+}
+
+async function issueCode(db, env, email, purpose) {
+  const recent = await db
+    .prepare("SELECT created_at FROM email_codes WHERE email = ? AND purpose = ?")
+    .bind(email, purpose)
+    .first();
+  if (recent && Date.now() - Date.parse(recent.created_at) < RESEND_GAP_MS) return true;
+  const code = newCode();
+  const now = new Date();
+  const expires = new Date(now.getTime() + CODE_MINUTES * 60 * 1000).toISOString();
+  await db
+    .prepare(
+      `INSERT INTO email_codes (email, purpose, code_hash, expires_at, attempts, created_at)
+       VALUES (?, ?, ?, ?, 0, ?)
+       ON CONFLICT(email, purpose) DO UPDATE SET
+         code_hash = excluded.code_hash, expires_at = excluded.expires_at,
+         attempts = 0, created_at = excluded.created_at`,
+    )
+    .bind(email, purpose, await sha256(`${email}:${purpose}:${code}`), expires, now.toISOString())
+    .run();
+  const subject = purpose === "verify" ? "Your FunBerry Kids confirmation code" : "Your FunBerry Kids password reset code";
+  const line = purpose === "verify" ? "Enter this code to confirm your email" : "Enter this code to choose a new password";
+  return sendEmail(
+    env,
+    email,
+    subject,
+    `${line}: ${code}\n\nIt expires in ${CODE_MINUTES} minutes. If you did not ask for this, ignore this email.\n\nFunBerry Kids\nhttps://www.funberrykids.in`,
+  );
+}
+
+async function checkCode(db, email, purpose, code) {
+  const row = await db
+    .prepare("SELECT * FROM email_codes WHERE email = ? AND purpose = ?")
+    .bind(email, purpose)
+    .first();
+  if (!row) return false;
+  if (row.attempts >= MAX_CODE_ATTEMPTS || Date.parse(row.expires_at) < Date.now()) {
+    await db.prepare("DELETE FROM email_codes WHERE email = ? AND purpose = ?").bind(email, purpose).run();
+    return false;
+  }
+  if (row.code_hash !== (await sha256(`${email}:${purpose}:${String(code).trim()}`))) {
+    await db
+      .prepare("UPDATE email_codes SET attempts = attempts + 1 WHERE email = ? AND purpose = ?")
+      .bind(email, purpose)
+      .run();
+    return false;
+  }
+  await db.prepare("DELETE FROM email_codes WHERE email = ? AND purpose = ?").bind(email, purpose).run();
+  return true;
+}
+
 async function createSession(db, userId) {
   const token = bytesToHex(crypto.getRandomValues(new Uint8Array(32)));
   const tokenHash = await sha256(token);
@@ -200,35 +272,110 @@ export default {
         if (pin && !/^\d{4}$/.test(pin)) {
           return json({ error: "PIN must be exactly 4 digits." }, 400, origin);
         }
-        const existing = await db.prepare("SELECT id FROM parents WHERE email = ?").bind(email).first();
-        if (existing) {
+        if (!emailReady(env)) {
+          return json({ error: "Sign-up emails are not switched on yet. Please try again later." }, 503, origin);
+        }
+        const existing = await db.prepare("SELECT id, email_verified_at FROM parents WHERE email = ?").bind(email).first();
+        if (existing?.email_verified_at) {
           return json({ error: "An account with this email already exists. Please sign in instead." }, 409, origin);
         }
         const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
         const passwordHash = await hashPassword(password, salt);
-        const id = crypto.randomUUID();
+        const now = nowIso();
+        if (existing) {
+          await db
+            .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, name = ?, pin = ?, updated_at = ? WHERE id = ?")
+            .bind(passwordHash, salt, name, pin || null, now, existing.id)
+            .run();
+        } else {
+          await db
+            .prepare(
+              `INSERT INTO parents
+               (id, email, password_hash, password_salt, name, pin, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            )
+            .bind(crypto.randomUUID(), email, passwordHash, salt, name, pin || null, now)
+            .run();
+        }
+        await db.prepare("DELETE FROM email_codes WHERE email = ? AND purpose = 'verify'").bind(email).run();
+        if (!(await issueCode(db, env, email, "verify"))) {
+          return json({ error: "We could not send the confirmation email. Try again in a minute." }, 502, origin);
+        }
+        return json({ needs_verification: true, email }, 201, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/verify") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        const parent = await db.prepare("SELECT * FROM parents WHERE email = ?").bind(email).first();
+        if (!parent || !(await checkCode(db, email, "verify", body?.code || ""))) {
+          return json({ error: "That code is wrong or expired. Check the latest email or resend a new code." }, 400, origin);
+        }
+        const now = nowIso();
+        await db.prepare("UPDATE parents SET email_verified_at = ?, updated_at = ? WHERE id = ?").bind(now, now, parent.id).run();
+        const token = await createSession(db, parent.id);
+        return json(sessionBody(parent, token), 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/resend-code") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        const parent = await db.prepare("SELECT email_verified_at FROM parents WHERE email = ?").bind(email).first();
+        if (parent && !parent.email_verified_at && emailReady(env)) await issueCode(db, env, email, "verify");
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/forgot-password") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        if (!emailReady(env)) {
+          return json({ error: "Password reset emails are not switched on yet. Please try again later." }, 503, origin);
+        }
+        const parent = await db.prepare("SELECT id FROM parents WHERE email = ?").bind(email).first();
+        if (parent) await issueCode(db, env, email, "reset");
+        return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/reset-password") {
+        const body = await readJson(request);
+        const email = String(body?.email || "").trim().toLowerCase();
+        const password = String(body?.password || "");
+        if (password.length < 6) return json({ error: "Password must be at least 6 characters." }, 400, origin);
+        const parent = await db.prepare("SELECT id FROM parents WHERE email = ?").bind(email).first();
+        if (!parent || !(await checkCode(db, email, "reset", body?.code || ""))) {
+          return json({ error: "That code is wrong or expired. Ask for a new one." }, 400, origin);
+        }
+        const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
         const now = nowIso();
         await db
           .prepare(
-            `INSERT INTO parents
-             (id, email, password_hash, password_salt, name, pin, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `UPDATE parents SET password_hash = ?, password_salt = ?, email_verified_at = COALESCE(email_verified_at, ?), updated_at = ?
+             WHERE id = ?`,
           )
-          .bind(id, email, passwordHash, salt, name, pin || null, now)
+          .bind(await hashPassword(password, salt), salt, now, now, parent.id)
           .run();
-        const token = await createSession(db, id);
-        const parent = await db.prepare("SELECT * FROM parents WHERE id = ?").bind(id).first();
-        return json(sessionBody(parent, token), 201, origin);
+        await db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(parent.id).run();
+        return json({ ok: true }, 200, origin);
       }
 
       if (request.method === "POST" && path === "/v1/login") {
         const body = await readJson(request);
-        const email = String(body?.email || "").trim().toLowerCase();
+        const login = String(body?.email || "").trim().toLowerCase();
         const password = String(body?.password || "");
-        const parent = await db.prepare("SELECT * FROM parents WHERE email = ?").bind(email).first();
+        const parent = login.includes("@")
+          ? await db.prepare("SELECT * FROM parents WHERE email = ?").bind(login).first()
+          : await db.prepare("SELECT * FROM parents WHERE username = ?").bind(login).first();
         if (!parent) return json({ error: "Invalid login credentials" }, 401, origin);
         const passwordHash = await hashPassword(password, parent.password_salt);
         if (passwordHash !== parent.password_hash) return json({ error: "Invalid login credentials" }, 401, origin);
+        if (!parent.email_verified_at) {
+          if (emailReady(env)) await issueCode(db, env, parent.email, "verify");
+          return json(
+            { error: "Confirm your email first. We sent you a code.", needs_verification: true, email: parent.email },
+            403,
+            origin,
+          );
+        }
         const token = await createSession(db, parent.id);
         return json(sessionBody(parent, token), 200, origin);
       }

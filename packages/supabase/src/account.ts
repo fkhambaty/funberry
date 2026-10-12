@@ -110,10 +110,17 @@ export async function accountRequest<T>(
     await writeSession(null, "SIGNED_OUT");
   }
   if (!response.ok) {
-    throw new Error(messageFrom(body, "The database did not accept that request."));
+    const error = new Error(messageFrom(body, "The database did not accept that request.")) as AccountError;
+    if (body && typeof body === "object" && "needs_verification" in body && body.needs_verification) {
+      error.needsVerification = true;
+      error.email = "email" in body && typeof body.email === "string" ? body.email : undefined;
+    }
+    throw error;
   }
   return body as T;
 }
+
+export type AccountError = Error & { needsVerification?: boolean; email?: string };
 
 type AuthPayload = {
   user: AccountUser;
@@ -125,13 +132,35 @@ async function storeAuth(payload: AuthPayload, event: string) {
   return payload;
 }
 
+/** Creates the account and emails a 6-digit code. No session until the code is confirmed. */
 export async function accountSignUp(email: string, password: string, name: string, pin?: string) {
-  const payload = await accountRequest<AuthPayload>("/v1/signup", {
+  await accountRequest("/v1/signup", {
     method: "POST",
     auth: false,
     body: { email, password, name, pin },
   });
+  return { user: null, session: null, needsVerification: true as const };
+}
+
+export async function accountVerify(email: string, code: string) {
+  const payload = await accountRequest<AuthPayload>("/v1/verify", {
+    method: "POST",
+    auth: false,
+    body: { email, code },
+  });
   return storeAuth(payload, "SIGNED_IN");
+}
+
+export async function accountResendCode(email: string) {
+  await accountRequest("/v1/resend-code", { method: "POST", auth: false, body: { email } });
+}
+
+export async function accountForgotPassword(email: string) {
+  await accountRequest("/v1/forgot-password", { method: "POST", auth: false, body: { email } });
+}
+
+export async function accountResetPassword(email: string, code: string, password: string) {
+  await accountRequest("/v1/reset-password", { method: "POST", auth: false, body: { email, code, password } });
 }
 
 export async function accountSignIn(email: string, password: string) {

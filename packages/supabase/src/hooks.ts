@@ -1,4 +1,14 @@
-import { accountRequest, accountSignIn, accountSignOut, accountSignUp, accountUser } from "./account";
+import {
+  accountForgotPassword,
+  accountRequest,
+  accountResendCode,
+  accountResetPassword,
+  accountSignIn,
+  accountSignOut,
+  accountSignUp,
+  accountUser,
+  accountVerify,
+} from "./account";
 import {
   buildParentCoachingReport,
   FALLBACK_COACHING_AXES,
@@ -13,7 +23,7 @@ import {
 import type { Child, LearningPack, PackPage, Parent, Progress, Reward, Unlock } from "./types";
 
 export type SignUpOptions = {
-  /** Kept so older callers still compile. Signup no longer sends a confirmation email. */
+  /** Unused. Confirmation is a 6-digit emailed code, not a link. */
   emailRedirectTo?: string;
 };
 
@@ -27,16 +37,24 @@ export async function signUp(
   return accountSignUp(email, password, name, pin);
 }
 
-export async function resendSignupConfirmation(_email: string, _redirectTo?: string) {
-  throw new Error("Email confirmation is no longer used. Sign in with your password.");
+export async function resendSignupConfirmation(email: string, _redirectTo?: string) {
+  await accountResendCode(email);
+}
+
+export async function requestPasswordReset(email: string) {
+  await accountForgotPassword(email);
+}
+
+export async function resetPasswordWithCode(email: string, code: string, newPassword: string) {
+  await accountResetPassword(email, code.trim(), newPassword);
 }
 
 export async function trySendWelcomeEmailAfterAuth(_client?: unknown): Promise<void> {
   // Welcome email is not connected on the new account service.
 }
 
-export async function verifyEmailOtp(_email: string, _token: string) {
-  throw new Error("Email confirmation is no longer used. Sign in with your password.");
+export async function verifyEmailOtp(email: string, token: string) {
+  return accountVerify(email, token.trim());
 }
 
 export async function signIn(email: string, password: string) {
