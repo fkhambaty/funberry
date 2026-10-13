@@ -210,6 +210,8 @@ test("health reports email readiness without creating an account", async () => {
   assert.equal(response.status, 200);
   assert.equal(body.ok, true);
   assert.equal(body.email_ready, false);
+  assert.equal(body.payments_configured, false);
+  assert.equal(body.checkout_mode, "modal-with-hosted-fallback");
   const parents = await db.prepare("SELECT COUNT(*) AS n FROM parents").first();
   assert.equal(Number(parents.n), 0);
 });

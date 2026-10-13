@@ -92,7 +92,7 @@ function tierForPlan(plan) {
   return PLAN_RULES[plan]?.tier || null;
 }
 
-function paymentsConfigured(env) {
+export function paymentsConfigured(env) {
   return Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET && env.RAZORPAY_PLAN_WEEKLY && env.RAZORPAY_PLAN_MONTHLY);
 }
 

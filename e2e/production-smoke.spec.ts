@@ -41,6 +41,8 @@ test("health, dummy login, and checkout without a charge", async ({ request }) =
   expect(healthBody.ok).toBe(true);
   expect(healthBody.service).toBe("funberry-api");
   expect(healthBody.email_ready).toBe(true);
+  expect(healthBody.payments_configured).toBe(true);
+  expect(healthBody.checkout_mode).toBe("modal-with-hosted-fallback");
 
   const login = await request.post(`${API}/v1/login`, {
     data: { email: "dummy", password: "dummy" },

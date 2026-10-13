@@ -1,8 +1,13 @@
 import { handleAdmin, handleCouponRedeem } from "./admin.js";
-import { handleRazorpayAuthed, handleRazorpayWebhook, syncParentBilling } from "./payments.js";
+import {
+  handleRazorpayAuthed,
+  handleRazorpayWebhook,
+  isDemoParent,
+  paymentsConfigured,
+  syncParentBilling,
+} from "./payments.js";
 import { roleForEmail } from "./owners.js";
 import { bytesToHex, hashSecret, sha256 } from "./crypto.js";
-import { isDemoParent } from "./payments.js";
 import {
   clearPinFailures,
   hashNewPin,
@@ -264,7 +269,17 @@ export default {
 
     try {
       if (request.method === "GET" && path === "/v1/health") {
-        return json({ ok: true, service: "funberry-api", email_ready: emailReady(env) }, 200, origin);
+        return json(
+          {
+            ok: true,
+            service: "funberry-api",
+            email_ready: emailReady(env),
+            payments_configured: paymentsConfigured(env),
+            checkout_mode: "modal-with-hosted-fallback",
+          },
+          200,
+          origin,
+        );
       }
 
       if (request.method === "POST" && path === "/v1/signup") {
