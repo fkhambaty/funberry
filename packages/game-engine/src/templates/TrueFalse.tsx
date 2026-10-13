@@ -13,6 +13,7 @@ import { useGameState } from "../core/useGameState";
 import { StarReveal } from "../components/StarReveal";
 import { playCorrect, playWrong, playTap, playStreak } from "../core/sound";
 import { fireMiniBurst } from "../core/confetti";
+import { onWhiteText } from "../core/contrast";
 
 export interface TrueFalseProps {
   data: TrueFalseData;
@@ -148,7 +149,7 @@ export function TrueFalse({ data, onComplete, accentColor = "#379df9", onNextGam
           whileTap={{ scale: 0.94 }}
           onClick={handleStart}
           style={{
-            background: `linear-gradient(135deg, ${accentColor}, ${accentColor}dd)`,
+            background: `linear-gradient(135deg, ${onWhiteText(accentColor)}, ${onWhiteText(accentColor)}dd)`,
             color: "white", border: "none", padding: "18px 56px", borderRadius: 28,
             fontSize: 22, fontWeight: 900, fontFamily: "Fredoka, sans-serif",
             cursor: "pointer", boxShadow: `0 8px 28px ${accentColor}55`,

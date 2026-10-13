@@ -7,6 +7,7 @@ import { useGameState } from "../core/useGameState";
 import { StarReveal } from "../components/StarReveal";
 import { playTap, playCorrect, playWrong, playStreak } from "../core/sound";
 import { fireMiniBurst } from "../core/confetti";
+import { onWhiteText } from "../core/contrast";
 
 export interface PictureQuizProps {
   data: PictureQuizData;
@@ -94,7 +95,7 @@ export function PictureQuiz({ data, onComplete, accentColor = "#379df9", onNextG
           whileTap={{ scale: 0.95 }}
           onClick={() => { playTap(); setShuffled(shuffleQuestions(questions)); start(); }}
           style={{
-            backgroundColor: accentColor,
+            backgroundColor: onWhiteText(accentColor),
             color: "white",
             border: "none",
             padding: "18px 48px",

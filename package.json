@@ -14,7 +14,7 @@
     "clean": "turbo clean",
     "typecheck": "turbo typecheck",
     "typecheck:tools": "tsc --noEmit -p scripts/tsconfig.json",
-    "test:lesson-gen": "tsx --test packages/game-engine/src/lesson/rulesEngine.test.ts packages/game-engine/src/lesson/evidenceGate.test.ts packages/game-engine/src/games/evs/computers.test.ts",
+    "test:lesson-gen": "tsx --test packages/game-engine/src/lesson/rulesEngine.test.ts packages/game-engine/src/lesson/evidenceGate.test.ts packages/game-engine/src/games/evs/computers.test.ts packages/game-engine/src/core/contrast.test.ts",
     "test:worker": "node --test cloudflare/worker/src/payments.test.js cloudflare/worker/src/integrity.test.js",
     "test:responsive": "playwright test",
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",

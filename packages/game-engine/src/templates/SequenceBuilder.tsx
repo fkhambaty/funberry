@@ -6,6 +6,7 @@ import type { SequenceBuilderData, GameResult } from "../types";
 import { buildGameResult } from "../core/scoring";
 import { playTap, playCorrect, playWrong, playDrop, playStreak } from "../core/sound";
 import { fireMiniBurst } from "../core/confetti";
+import { onWhiteText } from "../core/contrast";
 import { StarReveal } from "../components/StarReveal";
 
 export interface SequenceBuilderProps {
@@ -314,7 +315,7 @@ export function SequenceBuilder({
                     width: 32,
                     height: 32,
                     borderRadius: 16,
-                    background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
+                    background: `linear-gradient(135deg, ${onWhiteText(accentColor)}, ${onWhiteText(accentColor)}cc)`,
                     color: "white",
                     fontWeight: 800,
                     fontSize: 15,

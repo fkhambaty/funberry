@@ -6,6 +6,7 @@ import type { InteractiveStoryData, GameResult, StoryPage } from "../types";
 import { buildGameResult } from "../core/scoring";
 import { playTap, playCorrect, playWrong, playPageTurn } from "../core/sound";
 import { fireMiniBurst } from "../core/confetti";
+import { onWhiteText } from "../core/contrast";
 import { StarReveal } from "../components/StarReveal";
 
 /* ── Typewriter Text ── */
@@ -237,7 +238,7 @@ export function InteractiveStory({
           onClick={handleStart}
           disabled={!pages.length}
           style={{
-            backgroundColor: accentColor,
+            backgroundColor: onWhiteText(accentColor),
             color: "white",
             border: "none",
             padding: "18px 52px",
@@ -479,7 +480,7 @@ export function InteractiveStory({
                 padding: "16px 40px",
                 borderRadius: 22,
                 border: "none",
-                backgroundColor: isLastPage ? "#8b5cf6" : accentColor,
+                backgroundColor: isLastPage ? "#7c3aed" : onWhiteText(accentColor),
                 color: "white",
                 fontSize: 18,
                 fontWeight: 800,

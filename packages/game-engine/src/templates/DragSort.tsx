@@ -13,6 +13,7 @@ import {
   playStreak,
 } from "../core/sound";
 import { fireMiniBurst, fireConfetti } from "../core/confetti";
+import { onWhiteText } from "../core/contrast";
 
 export interface DragSortProps {
   data: DragSortData;
@@ -172,7 +173,7 @@ export function DragSort({ data, onComplete, accentColor = "#379df9", onNextGame
           whileTap={{ scale: 0.94 }}
           onClick={handleStart}
           style={{
-            background: `linear-gradient(135deg, ${accentColor}, #18b05a)`,
+            background: `linear-gradient(135deg, ${onWhiteText(accentColor)}, ${onWhiteText("#18b05a")})`,
             color: "white", border: "none", padding: "18px 52px",
             borderRadius: 24, fontSize: 20, fontWeight: 800,
             fontFamily: "Fredoka, sans-serif", cursor: "pointer",
