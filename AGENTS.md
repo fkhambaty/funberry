@@ -19,7 +19,7 @@ The brand name and tagline live in [`packages/config/src/brand.ts`](packages/con
 - Not Okavo / FORMA / a software marketplace. That repo is unrelated even if the same human owns it.
 - Not a school SIS. No attendance, no teacher gradebook, no “AI tutor that chats with the child.”
 - Not a claim that we copied any publisher’s textbook. Games are **theme-aligned**; see [`docs/SYLLABUS_ALIGNMENT.md`](docs/SYLLABUS_ALIGNMENT.md).
-- Stripe / RevenueCat copy in `packages/config` is **placeholder**. **Live web payments are Razorpay INR** (₹99/week, ₹349/month) on the Cloudflare worker. Checkout shows the name FKTech because FunBerry, Data For Dummies, and Okavo share one Razorpay account.
+- Stripe / RevenueCat copy in `packages/config` is **placeholder**. **Live web payments are Razorpay INR** (₹99/week, ₹349/month) on the Cloudflare worker. Checkout shows the name FKTech because FunBerry Kids and Data For Dummies share the FKTech EdTech Razorpay account. Okavo requires a separate marketplace merchant.
 
 ## Who uses which UI
 

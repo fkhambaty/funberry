@@ -19,6 +19,21 @@ test("homepage and pricing stay inside the screen", async ({ page }) => {
   }
 });
 
+test("Razorpay review policy pages are public", async ({ request }) => {
+  for (const path of [
+    "/pricing",
+    "/privacy",
+    "/terms",
+    "/cancellation",
+    "/refunds",
+    "/shipping",
+    "/contact",
+  ]) {
+    const response = await request.get(path);
+    expect(response.status(), path).toBe(200);
+  }
+});
+
 test("health, dummy login, and checkout without a charge", async ({ request }) => {
   const health = await request.get(`${API}/v1/health`);
   expect(health.status()).toBe(200);

@@ -232,10 +232,13 @@ export default function HomeContent() {
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">{brand.tagline}</p>
             </div>
             <div className="flex flex-col items-center gap-3 sm:items-end">
-              <div className="flex gap-6 text-sm font-semibold">
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-semibold sm:justify-end">
                 <a href="/privacy" className="fb-cta-ghost">Privacy</a>
                 <a href="/terms" className="fb-cta-ghost">Terms</a>
                 <a href="/pricing" className="fb-cta-ghost">Pricing</a>
+                <a href="/refunds" className="fb-cta-ghost">Refunds</a>
+                <a href="/shipping" className="fb-cta-ghost">Delivery</a>
+                <a href="/contact" className="fb-cta-ghost">Contact</a>
               </div>
               <p className="text-center text-xs text-slate-600 sm:text-right">© {new Date().getFullYear()} {brand.name}. Crafted for little learners and proud parents.</p>
             </div>

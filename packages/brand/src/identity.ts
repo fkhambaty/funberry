@@ -40,6 +40,6 @@ export const nativeDeliveryGate = {
 } as const;
 
 export const merchantBrandingGate = {
-  current: "Checkout shows FKTech because one Razorpay account serves FunBerry, Data For Dummies, and Okavo.",
+  current: "Checkout shows FKTech because its EdTech Razorpay account serves FunBerry Kids and Data For Dummies.",
   rule: "Ask for a dedicated FunBerry merchant name only if parents still abandon checkout after the FKTech sentence is visible, and the drop-off is measured.",
 } as const;

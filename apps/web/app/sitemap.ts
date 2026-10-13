@@ -1,6 +1,18 @@
 import type { MetadataRoute } from "next";
 
-const PUBLIC_PATHS = ["", "/pricing", "/privacy", "/terms", "/login", "/signup", "/forgot-password"];
+const PUBLIC_PATHS = [
+  "",
+  "/pricing",
+  "/privacy",
+  "/terms",
+  "/cancellation",
+  "/refunds",
+  "/shipping",
+  "/contact",
+  "/login",
+  "/signup",
+  "/forgot-password",
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date("2026-10-13T00:00:00.000Z");
