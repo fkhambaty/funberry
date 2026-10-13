@@ -214,4 +214,22 @@ export const aboutMeGames: GameConfig[] = [
       ],
     },
   },
+  {
+    id: "aboutme-spot-senses",
+    zoneId: "about-me",
+    type: "spot_difference",
+    title: "Spot the Sense",
+    description: "Find what changed between the two pictures.",
+    difficulty: 1,
+    maxStars: 3,
+    data: {
+      type: "spot_difference",
+      instruction: "Picture B is almost the same. Tap each circle that changed.",
+      imageA: "👀 👂 👃 👄",
+      imageB: "👀 👂 👃 👅",
+      differences: [
+        { id: "tongue", x: 78, y: 55, radius: 18, label: "The mouth became a tongue" },
+      ],
+    },
+  },
 ];

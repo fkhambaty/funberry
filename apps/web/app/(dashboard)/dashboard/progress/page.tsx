@@ -63,7 +63,7 @@ export default function ProgressPage() {
 
   if (loading) {
     return (
-      <div className="fb-parent flex min-h-screen items-center justify-center">
+      <div className="fb-parent flex min-h-dvh items-center justify-center">
         <p className="text-sm font-semibold text-slate-500">Loading your growth report…</p>
       </div>
     );

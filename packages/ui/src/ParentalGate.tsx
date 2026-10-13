@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 export interface ParentalGateProps {
   onSuccess: () => void;
@@ -10,12 +10,23 @@ export interface ParentalGateProps {
 export function ParentalGate({ onSuccess, onCancel }: ParentalGateProps) {
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState(false);
+  const [puzzle, setPuzzle] = useState<{ a: number; b: number } | null>(null);
 
-  const { a, b, correctAnswer } = useMemo(() => {
+  useEffect(() => {
     const a = Math.floor(Math.random() * 20) + 10;
     const b = Math.floor(Math.random() * 20) + 10;
-    return { a, b, correctAnswer: a + b };
+    setPuzzle({ a, b });
   }, []);
+
+  if (!puzzle) {
+    return (
+      <p className="p-4 text-center font-display text-lg font-bold text-ink-700">
+        Parents Only
+      </p>
+    );
+  }
+
+  const correctAnswer = puzzle.a + puzzle.b;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,7 +47,7 @@ export function ParentalGate({ onSuccess, onCancel }: ParentalGateProps) {
         Solve this to continue. This keeps kids safe!
       </p>
       <p className="font-display text-3xl font-bold text-sky-900">
-        {a} + {b} = ?
+        {puzzle.a} + {puzzle.b} = ?
       </p>
       <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3">
         <input

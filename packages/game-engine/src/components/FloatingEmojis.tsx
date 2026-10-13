@@ -8,18 +8,25 @@ interface FloatingEmojisProps {
   count?: number;
 }
 
+function emojiSpec(i: number) {
+  const n = (i * 53 + 17) % 100;
+  return {
+    x: 5 + (n % 86),
+    size: 18 + (n % 16),
+    duration: 12 + (n % 10),
+    delay: (i % 8) * 0.8,
+    drift: (n % 30) - 15,
+    opacity: 0.08 + (n % 10) / 100,
+  };
+}
+
 export function FloatingEmojis({ emojis, count = 8 }: FloatingEmojisProps) {
   const items = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
         id: i,
-        emoji: emojis[i % emojis.length],
-        x: 5 + Math.random() * 90,
-        size: 18 + Math.random() * 16,
-        duration: 12 + Math.random() * 10,
-        delay: Math.random() * 8,
-        drift: (Math.random() - 0.5) * 30,
-        opacity: 0.08 + Math.random() * 0.1,
+        emoji: emojis[i % emojis.length] ?? "⭐",
+        ...emojiSpec(i),
       })),
     [emojis, count]
   );
@@ -38,9 +45,9 @@ export function FloatingEmojis({ emojis, count = 8 }: FloatingEmojisProps) {
       {items.map((item) => (
         <motion.div
           key={item.id}
-          initial={{ y: "110vh", x: `${item.x}vw`, opacity: 0 }}
+          initial={{ y: "110dvh", x: `${item.x}vw`, opacity: 0 }}
           animate={{
-            y: "-10vh",
+            y: "-10dvh",
             x: `${item.x + item.drift}vw`,
             opacity: [0, item.opacity, item.opacity, 0],
           }}

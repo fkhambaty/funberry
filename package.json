@@ -16,9 +16,11 @@
     "typecheck:tools": "tsc --noEmit -p scripts/tsconfig.json",
     "test:lesson-gen": "tsx --test packages/game-engine/src/lesson/rulesEngine.test.ts packages/game-engine/src/games/evs/computers.test.ts",
     "test:worker": "node --test cloudflare/worker/src/payments.test.js",
+    "test:responsive": "playwright test",
     "eval:packs": "tsx scripts/eval-learning-packs.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "tesseract.js": "^5.1.1",
     "tsx": "^4.23.12",
     "turbo": "^2.4.0",

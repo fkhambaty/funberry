@@ -26,18 +26,29 @@ const GLITTER_COLORS = [
 const CELEBRATION_WORDS = ["AMAZING!", "FANTASTIC!", "SUPER STAR!", "WOW!", "YOU ROCK!"];
 const PARTIAL_WORDS = ["GREAT JOB!", "KEEP GOING!", "WELL DONE!", "NICE TRY!"];
 
-function GlitterParticle({ color, delay, x }: { color: string; delay: number; x: number }) {
+function glitterSpec(i: number) {
+  const n = (i * 47 + 13) % 100;
+  return {
+    x: (n / 100) * 280 - 40,
+    size: 6 + (n % 6),
+    round: n % 2 === 0,
+    duration: 2 + (n % 15) / 10,
+  };
+}
+
+function GlitterParticle({ color, delay, index }: { color: string; delay: number; index: number }) {
+  const spec = glitterSpec(index);
   return (
     <motion.div
-      initial={{ y: -20, x, opacity: 1, rotate: 0, scale: 1 }}
-      animate={{ y: "110vh", opacity: [1, 0.8, 0], rotate: 360, scale: [1, 0.6] }}
-      transition={{ duration: 2 + Math.random() * 1.5, delay, ease: "linear" }}
+      initial={{ y: -20, x: spec.x, opacity: 1, rotate: 0, scale: 1 }}
+      animate={{ y: "110dvh", opacity: [1, 0.8, 0], rotate: 360, scale: [1, 0.6] }}
+      transition={{ duration: spec.duration, delay, ease: "linear" }}
       style={{
         position: "fixed",
         top: 0,
-        width: 6 + Math.random() * 5,
-        height: 6 + Math.random() * 5,
-        borderRadius: Math.random() > 0.5 ? "50%" : 2,
+        width: spec.size,
+        height: spec.size,
+        borderRadius: spec.round ? "50%" : 2,
         backgroundColor: color,
         pointerEvents: "none",
         zIndex: 100,
@@ -110,14 +121,14 @@ export function StarReveal({
   const glitterCount = isPerfect ? 12 : isGood ? 6 : 0;
 
   return (
-    <div style={{ position: "relative", overflow: "hidden", minHeight: "60vh" }}>
+    <div className="fb-reveal">
       {/* Glitter rain overlay */}
       {phase >= 2 && Array.from({ length: glitterCount }, (_, i) => (
         <GlitterParticle
           key={i}
-          color={GLITTER_COLORS[i % GLITTER_COLORS.length]}
+          color={GLITTER_COLORS[i % GLITTER_COLORS.length] ?? "#ffd700"}
           delay={i * 0.1}
-          x={Math.random() * (typeof window !== "undefined" ? window.innerWidth : 400)}
+          index={i}
         />
       ))}
 

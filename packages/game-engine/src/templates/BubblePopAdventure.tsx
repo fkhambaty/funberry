@@ -376,7 +376,7 @@ export function BubblePopAdventure({ data, onComplete, accentColor = "#379df9", 
   const displayScore = Math.max(0, rawScore);
 
   return (
-    <div style={{ position: "relative", width: "100%", minHeight: "70vh", overflow: "hidden", padding: "0 16px" }}>
+    <div style={{ position: "relative", width: "100%", padding: "0 16px" }}>
       {/* Header */}
       <div style={{ textAlign: "center", padding: "12px 16px 4px" }}>
         <motion.p
@@ -461,7 +461,7 @@ export function BubblePopAdventure({ data, onComplete, accentColor = "#379df9", 
       </div>
 
       {/* Bubble arena */}
-      <div style={{ position: "relative", height: 480, overflow: "hidden" }}>
+      <div className="fb-arena fb-arena-tall">
         {liveBubbles.map((bubble) => {
           if (bubble.popped) return null;
           return (

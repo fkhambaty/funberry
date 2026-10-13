@@ -561,7 +561,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="fb-parent flex min-h-screen items-center justify-center">
+      <main className="fb-parent flex min-h-dvh items-center justify-center">
         <motion.div
           animate={{ opacity: [0.55, 1, 0.55] }}
           transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
@@ -734,7 +734,7 @@ export default function DashboardPage() {
     <main className="fb-parent">
       {/* Header — colorful wordmark, no logo asset */}
       <div className="kid-header-bar sticky top-0 z-20 px-3 sm:px-5">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-2">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-2">
           <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <span className="funberry-wordmark shrink-0 text-base sm:text-lg">FunBerryKids</span>
             {parent && (
@@ -1129,7 +1129,8 @@ export default function DashboardPage() {
                   if (e.key === "Enter") redeemCoupon();
                 }}
                 placeholder="Enter coupon code"
-                className="flex-1 rounded-2xl border-2 border-slate-200 px-4 py-3 font-mono text-lg tracking-wider outline-none transition focus:border-violet-400"
+                aria-label="Coupon code"
+                className="fb-field flex-1 font-mono text-lg tracking-wider"
               />
               <motion.button
                 whileHover={!couponBusy ? { scale: 1.03 } : {}}
@@ -1150,6 +1151,36 @@ export default function DashboardPage() {
             )}
           </div>
         </motion.section>
+
+        {(parent?.username || "").trim().toLowerCase() === "dummy" && (
+          <section className="mb-6" aria-label="Demo checkout">
+            <div className="glass-card rounded-kid p-4 sm:p-5">
+              <h3 className="font-display text-base font-black text-slate-800">Demo account</h3>
+              <p className="mt-1 text-sm font-semibold text-slate-600">
+                This login stays on lifetime access. Choosing a plan stops before any payment.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="fb-cta fb-cta-ink px-4"
+                  onClick={() => startRazorpayCheckout("weekly")}
+                >
+                  Weekly plan
+                </button>
+                <button
+                  type="button"
+                  className="fb-cta fb-cta-ink px-4"
+                  onClick={() => startRazorpayCheckout("monthly")}
+                >
+                  Monthly plan
+                </button>
+              </div>
+              {payError && (
+                <p className="mt-2 text-sm font-bold text-rose-700" role="alert">{payError}</p>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Grown-up Headquarters — growth & smarts report */}
         <motion.section

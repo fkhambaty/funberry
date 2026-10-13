@@ -59,7 +59,7 @@ export default function HomeContent() {
         </div>
       </header>
 
-      <section id="main" className="relative flex min-h-[80dvh] flex-col justify-center px-4 pb-10 pt-24 sm:px-6 sm:pt-24">
+      <section id="main" className="fb-below-nav relative flex min-h-[80dvh] flex-col justify-center px-4 pb-10 sm:px-6">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <div className="absolute -left-24 top-16 h-64 w-64 rounded-full bg-fuchsia-300/30 blur-3xl" />
           <div className="absolute -right-20 top-20 h-72 w-72 rounded-full bg-sky-300/35 blur-3xl" />

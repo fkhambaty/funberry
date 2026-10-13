@@ -48,10 +48,8 @@ export function GameShell({
     <div
       className="fb-game-shell"
       style={{
-        minHeight: "100vh",
         background: theme.bgGradient,
         position: "relative",
-        overflow: "hidden",
       }}
     >
       <div
@@ -73,19 +71,13 @@ export function GameShell({
           zIndex: 30,
           display: "flex",
           flexDirection: "column",
-          gap: 0,
-          padding: "3px 10px 6px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
+        <div className="fb-game-toolbar">
         <motion.button
-          className="kid-glass-btn kid-glass-berry"
+          type="button"
+          aria-label="Home"
+          className="kid-glass-btn kid-glass-berry fb-game-home"
           whileHover={{ scale: 1.1, y: -2 }}
           whileTap={{ scale: 0.88 }}
           onClick={onClose}
@@ -98,7 +90,6 @@ export function GameShell({
             borderRadius: 16,
             cursor: "pointer",
             gap: 1,
-            minWidth: 66,
             flexShrink: 0,
           }}
         >
@@ -117,7 +108,7 @@ export function GameShell({
           </span>
         </motion.button>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="fb-game-title">
           <p
             style={{
               fontWeight: 800,
@@ -147,18 +138,12 @@ export function GameShell({
           )}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexShrink: 0,
-          }}
-        >
+        <div className="fb-game-tools">
           {lifetimeStars !== undefined && (
             <motion.button
               key={lifetimeStars}
               type="button"
+              aria-label={`${lifetimeStars} stars`}
               onClick={onStarsClick}
               initial={{ scale: 1.35 }}
               animate={{ scale: 1 }}
@@ -167,8 +152,9 @@ export function GameShell({
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: 5,
-                padding: "5px 10px",
+                padding: "8px 12px",
                 borderRadius: 14,
                 fontWeight: 800,
                 fontSize: 13,
@@ -176,6 +162,8 @@ export function GameShell({
                 fontFamily: "Fredoka, sans-serif",
                 cursor: onStarsClick ? "pointer" : "default",
                 border: "none",
+                minWidth: 48,
+                minHeight: 48,
               }}
               title={onStarsClick ? "See your star history" : "Your total stars"}
             >
@@ -210,6 +198,7 @@ export function GameShell({
           )}
 
           <motion.button
+            type="button"
             className={
               muted ? "kid-glass-btn kid-glass-danger" : "kid-glass-btn kid-glass-leaf"
             }
@@ -220,8 +209,8 @@ export function GameShell({
               setMuted(!muted);
             }}
             style={{
-              width: 44,
-              height: 44,
+              width: 48,
+              height: 48,
               borderRadius: 14,
               cursor: "pointer",
               fontSize: 20,
@@ -230,6 +219,7 @@ export function GameShell({
               justifyContent: "center",
               padding: 0,
             }}
+            aria-label={muted ? "Unmute sounds" : "Mute sounds"}
             title={muted ? "Unmute sounds" : "Mute sounds"}
           >
             {muted ? "🔇" : "🔊"}
@@ -328,6 +318,8 @@ export function GameShell({
 
       {onNextGame && (
         <motion.button
+          type="button"
+          aria-label="Switch game"
           className="kid-glass-btn kid-glass-violet"
           whileHover={{ scale: 1.1, y: -4 }}
           whileTap={{ scale: 0.92 }}

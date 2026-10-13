@@ -705,7 +705,7 @@ export function PixiLab({ data, onComplete, accentColor = "#6366f1", onNextGame 
       host.appendChild(app.canvas);
       app.canvas.style.width = "100%";
       app.canvas.style.height = "auto";
-      app.canvas.style.maxWidth = "420px";
+      app.canvas.style.maxWidth = "100%";
       app.canvas.style.borderRadius = "16px";
       app.canvas.style.touchAction = "none";
 
@@ -748,7 +748,7 @@ export function PixiLab({ data, onComplete, accentColor = "#6366f1", onNextGame 
       <p className="mb-2 rounded-xl bg-white/80 px-3 py-2 text-center text-sm font-extrabold leading-snug text-slate-800 shadow-sm ring-1 ring-white/90">
         {data.instruction}
       </p>
-      <div ref={hostRef} className="relative flex min-h-[200px] justify-center rounded-2xl bg-white/16 p-1 shadow-inner ring-2 ring-white/40" />
+      <div ref={hostRef} className="relative flex min-h-[200px] w-full max-w-full justify-center overflow-hidden rounded-2xl bg-white/16 p-1 shadow-inner ring-2 ring-white/40" />
       {phase === "playing" && combo >= 2 && (
         <div
           className="pointer-events-none absolute left-1/2 top-20 z-10 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-1 text-sm font-black text-amber-950 shadow-lg animate-pulse"

@@ -44,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${nunito.variable} ${fredoka.variable} ${baloo.variable}`}>
-      <body className="fb-app min-h-screen">
+      <body className="fb-app min-h-dvh">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

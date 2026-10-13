@@ -109,6 +109,8 @@ function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) 
       whileHover={{ scale: 1.06, y: -6 }}
       whileTap={{ scale: 0.94 }}
       onClick={onSelect}
+      type="button"
+      aria-label={`Play as ${child.name}`}
       className="fb-picker-card"
     >
       {/* Avatar */}
@@ -221,16 +223,7 @@ function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(0,0,0,0.5)",
-        backdropFilter: "blur(6px)",
-      }}
+      className="fb-pin-scrim"
       onClick={onCancel}
     >
       <motion.div
@@ -277,14 +270,15 @@ function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel
               data-pin-idx={i}
               type="password"
               inputMode="numeric"
+              autoComplete="off"
+              aria-label={`Parent PIN digit ${i + 1}`}
               maxLength={1}
               value={d}
               onChange={(e) => handleDigitChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               disabled={checking}
+              className="fb-pin-digit"
               style={{
-                width: 56,
-                height: 64,
                 textAlign: "center",
                 fontSize: 28,
                 fontWeight: 900,
@@ -715,7 +709,7 @@ export default function PlayContent() {
           )}
         </AnimatePresence>
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center justify-between mb-8">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-2">
             <motion.button
               type="button"
               onClick={goHome}
@@ -873,7 +867,7 @@ export default function PlayContent() {
         </AnimatePresence>
 
         <div className="mx-auto max-w-6xl">
-          <div className="mb-4 flex items-center justify-between gap-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <motion.button
                 type="button"
@@ -1010,6 +1004,8 @@ export default function PlayContent() {
                     transition={{ delay: i * 0.02 }}
                     whileHover={{ y: -4, scale: 1.03 }}
                     whileTap={{ scale: 0.96 }}
+                    type="button"
+                    data-zone-id={zone.id}
                     onClick={() => handleZoneClick(zone.id)}
                     className="kid-glass-panel relative rounded-[22px] p-4 text-center shadow-[0_12px_0_rgba(255,255,255,0.35),0_20px_26px_-16px_rgba(30,41,59,0.45)]"
                     style={{
@@ -1093,7 +1089,7 @@ export default function PlayContent() {
     };
 
     return (
-      <main className="fb-kid-zone min-h-screen px-4 py-4 sm:px-5 sm:py-5" style={{ background: theme.bgGradient }}>
+      <main className="fb-kid-zone min-h-dvh px-4 py-4 sm:px-5 sm:py-5" style={{ background: theme.bgGradient }}>
         {/* Parent Gate Modal */}
         <AnimatePresence>
           {showParentGate && (
@@ -1147,7 +1143,7 @@ export default function PlayContent() {
 
         <div className="mx-auto max-w-2xl">
           {/* Back navigation */}
-          <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <motion.button
                 type="button"
@@ -1176,7 +1172,7 @@ export default function PlayContent() {
               </motion.button>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <motion.button
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
@@ -1273,6 +1269,9 @@ export default function PlayContent() {
                       transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 18 }}
                       whileHover={{ scale: 1.03, x: 5 }}
                       whileTap={{ scale: 0.97 }}
+                      type="button"
+                      data-game-id={game.id}
+                      data-game-type={game.type}
                       onClick={() => openGame(game)}
                       aria-label={locked ? `${game.title} (Premium — locked)` : game.title}
                       className="kid-glass-panel flex w-full items-center gap-3 rounded-kid p-4 text-left sm:gap-4 sm:p-5"
@@ -1338,6 +1337,9 @@ export default function PlayContent() {
                       transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 18 }}
                       whileHover={{ scale: 1.02, x: 4 }}
                       whileTap={{ scale: 0.98 }}
+                      type="button"
+                      data-game-id={game.id}
+                      data-game-type={game.type}
                       onClick={() => openGame(game)}
                       aria-label={locked ? `${game.title} (Premium — locked)` : game.title}
                       className="kid-glass-panel w-full flex items-center gap-4 rounded-kid p-4 text-left"

@@ -12,14 +12,14 @@ It is not Okavo and it is not Data For Dummies.
 
 ## Live addresses
 
-| Surface | Address | Status on 12 Oct 2026 |
+| Surface | Address | Status on 13 Oct 2026 |
 |---------|---------|------------------------|
-| Website (www) | https://www.funberrykids.in | HTTP 200. This is the address to use. |
-| Apex domain | https://funberrykids.in | Timed out from this network. DNS `A` is `76.76.21.21`. `www` is a CNAME to `cname.vercel-dns.com` and works. |
+| Website (www) | https://www.funberrykids.in | HTTP 200. |
+| Apex domain | https://funberrykids.in | HTTP 200. DNS `A` is still `76.76.21.21`. |
 | Vercel default | https://funberry-web.vercel.app | HTTP 200. Same app. |
 | GitHub | https://github.com/fkhambaty/funberry | Source of truth. |
 
-The apex domain needs a GoDaddy DNS change so it follows Vercel the same way `www` does (CNAME or ANAME to `cname.vercel-dns.com`). GoDaddy's API keys are created at https://developer.godaddy.com/keys. Do not invent a DNS record.
+`www` is a CNAME to `cname.vercel-dns.com`. Apex and www both answered on 13 Oct 2026, so DNS was left unchanged.
 
 ## How a request moves
 
@@ -73,7 +73,7 @@ Signup emails a 6-digit code. The parent cannot sign in until `/signup` accepts 
 
 The browser may only call servers listed in `connect-src` in `apps/web/vercel.json`. The worker address must stay in that list or every login fails.
 
-Test login: username `dummy`, password `dummy`, parent PIN `1234`, one child "Test Kid". It is an ordinary parent account and is not on the admin list.
+Test login: username `dummy`, password `dummy`, parent PIN `1234`, one child "Test Kid". It is an ordinary parent account and is not on the admin list. The account stays on lifetime access. Choosing Weekly or Monthly on the dashboard returns before Razorpay and shows “Demo account: no charge”. The worker answers the same phrase with HTTP 403 if a charge is requested anyway. There is no separate payment-return route: a finished checkout reloads `/dashboard` and the page reads `sessionStorage` key `funberry_pending_sub`.
 
 The parent PIN is still compared in the browser. Do not log it.
 
@@ -102,7 +102,11 @@ cp apps/web/.env.example apps/web/.env.local
 npm run dev:web          # http://localhost:3000
 npm run typecheck
 npm run build --workspace=@funberry/web
+npx playwright install chromium
+npm run test:responsive
 ```
+
+`test:responsive` starts the already-built site on port 3000. Build the web app first. The suite signs in as `dummy` / `dummy`, then checks public pages, protected redirects, the parent PIN, the dashboard coupon and dummy checkout, the child picker, and one game of every template.
 
 Never commit `.env`, `.env.local`, or a service-role key.
 
@@ -117,6 +121,12 @@ The look is a berry-and-sky meadow with tactile press controls, sized for ages 5
 | Tokens and chrome | `apps/web/app/globals.css` | CSS variables, focus rings, reduced motion, page washes (`.fb-app`, `.fb-marketing`, `.fb-auth`, `.fb-parent`, `.fb-kid-who`, `.fb-kid-world`, `.fb-admin`), tactile buttons (`.fb-cta`, `.kid-glass-btn`), cards (`.glass-card`, `.fb-plan`, `.fb-modal`), fields (`.fb-field`), and the game frame (`.fb-play-canvas`, `.fb-track`). |
 | Shared controls | `packages/ui/src` | `KidButton`, `KidCard`, `KidModal`, `ZoneCard`, `GameResultScreen`, `ProgressBar`, `StarRating`, `ParentalGate`, `AvatarPicker`, plus presentational `AuthStage`, `Notice`, and `TextField`. These do not own account state. |
 | Game chrome | `packages/game-engine/src/components/GameShell.tsx` | Header, star chip, progress track, and the shared play frame around every template. Templates keep their own logic and load through `loadGameTemplate()`. |
+
+Full-height pages set `min-height: 100vh` and then `min-height: 100dvh`, so older browsers keep a height and mobile browser chrome does not cover the bottom. The game shell is the scrollport: `height` and `min-height` use that same pair, `overflow-x: hidden`, and `overflow-y: auto`. Bubble Pop, Star Catcher, and Pixi arenas stay `overflow: hidden` on purpose. Their height is `min(px, dvh)` so the canvas fits the visible screen and the shell can still scroll the rest.
+
+Kid controls stay at least 48px. Home and other primary kid actions aim for 64px (`--tap-min`, `--tap-kid`). Headers pad for `safe-area-inset-*`.
+
+Responsive smoke tests live in `e2e/` and `playwright.config.ts`. Viewports are `390x667`, `390x844`, `393x852`, `768x1024`, `820x1180`, `1024x768`, and `1440x900` (`e2e/viewports.ts`). Touch interactions run on `390x844`, `768x1024`, `1024x768`, and `1440x900`. One live game per template is listed in `e2e/template-catalog.ts`, including `aboutme-spot-senses` for spot-the-difference.
 
 Rules for a visual edit:
 

@@ -259,8 +259,10 @@ body {
 
 /* Ultra-slim sticky header — half visual height vs previous */
 .kid-header-bar {
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
+  padding-top: max(0.35rem, env(safe-area-inset-top));
+  padding-bottom: 0.35rem;
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+  padding-right: max(0.5rem, env(safe-area-inset-right));
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.94) 0%,
@@ -601,10 +603,21 @@ h3 {
   font-family: var(--font-fredoka), ui-rounded, sans-serif;
 }
 
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  touch-action: manipulation;
+}
+
 .kid-glass-btn {
-  min-height: 44px;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
   font-family: var(--font-fredoka), ui-rounded, sans-serif;
   letter-spacing: 0.01em;
+  touch-action: manipulation;
 }
 
 .glass-card {
@@ -635,6 +648,7 @@ h3 {
   right: 0;
   top: 0;
   z-index: 50;
+  padding-top: env(safe-area-inset-top);
   border-bottom: 1px solid rgba(255, 255, 255, 0.72);
   background: rgba(255, 253, 250, 0.78);
   backdrop-filter: blur(18px) saturate(1.3);
@@ -645,13 +659,20 @@ h3 {
 .fb-nav-inner {
   margin: 0 auto;
   display: flex;
-  height: 4.25rem;
+  flex-wrap: wrap;
+  min-height: 4.25rem;
+  height: auto;
   max-width: 72rem;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
   padding-left: max(1rem, env(safe-area-inset-left));
   padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+.fb-below-nav {
+  padding-top: calc(6.5rem + env(safe-area-inset-top));
 }
 
 .fb-hero-plaque {
@@ -777,10 +798,15 @@ h3 {
 .fb-cta-ink:active { box-shadow: 0 2px 0 #94a3b8; }
 
 .fb-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #dbe7f5;
   background: transparent;
   box-shadow: none;
-  min-height: 40px;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: 0 0.35rem;
 }
 
 .fb-cta-ghost:hover { color: #fff; transform: none; }
@@ -788,16 +814,29 @@ h3 {
 /* Auth + forms */
 .fb-auth {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 1.5rem;
+  padding-top: max(1.5rem, env(safe-area-inset-top));
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
   background:
     radial-gradient(640px 320px at 15% 10%, rgba(255, 45, 106, 0.14), transparent 60%),
     radial-gradient(640px 340px at 90% 0%, rgba(55, 157, 249, 0.2), transparent 55%),
     linear-gradient(160deg, #eef7ff 0%, #fffdf8 48%, #f4fff6 100%);
+}
+
+.fb-auth a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
 }
 
 .fb-auth-leaf {
@@ -880,9 +919,12 @@ h3 {
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
-  align-items: center;
+  align-items: safe center;
   justify-content: center;
-  padding: 1.5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -894,7 +936,13 @@ h3 {
 /* Legal prose — no typography plugin, so this is the reading surface. */
 .fb-legal {
   min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
   padding: 4.5rem 1.25rem 4rem;
+  padding-top: max(4.5rem, calc(env(safe-area-inset-top) + 1.25rem));
+  padding-bottom: max(4rem, env(safe-area-inset-bottom));
+  padding-left: max(1.25rem, env(safe-area-inset-left));
+  padding-right: max(1.25rem, env(safe-area-inset-right));
   background:
     radial-gradient(700px 280px at 50% 0%, rgba(55, 157, 249, 0.12), transparent 60%),
     linear-gradient(180deg, #f7fbff 0%, #fffdf8 30%, #fff 100%);
@@ -1058,6 +1106,11 @@ h3 {
     0 18px 30px -16px rgba(28, 51, 88, 0.35);
 }
 
+.min-h-dvh {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 .fb-float-home {
   position: fixed;
   left: max(1rem, env(safe-area-inset-left));
@@ -1066,7 +1119,8 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 44px;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
   border-radius: 999px;
   border: 1.5px solid rgba(255, 255, 255, 0.85);
   background: rgba(255, 253, 250, 0.92);
@@ -1107,7 +1161,7 @@ h3 {
 
 .fb-admin input,
 .fb-admin select {
-  min-height: 44px;
+  min-height: var(--tap-min);
   border-radius: 0.85rem;
   border: 1.5px solid rgba(147, 197, 253, 0.28);
   background: rgba(8, 14, 28, 0.72);
@@ -1122,7 +1176,8 @@ h3 {
 }
 
 .fb-admin button {
-  min-height: 40px;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
   border-radius: 0.75rem;
 }
 
@@ -1142,9 +1197,103 @@ h3 {
   color: #ffd1e0;
 }
 
-/* Game shell + shared template frame */
+/* Game shell is the scrollport. 100vh is the fallback; 100dvh tracks
+   mobile browser chrome so the bottom controls are not trapped behind it.
+   Decorative layers stay clipped. The playfield itself scrolls. */
 .fb-game-shell {
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.fb-game-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.fb-game-title {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.fb-game-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.fb-game-home {
+  min-width: var(--tap-kid);
+  min-height: var(--tap-kid);
+}
+
+.fb-arena {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  height: 420px;
+  height: min(420px, 56dvh);
+  touch-action: none;
+}
+
+.fb-arena-tall {
+  height: 480px;
+  height: min(480px, 62dvh);
+}
+
+.fb-reveal {
+  position: relative;
+  min-height: 60vh;
+  min-height: 60dvh;
+  overflow-x: hidden;
+}
+
+.fb-spot-panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+@media (min-width: 720px) {
+  .fb-spot-panels {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fb-pin-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+}
+
+.fb-pin-digit {
+  width: 56px;
+  height: 64px;
+  min-width: 56px;
+  min-height: var(--tap-kid);
 }
 
 .fb-track {
@@ -1184,7 +1333,7 @@ h3 {
 
 .fb-streak {
   border: 1.5px solid rgba(255, 255, 255, 0.55);
-  min-height: 40px;
+  min-height: var(--tap-min);
 }
 
 .fb-lock {

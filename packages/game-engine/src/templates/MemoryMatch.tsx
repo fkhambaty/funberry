@@ -310,7 +310,6 @@ export function MemoryMatch({
   }
 
   /* ── PLAYING ── */
-  const cols = cards.length <= 8 ? 4 : cards.length <= 12 ? 4 : 5;
   const progressPct =
     pairs.length > 0 ? (matchCount / pairs.length) * 100 : 0;
 
@@ -395,7 +394,7 @@ export function MemoryMatch({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          gridTemplateColumns: "repeat(auto-fit, minmax(64px, 1fr))",
           gap: 10,
         }}
       >

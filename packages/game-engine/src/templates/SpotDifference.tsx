@@ -96,7 +96,7 @@ export function SpotDifference({
   const [foundIds, setFoundIds] = useState<Set<string>>(new Set());
   const foundRef = useRef<Set<string>>(new Set());
   const [hintWrong, setHintWrong] = useState(false);
-  const [panelBEl, setPanelBEl] = useState<HTMLDivElement | null>(null);
+  const [panelBEl, setPanelBEl] = useState<HTMLElement | null>(null);
   const [lastFoundId, setLastFoundId] = useState<string | null>(null);
 
   const cellsA = useMemo(() => parseSceneCells(imageA), [imageA]);
@@ -319,14 +319,7 @@ export function SpotDifference({
       </p>
 
       {/* Two panels */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 14,
-          alignItems: "start",
-        }}
-      >
+      <div className="fb-spot-panels">
         {/* Picture A */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -360,14 +353,22 @@ export function SpotDifference({
           >
             Picture B
           </p>
-          <div
+          <button
+            type="button"
             ref={setPanelBEl}
             onClick={handlePanelBPointer}
+            aria-label="Picture B, tap a difference"
             style={{
               position: "relative",
+              display: "block",
+              width: "100%",
               cursor: "pointer",
               borderRadius: 20,
+              border: "none",
+              background: "transparent",
+              padding: 0,
               touchAction: "manipulation",
+              textAlign: "left",
             }}
           >
             {/* Grid inside B */}
@@ -454,7 +455,7 @@ export function SpotDifference({
                 </motion.div>
               );
             })}
-          </div>
+          </button>
         </motion.div>
       </div>
 

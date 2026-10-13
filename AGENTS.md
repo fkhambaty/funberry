@@ -2,7 +2,7 @@
 
 Read [`ARCHITECTURE.md`](ARCHITECTURE.md) first if you are on a new computer. It is the map of hosting, DNS, database, payments, and the failures that look like bugs. This file is the editing contract.
 
-FunBerry Kids is an **educational games website (and Expo app)** for children roughly **ages 5–8**. It is **not** a marketplace, LMS, or homework grader. Parents create an account, add child profiles, and kids play short EVS (Environmental Studies) mini-games in themed “worlds.” Live site: <https://funberrykids.in>. Support: `hello@funberrykids.in`.
+FunBerry Kids is an **educational games website (and Expo app)** for children roughly **ages 5–8**. It is **not** a marketplace, LMS, or homework grader. Parents create an account, add child profiles, and kids play short EVS (Environmental Studies) mini-games in themed “worlds.” Live site: <https://funberrykids.in> and <https://www.funberrykids.in> (both HTTP 200 on 13 Oct 2026; do not change DNS unless one stops answering). Support: `hello@funberrykids.in`.
 
 The brand name and tagline live in [`packages/config/src/brand.ts`](packages/config/src/brand.ts). Change them there, not in random screens.
 
@@ -72,7 +72,7 @@ The website does not use a Supabase URL or service-role key. Razorpay secrets li
 - Web session is a bearer token in `localStorage` key `funberry_session`. The worker checks ownership. There is no row-level security.
 - Parent **PIN** is stored on `parents.pin` and compared in the client for lock screen / parent gate. Do not print PINs in logs or kid UI.
 - **Stars:** `POST /v1/progress` adds the stars for that round only when the child belongs to the signed-in parent. Never add a client-only star counter as source of truth.
-- **Payments:** amounts and plan IDs live on the worker. The browser must not tell the server “charge ₹X.” Checkout signature and webhook HMAC are checked on the worker. The dummy account must never open a real charge. Stripe webhook routes are stubs — do not market Stripe as live.
+- **Payments:** amounts and plan IDs live on the worker. The browser must not tell the server “charge ₹X.” Checkout signature and webhook HMAC are checked on the worker. The dummy account (`dummy` / `dummy`, PIN `1234`) stays on lifetime access and must never open a real charge. The dashboard stops before Razorpay and shows “Demo account: no charge”; the worker returns that same phrase with HTTP 403. Stripe webhook routes are stubs — do not market Stripe as live.
 - **Coupons:** create, list, and redeem only through the worker. One redemption per account. A code can expire and can have a redemption cap.
 
 ## Data you must not leak
@@ -97,9 +97,13 @@ npm install
 npm run dev:web          # website
 npm run typecheck        # all workspaces
 npm run build --workspace=@funberry/web
+npx playwright install chromium
+npm run test:responsive  # phone, tablet, and desktop smoke tests
 ```
 
-Typecheck the web app with the workspace script (`tsc --noEmit` in `apps/web`). After UI changes, exercise the real flow in the browser: landing → signup/login → add child → `/play` → finish a game → parent dashboard/report. A single screenshot is not enough.
+Typecheck the web app with the workspace script (`tsc --noEmit` in `apps/web`). `npm run typecheck` also typechecks the Expo app. After UI changes, exercise the real flow in the browser: landing → signup/login → add child → `/play` → finish a game → parent dashboard/report. A single screenshot is not enough.
+
+`npm run test:responsive` needs a fresh web build, then Playwright starts that build. It covers `/`, `/pricing`, `/privacy`, `/terms`, auth pages, `/admin`, `/dashboard`, `/dashboard/progress`, `/dashboard/packs`, and `/play` at `390x667`, `390x844`, `393x852`, `768x1024`, `820x1180`, `1024x768`, and `1440x900`. Signed-out visits to dashboard, progress, packs, and play must land on `/login`. The dummy login then opens the child picker, one game of every template (including a touch), the parent PIN, and a checkout that stops before Razorpay. Full-height layout uses `100vh` and then `100dvh`. The game shell scrolls; bubble, star, and Pixi arenas stay clipped.
 
 If you add a Postgres function or policy, add a migration under `supabase/migrations/` with the next number. Apply it on the hosted project or local `supabase` — shipping SQL in git without applying it does nothing.
 

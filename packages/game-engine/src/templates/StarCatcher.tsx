@@ -393,13 +393,11 @@ export function StarCatcher({ data, onComplete, accentColor = "#379df9", onNextG
       {/* Arena */}
       <div
         ref={arenaRef}
+        className="fb-arena"
         style={{
-          position: "relative",
-          height: 420,
           background: "linear-gradient(180deg, rgba(219,234,254,0.3) 0%, rgba(254,252,232,0.3) 60%, rgba(254,243,199,0.4) 100%)",
           borderRadius: 24,
           border: "2px solid rgba(255,255,255,0.5)",
-          overflow: "hidden",
           marginBottom: 6,
         }}
       >
@@ -524,19 +522,19 @@ function ControlButton({ direction, active, onDown, onUp }: {
 
   return (
     <button
-      onTouchStart={(e) => { e.preventDefault(); onDown(); }}
-      onTouchEnd={onUp}
-      onTouchCancel={onUp}
-      onMouseDown={onDown}
-      onMouseUp={onUp}
-      onMouseLeave={onUp}
+      type="button"
+      aria-label={isLeft ? "Move left" : "Move right"}
+      onPointerDown={(e) => { e.preventDefault(); onDown(); }}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      onPointerLeave={onUp}
       style={{
-        width: 84, height: 84, borderRadius: 22, border: "none",
+        width: 84, height: 84, minWidth: 64, minHeight: 64, borderRadius: 22, border: "none",
         background: bg, color: "white", fontSize: 36, fontWeight: 900,
         cursor: "pointer",
         boxShadow: shadow,
         display: "flex", alignItems: "center", justifyContent: "center",
-        userSelect: "none", touchAction: "manipulation",
+        userSelect: "none", touchAction: "none",
         WebkitUserSelect: "none",
         transform: active ? "scale(0.92) translateY(2px)" : "scale(1) translateY(0)",
         transition: "transform 0.08s, box-shadow 0.08s, background 0.08s",

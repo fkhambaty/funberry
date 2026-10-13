@@ -163,6 +163,8 @@ export function SectionedGameList<TSection extends CurriculumSection>({
                             type="button"
                             whileHover={{ scale: 1.015, x: 3 }}
                             whileTap={{ scale: 0.98 }}
+                            data-game-id={game.id}
+                            data-game-type={game.type}
                             onClick={() => onOpenGame(game)}
                             disabled={challengeLocked}
                             aria-label={
@@ -172,10 +174,10 @@ export function SectionedGameList<TSection extends CurriculumSection>({
                                   ? `${game.title}. Finish the practice games to unlock this final challenge.`
                                 : `${role === "challenge" ? "Final challenge. " : ""}${game.title}. ${stars} of ${game.maxStars} stars.`
                             }
-                            className="flex min-h-14 w-full items-center gap-3 rounded-2xl border border-white bg-white p-3 text-left shadow-sm sm:p-4"
+                            className="flex min-h-tap-kid w-full items-center gap-3 rounded-2xl border border-white bg-white p-3 text-left shadow-sm sm:p-4"
                             style={{ opacity: locked || challengeLocked ? 0.88 : 1 }}
                           >
-                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-2xl">
+                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-2xl">
                               {locked || challengeLocked ? "🔒" : GAME_ICONS[game.type]}
                             </span>
                             <span className="min-w-0 flex-1">
