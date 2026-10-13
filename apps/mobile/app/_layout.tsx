@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { View, Image, ActivityIndicator, StyleSheet } from "react-native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import type { Session } from "@supabase/supabase-js";
+import type { AccountSession } from "@funberry/supabase";
 import { supabase } from "../lib/supabase";
 
 /**
@@ -10,7 +10,7 @@ import { supabase } from "../lib/supabase";
  * is signed in or not. This fires on every auth change (login, logout,
  * token refresh) — so navigation always reflects the real session state.
  */
-function useAuthRedirect(session: Session | null, ready: boolean) {
+function useAuthRedirect(session: AccountSession | null, ready: boolean) {
   const router = useRouter();
   const segments = useSegments();
 
@@ -31,7 +31,7 @@ function useAuthRedirect(session: Session | null, ready: boolean) {
 }
 
 export default function RootLayout() {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<AccountSession | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {

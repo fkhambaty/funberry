@@ -9,9 +9,8 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import { signUp } from "@funberry/supabase";
+import { resendSignupConfirmation, signUp, verifyEmailOtp } from "@funberry/supabase";
 
 const LEAF = "#18b05a";
 const APP_NAME = "FunBerry Kids";
@@ -21,24 +20,29 @@ export default function SignupScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [awaitingEmail, setAwaitingEmail] = useState(false);
 
   async function handleSignup() {
     setError("");
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !pin) {
       setError("Please fill in all fields");
       return;
     }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      return;
+    }
+    if (!/^\d{4}$/.test(pin)) {
+      setError("Parent PIN must be exactly 4 digits");
       return;
     }
     setLoading(true);
     try {
-      const emailRedirectTo = Linking.createURL("auth/callback");
-      const data = await signUp(email, password, name, undefined, { emailRedirectTo });
+      const data = await signUp(email, password, name, pin);
 
       if (data.session) {
         router.replace("/(tabs)" as never);
@@ -52,16 +56,47 @@ export default function SignupScreen() {
     }
   }
 
+  async function handleVerify() {
+    if (!/^\d{6}$/.test(code)) {
+      setError("Enter the 6-digit code from your email");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      await verifyEmailOtp(email, code);
+      router.replace("/(tabs)" as never);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "That code could not be verified.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (awaitingEmail) {
     return (
       <View style={[styles.container, { justifyContent: "center", padding: 24 }]}>
         <Text style={styles.emoji}>📧</Text>
-        <Text style={styles.title}>Check your email</Text>
+        <Text style={styles.title}>Enter your confirmation code</Text>
         <Text style={[styles.subtitle, { marginBottom: 16 }]}>
-          We sent a link to <Text style={styles.linkBold}>{email}</Text>. Tap it to confirm, then sign in.
+          We sent a 6-digit code to <Text style={styles.linkBold}>{email}</Text>.
         </Text>
-        <Pressable style={[styles.button, { backgroundColor: "#2180ee" }]} onPress={() => router.push("/auth/login" as never)}>
-          <Text style={styles.buttonText}>Go to Sign In</Text>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        <TextInput
+          style={styles.input}
+          placeholder="6-digit code"
+          value={code}
+          onChangeText={(value) => setCode(value.replace(/\D/g, "").slice(0, 6))}
+          keyboardType="number-pad"
+          autoComplete="one-time-code"
+          textContentType="oneTimeCode"
+          placeholderTextColor="#9ca3af"
+        />
+        <Pressable style={[styles.button, { backgroundColor: "#2180ee" }]} onPress={handleVerify} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? "Checking..." : "Confirm account"}</Text>
+        </Pressable>
+        <Pressable onPress={() => void resendSignupConfirmation(email)}>
+          <Text style={styles.link}>Send a new code</Text>
         </Pressable>
       </View>
     );
@@ -108,9 +143,18 @@ export default function SignupScreen() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Password (6+ characters)"
+            placeholder="Password (8+ characters)"
             value={password}
             onChangeText={setPassword}
+            secureTextEntry
+            placeholderTextColor="#9ca3af"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="4-digit parent PIN"
+            value={pin}
+            onChangeText={(value) => setPin(value.replace(/\D/g, "").slice(0, 4))}
+            keyboardType="number-pad"
             secureTextEntry
             placeholderTextColor="#9ca3af"
           />

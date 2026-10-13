@@ -1,5 +1,6 @@
 export { supabase, createSupabaseClient } from "./client";
 export { FUNBERRY_API, setSessionStore } from "./account";
+export type { AccountSession, AccountUser } from "./account";
 export * from "./types";
 export * from "./hooks";
 export type {
