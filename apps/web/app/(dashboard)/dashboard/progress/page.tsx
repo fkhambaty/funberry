@@ -36,7 +36,7 @@ export default function ProgressPage() {
           setSelectedChild(data[0]!.id);
         }
       } catch {
-        router.push("/login");
+        router.replace("/login");
       } finally {
         setLoading(false);
       }

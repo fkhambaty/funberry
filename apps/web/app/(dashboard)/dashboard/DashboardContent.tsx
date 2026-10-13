@@ -456,7 +456,7 @@ function AccountDataPanel({ userEmail }: { userEmail: string | null }) {
     try {
       await deleteAccount(deletePhrase, deletePassword);
       await signOut();
-      router.push("/");
+      router.replace("/");
     } catch (err) {
       setDeleteMsg(err instanceof Error ? err.message : "The account was not deleted.");
       setDeleting(false);
@@ -598,7 +598,7 @@ export default function DashboardPage() {
       try {
         const user = await getCurrentUser();
         if (!user) {
-          router.push("/login");
+          router.replace("/login");
           return;
         }
         setUserEmail(user.email ?? null);
@@ -633,7 +633,7 @@ export default function DashboardPage() {
           setShowOnboarding(true);
         }
       } catch {
-        router.push("/login");
+        router.replace("/login");
       } finally {
         setLoading(false);
       }
@@ -685,7 +685,7 @@ export default function DashboardPage() {
   async function handleSignOut() {
     playTap();
     await signOut();
-    router.push("/");
+    router.replace("/");
   }
 
   async function redeemCoupon() {

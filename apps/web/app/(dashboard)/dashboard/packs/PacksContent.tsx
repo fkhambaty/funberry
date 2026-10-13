@@ -54,7 +54,7 @@ export default function PacksContent() {
       setChildren(kids);
       setPacks(list);
     } catch {
-      router.push("/login");
+      router.replace("/login");
     } finally {
       setLoading(false);
     }
