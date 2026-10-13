@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { zones, isPremium as tierIsPremium, pricing } from "@funberry/config";
+import { checkoutCopy } from "@funberry/brand";
+import { BerryGuide } from "@funberry/brand";
 import type { SubscriptionTier } from "@funberry/config";
-import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword, trySendWelcomeEmailAfterAuth, redeemCouponCode, createRazorpaySubscription, confirmRazorpaySubscription, cancelRazorpaySubscription } from "@funberry/supabase";
+import { getCurrentUser, getChildren, getFamilyPlayStats, signOut, signIn, getParent, updateParentPin, updateParentPassword, trySendWelcomeEmailAfterAuth, redeemCouponCode, createRazorpaySubscription, confirmRazorpaySubscription, cancelRazorpaySubscription, parentHasPin, getWeeklySummary, exportAccount, deleteAccount, type WeeklySummary } from "@funberry/supabase";
 import type { Child, Parent } from "@funberry/supabase";
 import { TimerSetup } from "../../components/TimerSetup";
 import { useTimer } from "../../components/TimerProvider";
@@ -36,12 +38,13 @@ function ChildAvatar({ child }: { child: Child }) {
   );
 }
 
-function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent | null; userEmail: string | null; onPinUpdated: (pin: string) => void }) {
+function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent | null; userEmail: string | null; onPinUpdated: () => void }) {
   const [showSettings, setShowSettings] = useState(false);
   const [verified, setVerified] = useState(false);
   const [verifyPw, setVerifyPw] = useState("");
   const [verifyError, setVerifyError] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
+  const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -78,11 +81,16 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
       setPinMsg({ text: "PINs do not match", ok: false });
       return;
     }
+    if (parentHasPin(parent) && !/^\d{4}$/.test(currentPin)) {
+      setPinMsg({ text: "Enter your current PIN", ok: false });
+      return;
+    }
     setSavingPin(true);
     try {
-      await updateParentPin(newPin);
-      onPinUpdated(newPin);
+      await updateParentPin(newPin, currentPin || undefined);
+      onPinUpdated();
       setPinMsg({ text: "PIN updated successfully!", ok: true });
+      setCurrentPin("");
       setNewPin("");
       setConfirmPin("");
     } catch (err) {
@@ -141,7 +149,7 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
             Account Settings
           </span>
           <span style={{ marginLeft: "auto", color: "#9ca3af", fontSize: 14 }}>
-            PIN: {parent?.pin ? "••••" : "Not set"} &nbsp;→
+            PIN: {parentHasPin(parent) ? "Set" : "Not set"} &nbsp;→
           </span>
         </motion.button>
       </div>
@@ -253,6 +261,29 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
             This PIN is used to access the parent dashboard from the play area.
           </p>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+            {parentHasPin(parent) ? (
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={currentPin}
+                onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="Current"
+                aria-label="Current PIN"
+                autoComplete="off"
+                style={{
+                  width: 130,
+                  padding: "10px 14px",
+                  borderRadius: 14,
+                  border: "2px solid #e5e7eb",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  textAlign: "center",
+                  letterSpacing: "0.3em",
+                  outline: "none",
+                }}
+              />
+            ) : null}
             <input
               type="password"
               inputMode="numeric"
@@ -377,8 +408,103 @@ function AccountSettings({ parent, userEmail, onPinUpdated }: { parent: Parent |
             </p>
           )}
         </form>
+
+        <div style={{ height: 1, background: "#f3f4f6", margin: "24px 0" }} />
+        <AccountDataPanel userEmail={userEmail} />
       </div>
     </motion.div>
+  );
+}
+
+const DELETE_PHRASE = "DELETE MY ACCOUNT";
+
+function AccountDataPanel({ userEmail }: { userEmail: string | null }) {
+  const router = useRouter();
+  const [exporting, setExporting] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deletePhrase, setDeletePhrase] = useState("");
+  const [deleteMsg, setDeleteMsg] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function downloadExport() {
+    setExporting(true);
+    setDeleteMsg(null);
+    try {
+      const bundle = await exportAccount();
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "funberry-account.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setDeleteMsg(err instanceof Error ? err.message : "Export failed.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function removeAccount(event: React.FormEvent) {
+    event.preventDefault();
+    setDeleteMsg(null);
+    if (deletePhrase !== DELETE_PHRASE) {
+      setDeleteMsg(`Type ${DELETE_PHRASE} to confirm.`);
+      return;
+    }
+    setDeleting(true);
+    try {
+      await deleteAccount(deletePhrase, deletePassword);
+      await signOut();
+      router.push("/");
+    } catch (err) {
+      setDeleteMsg(err instanceof Error ? err.message : "The account was not deleted.");
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div>
+      <h4 style={{ fontSize: 16, fontWeight: 800, fontFamily: "Fredoka, sans-serif", color: "#374151", margin: "0 0 4px" }}>
+        Your data
+      </h4>
+      <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 12px" }}>
+        Download this account, or delete it. Deletion needs your password and the exact phrase. It does not refund a charge. Turn off auto-renew first if Premium renews on its own.
+      </p>
+      <button type="button" onClick={downloadExport} disabled={exporting} className="kid-glass-btn kid-glass-sky rounded-xl px-4 py-2 text-sm">
+        {exporting ? "Preparing…" : "Download my data"}
+      </button>
+      <form onSubmit={removeAccount} style={{ marginTop: 16 }}>
+        <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 6 }}>
+          Password for {userEmail || "this account"}
+        </label>
+        <input
+          type="password"
+          value={deletePassword}
+          onChange={(e) => setDeletePassword(e.target.value)}
+          autoComplete="current-password"
+          aria-label="Password to delete account"
+          className="fb-field mb-2 w-full"
+        />
+        <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#374151", marginBottom: 6 }}>
+          Type {DELETE_PHRASE}
+        </label>
+        <input
+          value={deletePhrase}
+          onChange={(e) => setDeletePhrase(e.target.value)}
+          aria-label="Deletion confirmation phrase"
+          className="fb-field mb-2 w-full"
+        />
+        <button
+          type="submit"
+          disabled={deleting || deletePhrase !== DELETE_PHRASE || deletePassword.length < 6}
+          className="kid-glass-btn kid-glass-danger rounded-xl px-4 py-2 text-sm disabled:opacity-50"
+        >
+          {deleting ? "Deleting…" : "Delete account"}
+        </button>
+      </form>
+      {deleteMsg ? <p className="mt-2 text-sm font-bold text-rose-600">{deleteMsg}</p> : null}
+    </div>
   );
 }
 
@@ -444,7 +570,7 @@ function markOnboardingSeen(userId: string): void {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { setParentPin } = useTimer();
+  const { setPinSet } = useTimer();
   const [parent, setParent] = useState<Parent | null>(null);
   const [children, setChildrenState] = useState<Child[]>([]);
   const [loading, setLoading] = useState(true);
@@ -465,6 +591,7 @@ export default function DashboardPage() {
     uniqueGamesTouched: number;
     lastActivityAt: string | null;
   } | null>(null);
+  const [weekNotes, setWeekNotes] = useState<{ name: string; week: WeeklySummary }[]>([]);
 
   useEffect(() => {
     async function load() {
@@ -480,7 +607,7 @@ export default function DashboardPage() {
         const p = await getParent();
         if (p) {
           setParent(p);
-          if (p.pin) setParentPin(p.pin);
+          setPinSet(parentHasPin(p));
           let pending = "";
           try {
             pending = window.sessionStorage.getItem("funberry_pending_sub") || "";
@@ -512,7 +639,7 @@ export default function DashboardPage() {
       }
     }
     load();
-  }, [router, setParentPin]);
+  }, [router, setPinSet]);
 
   useEffect(() => {
     if (loading || children.length === 0) {
@@ -526,6 +653,29 @@ export default function DashboardPage() {
       })
       .catch(() => {
         if (!cancelled) setFamilyStats(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, children]);
+
+  useEffect(() => {
+    if (loading || children.length === 0) {
+      setWeekNotes([]);
+      return;
+    }
+    let cancelled = false;
+    Promise.all(
+      children.map(async (child) => {
+        const week = await getWeeklySummary(child.id);
+        return { name: child.name, week };
+      }),
+    )
+      .then((rows) => {
+        if (!cancelled) setWeekNotes(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setWeekNotes([]);
       });
     return () => {
       cancelled = true;
@@ -550,7 +700,7 @@ export default function DashboardPage() {
       const p = await getParent();
       if (p) {
         setParent(p);
-        if (p.pin) setParentPin(p.pin);
+        setPinSet(parentHasPin(p));
       }
     } catch (err) {
       setCouponMsg({ text: err instanceof Error ? err.message : "Something went wrong. Try again.", ok: false });
@@ -630,8 +780,8 @@ export default function DashboardPage() {
 
       const description =
         plan === "weekly"
-          ? `FunBerry Kids Premium — ₹${pricing.premiumWeeklyInr.priceInr}/week`
-          : `FunBerry Kids Premium — ₹${pricing.premiumMonthlyInr.priceInr}/month`;
+          ? checkoutCopy.description(`₹${pricing.premiumWeeklyInr.priceInr}/week`)
+          : checkoutCopy.description(`₹${pricing.premiumMonthlyInr.priceInr}/month`);
       let settled = false;
       let poll = 0;
       let watchdog = 0;
@@ -642,7 +792,7 @@ export default function DashboardPage() {
       const rzp = new RazorpayClass({
         key: created.key_id,
         subscription_id: created.subscription_id,
-        name: "FKTech",
+        name: checkoutCopy.merchantName,
         description,
         prefill: { email: userEmail ?? "", name: parent?.name ?? "" },
         theme: { color: "#7c3aed" },
@@ -814,9 +964,9 @@ export default function DashboardPage() {
           <div className="glass-card rounded-kid p-4 sm:p-5">
             <h3 className="font-display text-lg font-bold text-slate-800">What the games show</h3>
             {gamesPlayed === 0 ? (
-              <p className="mt-3 text-sm font-semibold text-slate-600">
-                No games played yet. Skill notes appear in the growth report after your child finishes a game.
-              </p>
+              <div className="mt-3">
+                <BerryGuide moment="empty" line="No games yet. Skill notes appear after a child finishes a round." />
+              </div>
             ) : (
               <p className="mt-3 text-sm font-semibold text-slate-600">
                 {gamesExplored} game{gamesExplored === 1 ? "" : "s"} explored across {gamesPlayed} session{gamesPlayed === 1 ? "" : "s"}.
@@ -828,6 +978,25 @@ export default function DashboardPage() {
             </a>
           </div>
         </motion.section>
+
+        {weekNotes.length > 0 ? (
+          <motion.section className="mb-6" aria-label="This week">
+            <div className="glass-card rounded-kid p-4 sm:p-5">
+              <h3 className="font-display text-lg font-bold text-slate-800">This week</h3>
+              <p className="mt-1 text-xs font-semibold text-slate-500">
+                {weekNotes[0]?.week.period_start} to {weekNotes[0]?.week.period_end}. Stars count only when a score beats the previous best. There is no streak.
+              </p>
+              <ul className="mt-3 space-y-2 text-sm font-semibold text-slate-700">
+                {weekNotes.map((note) => (
+                  <li key={note.name}>
+                    {note.name}: {note.week.rounds} round{note.week.rounds === 1 ? "" : "s"}, {note.week.stars_credited} new star{note.week.stars_credited === 1 ? "" : "s"}
+                    {note.week.continue_game_id ? ". A game is ready to continue in play." : "."}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.section>
+        ) : null}
 
         {/* At-a-glance stats for Parent Zone */}
         <motion.section
@@ -1096,8 +1265,7 @@ export default function DashboardPage() {
                 Learning Packs — from your child&apos;s textbook
               </p>
               <p className="mt-0.5 text-xs font-semibold leading-snug text-indigo-700/80 sm:text-sm">
-                Upload photos of a few book pages. We turn them into games so your child
-                learns those exact pages by playing.
+                Photograph pages on this device. Only the text you review is saved, then turned into games.
               </p>
             </div>
             <span className="kid-glass-btn kid-glass-violet hidden rounded-xl px-4 py-2 text-sm font-bold sm:inline-flex">
@@ -1312,8 +1480,11 @@ export default function DashboardPage() {
             <h3 id="upgrade-title" className="font-display text-xl font-bold text-purple-900 mb-1 text-center">
               Unlock Premium
             </h3>
-            <p className="text-center text-sm text-gray-600 mb-4">
+            <p className="text-center text-sm text-gray-600 mb-2">
               Have a coupon? Redeem it first. Otherwise choose a plan below.
+            </p>
+            <p className="text-center text-xs font-semibold text-slate-500 mb-4">
+              {checkoutCopy.provides}. The payment page shows FKTech. A closed checkout is not a charge. Turning off auto-renew does not refund the period already paid.
             </p>
 
             {/* Coupon first */}
@@ -1412,9 +1583,9 @@ export default function DashboardPage() {
     </AnimatePresence>
 
     {/* Account Settings Section */}
-    <AccountSettings parent={parent} userEmail={userEmail} onPinUpdated={(newPin) => {
-      setParentPin(newPin);
-      setParent(parent ? { ...parent, pin: newPin } : null);
+    <AccountSettings parent={parent} userEmail={userEmail} onPinUpdated={() => {
+      setPinSet(true);
+      setParent(parent ? { ...parent, pin_set: true, pin: null } : null);
     }} />
 
     {/* First-run welcome tour (only when this parent has no child yet) */}

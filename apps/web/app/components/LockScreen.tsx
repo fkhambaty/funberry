@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { BerryGuide } from "@funberry/brand";
 import { useTimer } from "./TimerProvider";
 import { useRouter } from "next/navigation";
 
@@ -20,7 +21,7 @@ export function LockScreen() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("pin");
   const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
 
   const isVisible = timer.isLocked || timer.awaitingDecision;
@@ -31,27 +32,28 @@ export function LockScreen() {
     if (pin.length >= 4) return;
     const next = pin + digit;
     setPin(next);
-    setError(false);
+    setError("");
     if (next.length === 4) {
       setTimeout(() => {
-        const ok = verifyPin(next);
-        if (ok) {
-          setPhase("decision");
-          setPin("");
-          setError(false);
-        } else {
-          setError(true);
-          setShake(true);
-          setPin("");
-          setTimeout(() => setShake(false), 500);
-        }
+        void verifyPin(next).then((ok) => {
+          if (ok) {
+            setPhase("decision");
+            setPin("");
+            setError("");
+          } else {
+            setError("That code did not open the lock.");
+            setShake(true);
+            setPin("");
+            setTimeout(() => setShake(false), 500);
+          }
+        });
       }, 150);
     }
   }
 
   function handleBackspace() {
     setPin((p) => p.slice(0, -1));
-    setError(false);
+    setError("");
   }
 
   function handleExtend(minutes: number) {
@@ -91,13 +93,9 @@ export function LockScreen() {
             transition={{ duration: 0.3 }}
             style={{ textAlign: "center", padding: 32, maxWidth: 360 }}
           >
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              style={{ fontSize: 64, marginBottom: 16 }}
-            >
-              ⏰
-            </motion.div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+              <BerryGuide moment="timer" />
+            </div>
             <h1 style={{
               fontFamily: "Fredoka, sans-serif",
               fontSize: 28,
@@ -149,15 +147,15 @@ export function LockScreen() {
               ))}
             </div>
 
-            {error && (
+            {error ? (
               <motion.p
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 style={{ color: "#fca5a5", fontSize: 13, fontWeight: 700, marginBottom: 16 }}
               >
-                Wrong PIN — try again
+                {error}
               </motion.p>
-            )}
+            ) : null}
 
             <div style={{
               display: "grid",

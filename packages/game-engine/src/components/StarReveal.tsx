@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { BerryGuide } from "@funberry/brand";
 import { playStar, playVictory, playComplete } from "../core/sound";
 import { fireStarExplosion, fireFireworks, fireGlitterStorm } from "../core/confetti";
 import { getEncouragementMessage } from "../core/scoring";
@@ -159,9 +160,9 @@ export function StarReveal({
             ease: "easeOut",
             delay: 0.1,
           }}
-          style={{ fontSize: 80, marginBottom: 8, display: "inline-block" }}
+          style={{ marginBottom: 8, display: "inline-block" }}
         >
-          {isPerfect ? "🎉" : isGood ? "🌟" : "👏"}
+          <BerryGuide moment="celebrate" compact />
         </motion.div>
 
         {/* Character */}

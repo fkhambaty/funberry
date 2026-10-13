@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@funberry/brand": "*",
     "@funberry/config": "*"
   },
   "devDependencies": {

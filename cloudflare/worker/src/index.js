@@ -1,6 +1,22 @@
 import { handleAdmin, handleCouponRedeem } from "./admin.js";
 import { handleRazorpayAuthed, handleRazorpayWebhook, syncParentBilling } from "./payments.js";
 import { roleForEmail } from "./owners.js";
+import { bytesToHex, hashSecret, sha256 } from "./crypto.js";
+import { isDemoParent } from "./payments.js";
+import {
+  clearPinFailures,
+  hashNewPin,
+  isFourDigitPin,
+  migratePlainPin,
+  pinIsSet,
+  pinLockActive,
+  pinMatches,
+  recordPinFailure,
+  storeParentPin,
+} from "./pin.js";
+import { reconcileChildStars, recordGameProgress } from "./progress.js";
+import { countProductEvents, loadWeeklySummary, parentProductCounts, recordProductEvent, recordProductEventOnce } from "./analytics.js";
+import { DELETE_PHRASE, deleteParentAccount, deletionAllowed, exportParentAccount, passwordMatches } from "./accountData.js";
 
 const ALLOWED_ORIGINS = new Set([
   "https://funberrykids.in",
@@ -38,25 +54,6 @@ function json(body, status, origin) {
   return new Response(status === 204 ? null : JSON.stringify(body), { status, headers });
 }
 
-function bytesToHex(bytes) {
-  return [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
-}
-
-async function sha256(value) {
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
-  return bytesToHex(new Uint8Array(digest));
-}
-
-async function hashPassword(password, salt) {
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations: 100000, hash: "SHA-256" },
-    key,
-    256,
-  );
-  return bytesToHex(new Uint8Array(bits));
-}
-
 function nowIso() {
   return new Date().toISOString();
 }
@@ -86,7 +83,7 @@ function parentOut(row) {
     email: row.email,
     name: row.name || "",
     username: row.username || null,
-    pin: row.pin || null,
+    pin_set: pinIsSet(row),
     subscription_tier: row.subscription_tier || "free",
     subscription_expires_at: row.subscription_expires_at || null,
     welcome_email_sent_at: row.welcome_email_sent_at || null,
@@ -240,7 +237,8 @@ async function parentFromRequest(request, db) {
 
 async function requireParent(request, db) {
   const parent = await parentFromRequest(request, db);
-  return parent;
+  if (!parent) return null;
+  return migratePlainPin(db, parent, nowIso());
 }
 
 async function ownChild(db, parentId, childId) {
@@ -265,6 +263,10 @@ export default {
     const db = env.DB;
 
     try {
+      if (request.method === "GET" && path === "/v1/health") {
+        return json({ ok: true, service: "funberry-api", email_ready: emailReady(env) }, 200, origin);
+      }
+
       if (request.method === "POST" && path === "/v1/signup") {
         const body = await readJson(request);
         const email = String(body?.email || "").trim().toLowerCase();
@@ -285,22 +287,31 @@ export default {
           return json({ error: "An account with this email already exists. Please sign in instead." }, 409, origin);
         }
         const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-        const passwordHash = await hashPassword(password, salt);
+        const passwordHash = await hashSecret(password, salt);
         const now = nowIso();
         const role = roleForEmail(email);
+        let pinHash = null;
+        let pinSalt = null;
+        if (pin) {
+          const hashed = await hashNewPin(pin);
+          pinHash = hashed.pin_hash;
+          pinSalt = hashed.pin_salt;
+        }
         if (existing) {
           await db
-            .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, name = ?, pin = ?, role = ?, updated_at = ? WHERE id = ?")
-            .bind(passwordHash, salt, name, pin || null, role, now, existing.id)
+            .prepare(
+              "UPDATE parents SET password_hash = ?, password_salt = ?, name = ?, pin = NULL, pin_hash = ?, pin_salt = ?, pin_attempts = 0, pin_locked_until = NULL, role = ?, updated_at = ? WHERE id = ?",
+            )
+            .bind(passwordHash, salt, name, pinHash, pinSalt, role, now, existing.id)
             .run();
         } else {
           await db
             .prepare(
               `INSERT INTO parents
-               (id, email, password_hash, password_salt, name, pin, role, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+               (id, email, password_hash, password_salt, name, pin, pin_hash, pin_salt, role, updated_at)
+               VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?)`,
             )
-            .bind(crypto.randomUUID(), email, passwordHash, salt, name, pin || null, role, now)
+            .bind(crypto.randomUUID(), email, passwordHash, salt, name, pinHash, pinSalt, role, now)
             .run();
         }
         await db.prepare("DELETE FROM email_codes WHERE email = ? AND purpose = 'verify'").bind(email).run();
@@ -324,7 +335,10 @@ export default {
           .bind(now, role, now, parent.id)
           .run();
         parent.role = role;
+        parent.email_verified_at = now;
+        await migratePlainPin(db, parent, now);
         const token = await createSession(db, parent.id);
+        await recordProductEventOnce(db, "verified_signup", parent.id, now);
         return json(sessionBody(parent, token), 200, origin);
       }
 
@@ -363,7 +377,7 @@ export default {
             `UPDATE parents SET password_hash = ?, password_salt = ?, email_verified_at = COALESCE(email_verified_at, ?), updated_at = ?
              WHERE id = ?`,
           )
-          .bind(await hashPassword(password, salt), salt, now, now, parent.id)
+          .bind(await hashSecret(password, salt), salt, now, now, parent.id)
           .run();
         await db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(parent.id).run();
         return json({ ok: true }, 200, origin);
@@ -377,7 +391,7 @@ export default {
           ? await db.prepare("SELECT * FROM parents WHERE email = ?").bind(login).first()
           : await db.prepare("SELECT * FROM parents WHERE username = ?").bind(login).first();
         if (!parent) return json({ error: "Invalid login credentials" }, 401, origin);
-        const passwordHash = await hashPassword(password, parent.password_salt);
+        const passwordHash = await hashSecret(password, parent.password_salt);
         if (passwordHash !== parent.password_hash) return json({ error: "Invalid login credentials" }, 401, origin);
         const signedInAt = nowIso();
         const role = roleForEmail(parent.email);
@@ -395,6 +409,7 @@ export default {
             origin,
           );
         }
+        await migratePlainPin(db, parent, signedInAt);
         const token = await createSession(db, parent.id);
         return json(sessionBody(parent, token), 200, origin);
       }
@@ -434,15 +449,48 @@ export default {
 
       if (request.method === "PUT" && path === "/v1/parent") {
         const body = await readJson(request);
-        const pin = body?.pin == null ? parent.pin : String(body.pin).trim();
-        if (pin && !/^\d{4}$/.test(pin)) return json({ error: "PIN must be exactly 4 digits." }, 400, origin);
         const name = body?.name == null ? parent.name : String(body.name).trim();
-        await db
-          .prepare("UPDATE parents SET pin = ?, name = ?, updated_at = ? WHERE id = ?")
-          .bind(pin || null, name, nowIso(), parent.id)
-          .run();
+        const now = nowIso();
+        if (body?.pin != null) {
+          const nextPin = String(body.pin).trim();
+          if (!isFourDigitPin(nextPin)) return json({ error: "PIN must be exactly 4 digits." }, 400, origin);
+          if (pinIsSet(parent)) {
+            if (pinLockActive(parent)) {
+              return json({ error: "Too many PIN tries. Wait 15 minutes and try again." }, 429, origin);
+            }
+            if (!(await pinMatches(parent, body.current_pin))) {
+              const failure = await recordPinFailure(db, parent, now);
+              return json(
+                { error: failure.locked ? "Too many PIN tries. Wait 15 minutes and try again." : "Current PIN is wrong." },
+                failure.locked ? 429 : 403,
+                origin,
+              );
+            }
+          }
+          await storeParentPin(db, parent.id, nextPin, now);
+        }
+        await db.prepare("UPDATE parents SET name = ?, updated_at = ? WHERE id = ?").bind(name, now, parent.id).run();
         const next = await db.prepare("SELECT * FROM parents WHERE id = ?").bind(parent.id).first();
         return json({ parent: parentOut(next) }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/pin/verify") {
+        const body = await readJson(request);
+        const now = nowIso();
+        if (!pinIsSet(parent)) return json({ error: "Set a parent PIN first." }, 404, origin);
+        if (pinLockActive(parent)) {
+          return json({ error: "Too many PIN tries. Wait 15 minutes and try again." }, 429, origin);
+        }
+        if (!(await pinMatches(parent, body?.pin))) {
+          const failure = await recordPinFailure(db, parent, now);
+          return json(
+            { error: failure.locked ? "Too many PIN tries. Wait 15 minutes and try again." : "That PIN is not right." },
+            failure.locked ? 429 : 403,
+            origin,
+          );
+        }
+        await clearPinFailures(db, parent.id, now);
+        return json({ ok: true }, 200, origin);
       }
 
       if (request.method === "POST" && path === "/v1/password") {
@@ -450,7 +498,7 @@ export default {
         const password = String(body?.password || "");
         if (password.length < 6) return json({ error: "Password must be at least 6 characters." }, 400, origin);
         const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16)));
-        const passwordHash = await hashPassword(password, salt);
+        const passwordHash = await hashSecret(password, salt);
         await db
           .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, updated_at = ? WHERE id = ?")
           .bind(passwordHash, salt, nowIso(), parent.id)
@@ -463,7 +511,15 @@ export default {
           .prepare("SELECT * FROM children WHERE parent_id = ? ORDER BY created_at ASC")
           .bind(parent.id)
           .all();
-        return json({ children: (rows.results || []).map(childOut) }, 200, origin);
+        const now = nowIso();
+        for (const row of rows.results || []) {
+          await reconcileChildStars(db, row.id, parent.id, now);
+        }
+        const fresh = await db
+          .prepare("SELECT * FROM children WHERE parent_id = ? ORDER BY created_at ASC")
+          .bind(parent.id)
+          .all();
+        return json({ children: (fresh.results || []).map(childOut) }, 200, origin);
       }
 
       if (request.method === "POST" && path === "/v1/children") {
@@ -485,6 +541,7 @@ export default {
           .bind(id, parent.id, name, age, photoUrl, now, now)
           .run();
         const row = await db.prepare("SELECT * FROM children WHERE id = ?").bind(id).first();
+        await recordProductEvent(db, "child_created", parent.id, now);
         return json({ child: childOut(row) }, 201, origin);
       }
 
@@ -523,48 +580,68 @@ export default {
         const body = await readJson(request);
         const childId = String(body?.child_id || "");
         const gameId = String(body?.game_id || "");
-        const stars = Math.max(0, Math.min(3, Number(body?.stars_earned) || 0));
-        const score = Number(body?.score) || 0;
-        const timeSpent = Math.max(0, Number(body?.time_spent_seconds) || 0);
         const child = await ownChild(db, parent.id, childId);
         if (!child) return json({ error: "Child not found" }, 404, origin);
         if (!gameId) return json({ error: "Missing game." }, 400, origin);
-        const existing = await db
-          .prepare("SELECT * FROM progress WHERE child_id = ? AND game_id = ?")
-          .bind(childId, gameId)
-          .first();
         const now = nowIso();
-        let row;
-        if (existing) {
-          const best = Math.max(existing.stars_earned || 0, stars);
-          await db
-            .prepare(
-              `UPDATE progress
-               SET stars_earned = ?, score = ?, time_spent_seconds = ?, attempts = ?, completed = ?, completed_at = ?
-               WHERE id = ?`,
-            )
-            .bind(best, score, timeSpent, (existing.attempts || 0) + 1, best > 0 ? 1 : 0, best > 0 ? now : null, existing.id)
-            .run();
-          row = await db.prepare("SELECT * FROM progress WHERE id = ?").bind(existing.id).first();
-        } else {
-          const id = crypto.randomUUID();
-          await db
-            .prepare(
-              `INSERT INTO progress
-               (id, child_id, game_id, stars_earned, score, time_spent_seconds, attempts, completed, completed_at)
-               VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-            )
-            .bind(id, childId, gameId, stars, score, timeSpent, stars > 0 ? 1 : 0, stars > 0 ? now : null)
-            .run();
-          row = await db.prepare("SELECT * FROM progress WHERE id = ?").bind(id).first();
+        const prior = await db
+          .prepare(
+            `SELECT progress.id FROM progress
+             JOIN children ON children.id = progress.child_id
+             WHERE children.parent_id = ? LIMIT 1`,
+          )
+          .bind(parent.id)
+          .first();
+        const saved = await recordGameProgress(db, parent.id, body, now);
+        if (!prior) await recordProductEventOnce(db, "first_game", parent.id, now);
+        if (saved.first_completion) await recordProductEvent(db, "game_completed", parent.id, now);
+        return json(
+          { progress: progressOut(saved.progress), stars_credited: saved.stars_credited, total_stars: saved.total_stars },
+          200,
+          origin,
+        );
+      }
+
+      if (request.method === "GET" && path === "/v1/weekly-summary") {
+        const childId = url.searchParams.get("child_id") || "";
+        if (!(await ownChild(db, parent.id, childId))) return json({ error: "Child not found" }, 404, origin);
+        return json(await loadWeeklySummary(db, parent.id, childId), 200, origin);
+      }
+
+      if (request.method === "GET" && path === "/v1/insights") {
+        const counts = await parentProductCounts(db, parent.id);
+        const rounds = await db.prepare("SELECT COUNT(*) AS n FROM play_events WHERE parent_id = ?").bind(parent.id).first();
+        return json(
+          {
+            children_created: counts.child_created,
+            first_game: counts.first_game > 0,
+            games_completed: counts.game_completed,
+            checkouts_started: counts.checkout_started,
+            subscription_activated: counts.subscription_activated > 0,
+            rounds_logged: Number(rounds?.n || 0),
+          },
+          200,
+          origin,
+        );
+      }
+
+      if (request.method === "GET" && path === "/v1/account/export") {
+        return json(await exportParentAccount(db, parent), 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/account/delete") {
+        if (isDemoParent(parent)) return json({ error: "The demo account cannot be deleted." }, 403, origin);
+        const body = await readJson(request);
+        if (String(body?.confirm || "") !== DELETE_PHRASE) {
+          return json({ error: `Type ${DELETE_PHRASE} to confirm.` }, 400, origin);
         }
-        if (stars > 0) {
-          await db
-            .prepare("UPDATE children SET total_stars = total_stars + ?, updated_at = ? WHERE id = ? AND parent_id = ?")
-            .bind(stars, now, childId, parent.id)
-            .run();
+        if (!(await passwordMatches(parent, body?.password))) {
+          return json({ error: "Password does not match." }, 403, origin);
         }
-        return json({ progress: progressOut(row) }, 200, origin);
+        const blocked = deletionAllowed(parent);
+        if (blocked) return json({ error: blocked }, 409, origin);
+        await deleteParentAccount(db, parent);
+        return json({ ok: true }, 200, origin);
       }
 
       if (request.method === "GET" && path === "/v1/family-stats") {

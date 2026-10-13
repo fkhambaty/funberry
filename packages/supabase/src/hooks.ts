@@ -124,16 +124,68 @@ export async function redeemCouponCode(code: string) {
   });
 }
 
-export async function updateParentPin(pin: string) {
+export async function updateParentPin(pin: string, currentPin?: string) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Not authenticated");
-  await accountRequest("/v1/parent", { method: "PUT", body: { pin } });
+  await accountRequest("/v1/parent", { method: "PUT", body: { pin, current_pin: currentPin } });
 }
 
+export function parentHasPin(parent: { pin_set?: boolean; pin?: string | null } | null): boolean {
+  if (!parent) return false;
+  if (typeof parent.pin_set === "boolean") return parent.pin_set;
+  return Boolean(parent.pin);
+}
+
+/** Server check. A missing route falls back to a PIN still present on an older parent payload. */
 export async function verifyParentPin(pin: string): Promise<boolean> {
-  const parent = await getParent();
-  if (!parent || !parent.pin) return false;
-  return parent.pin === pin;
+  try {
+    await accountRequest("/v1/pin/verify", { method: "POST", body: { pin } });
+    return true;
+  } catch (err) {
+    const status = err && typeof err === "object" && "status" in err ? Number((err as { status?: number }).status) : 0;
+    if (status !== 404) return false;
+    const parent = await getParent();
+    return Boolean(parent?.pin) && parent?.pin === pin;
+  }
+}
+
+export type WeeklySummary = {
+  period_start: string;
+  period_end: string;
+  generated_at: string;
+  rounds: number;
+  distinct_games: number;
+  stars_credited: number;
+  continue_game_id: string | null;
+  continue_played_at: string | null;
+  streak: null;
+  note: string;
+};
+
+export async function getWeeklySummary(childId: string): Promise<WeeklySummary> {
+  return accountRequest(`/v1/weekly-summary?child_id=${encodeURIComponent(childId)}`);
+}
+
+export async function getParentInsights() {
+  return accountRequest<{
+    children_created: number;
+    first_game: boolean;
+    games_completed: number;
+    checkouts_started: number;
+    subscription_activated: boolean;
+    rounds_logged: number;
+  }>("/v1/insights");
+}
+
+export async function exportAccount() {
+  return accountRequest<Record<string, unknown>>("/v1/account/export");
+}
+
+export async function deleteAccount(confirm: string, password: string) {
+  return accountRequest<{ ok: boolean }>("/v1/account/delete", {
+    method: "POST",
+    body: { confirm, password },
+  });
 }
 
 export async function updateParentPassword(newPassword: string) {
@@ -211,8 +263,8 @@ export async function saveProgress(
   starsEarned: number,
   score: number,
   timeSpent: number,
-): Promise<Progress> {
-  const data = await accountRequest<{ progress: Progress }>("/v1/progress", {
+): Promise<{ progress: Progress; stars_credited: number; total_stars: number }> {
+  return accountRequest("/v1/progress", {
     method: "POST",
     body: {
       child_id: childId,
@@ -222,7 +274,6 @@ export async function saveProgress(
       time_spent_seconds: timeSpent,
     },
   });
-  return data.progress;
 }
 
 export async function getChildUnlocks(childId: string) {

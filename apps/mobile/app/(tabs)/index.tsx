@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { voice } from "@funberry/brand/identity";
 
 // Inlined to avoid any shared-package transformation issues in release build
 const FREE_ZONES = [
@@ -20,6 +21,7 @@ export default function HomeTab() {
           <View>
             <Text style={styles.greeting}>Hi there! 👋</Text>
             <Text style={styles.title}>Ready to learn?</Text>
+            <Text style={styles.guide}>{voice.guide}</Text>
           </View>
           <View style={styles.starBadge}>
             <Text style={styles.starText}>⭐ 0</Text>
@@ -75,6 +77,7 @@ const styles = StyleSheet.create({
   },
   greeting: { fontSize: 16, color: "#6b7280" },
   title: { fontSize: 28, fontWeight: "800", color: "#1c498c" },
+  guide: { marginTop: 4, fontSize: 14, color: "#4b6284", maxWidth: 240 },
   starBadge: {
     backgroundColor: "#fffbeb",
     paddingHorizontal: 16,

@@ -1,6 +1,7 @@
 "use client";
 
 import { brand, pricing } from "@funberry/config";
+import { checkoutCopy } from "@funberry/brand/identity";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
 
 export default function PricingPage() {
@@ -56,6 +57,19 @@ export default function PricingPage() {
             <a href="/signup" className="fb-cta fb-cta-sky mt-6 w-full">Start monthly plan</a>
           </section>
         </div>
+
+        <section className="mx-auto mt-10 max-w-3xl rounded-kid border border-slate-200 bg-white/90 p-5 text-sm leading-relaxed text-slate-700">
+          <h2 className="font-display text-xl font-bold text-slate-900">Payment and refunds</h2>
+          <p className="mt-2">
+            {checkoutCopy.provides}. Checkout is Razorpay, in INR. The payment page shows the name FKTech because FunBerry shares that merchant account. Weekly is ₹{pricing.premiumWeeklyInr.priceInr} and renews each week. Monthly is ₹{pricing.premiumMonthlyInr.priceInr} and renews each month.
+          </p>
+          <p className="mt-2">
+            If you close checkout before paying, you are not charged. Turn off auto-renew in the parent dashboard and Premium stays until the date already paid. That does not refund the current period. FunBerry does not promise an automatic refund. To ask about a charge, email {brand.supportEmail} with the payment date. A refund, if approved, goes back through Razorpay to the original payment method.
+          </p>
+          <p className="mt-2">
+            <a href="/terms" className="font-bold text-sky-800">Read the terms</a>
+          </p>
+        </section>
       </div>
     </main>
   );

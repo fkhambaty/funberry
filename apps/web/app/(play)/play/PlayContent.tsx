@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { zones, getZoneById, isPremium } from "@funberry/config";
+import { BerryGuide } from "@funberry/brand";
 import {
   getCurriculumSectionsForZone,
   getGamesForZone,
@@ -13,7 +14,7 @@ import {
   RankProvider,
 } from "@funberry/game-engine";
 import type { GameConfig, GameResult } from "@funberry/game-engine";
-import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank, getAssignedPacksForChild, getParent, getChildProgress, getCurrentUser } from "@funberry/supabase";
+import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank, getAssignedPacksForChild, getParent, getChildProgress, getCurrentUser, getWeeklySummary } from "@funberry/supabase";
 import type { Child, LearningPack, Parent, Progress } from "@funberry/supabase";
 import { LeaderboardModal } from "../../components/Leaderboard";
 import { FunBerryLogo } from "../../components/FunBerryLogo";
@@ -324,6 +325,44 @@ function PinGateModal({ onSuccess, onCancel }: { onSuccess: () => void; onCancel
   );
 }
 
+function ContinueGame({ childId, onOpen }: { childId?: string; onOpen: (gameId: string) => void }) {
+  const [gameId, setGameId] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    if (!childId) return;
+    let cancelled = false;
+    getWeeklySummary(childId)
+      .then((week) => {
+        if (cancelled || !week.continue_game_id) return;
+        let nextTitle = "your last game";
+        for (const zone of zones) {
+          const game = getGamesForZone(zone.id).find((item) => item.id === week.continue_game_id);
+          if (game) nextTitle = game.title;
+        }
+        setGameId(week.continue_game_id);
+        setTitle(nextTitle);
+      })
+      .catch(() => {
+        if (!cancelled) setGameId(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [childId]);
+
+  if (!gameId) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(gameId)}
+      className="mb-4 w-full rounded-kid border-2 border-berry-100 bg-white/80 p-3 text-left"
+    >
+      <BerryGuide moment="guide" line={`Continue: ${title}`} />
+    </button>
+  );
+}
+
 export default function PlayContent() {
   const router = useRouter();
   const [view, setView] = useState<ViewMode>("who");
@@ -454,11 +493,8 @@ export default function PlayContent() {
                 {loadingHistory ? (
                   <p className="py-8 text-center text-sm font-semibold text-slate-400">Loading…</p>
                 ) : starHistory.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <p className="mb-1 text-4xl">🌟</p>
-                    <p className="text-sm font-semibold text-slate-500">
-                      No stars yet — finish a game to earn your first ones!
-                    </p>
+                  <div className="py-8">
+                    <BerryGuide moment="empty" line="No stars yet. Finish a game to earn the first ones." />
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -601,6 +637,16 @@ export default function PlayContent() {
     setView("playing");
   }
 
+  function openContinueGame(gameId: string) {
+    for (const zone of zones) {
+      const game = getGamesForZone(zone.id).find((item) => item.id === gameId);
+      if (!game) continue;
+      setSelectedZone(zone.id);
+      handleGameClick(game);
+      return;
+    }
+  }
+
   function handlePackClick(pack: LearningPack) {
     playTap();
     setSelectedPack(pack);
@@ -635,32 +681,28 @@ export default function PlayContent() {
 
     if (!selectedChild) return;
 
-    // Optimistically bump the top-right counter + fire the "+N ⭐" fly-up animation.
-    const earned = result.starsEarned;
-    if (earned > 0) {
-      setSelectedChild((prev) => (prev ? { ...prev, total_stars: (prev.total_stars ?? 0) + earned } : prev));
-      setStarBurst({ n: earned, key: Date.now() });
-      setTimeout(() => setStarBurst(null), 1800);
-    }
-
     setSaveState("saving");
     try {
-      await saveProgress(
+      const saved = await saveProgress(
         selectedChild.id,
         selectedGame.id,
         result.starsEarned,
         result.score,
         result.timeSpent,
       );
+      const credited = saved.stars_credited ?? 0;
+      if (credited > 0) {
+        setStarBurst({ n: credited, key: Date.now() });
+        setTimeout(() => setStarBurst(null), 1800);
+      }
       const updatedKids = await getChildren();
       setChildren(updatedKids);
       const refreshed = updatedKids.find((c) => c.id === selectedChild.id);
-      // Never let a lagging refresh pull the visible count below the optimistic value.
       if (refreshed) {
-        setSelectedChild((prev) => ({
+        setSelectedChild({
           ...refreshed,
-          total_stars: Math.max(refreshed.total_stars ?? 0, prev?.total_stars ?? 0),
-        }));
+          total_stars: saved.total_stars ?? refreshed.total_stars,
+        });
       }
 
       const rank = await getChildRank(selectedChild.id);
@@ -816,7 +858,9 @@ export default function PlayContent() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center rounded-kid p-10 glass-card"
             >
-              <p className="text-5xl mb-4">👶</p>
+              <div className="mb-4 flex justify-center">
+                <BerryGuide moment="empty" />
+              </div>
               <p className="font-display font-bold text-gray-700 text-xl mb-2">No children added yet!</p>
               <p className="text-gray-500 text-sm mb-6">Add a child profile from the dashboard first.</p>
               <motion.button
@@ -913,6 +957,8 @@ export default function PlayContent() {
               </motion.button>
             </div>
           </div>
+
+          <ContinueGame childId={selectedChild?.id} onOpen={openContinueGame} />
 
           <LeaderboardModal
             open={showLeaderboard}

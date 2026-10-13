@@ -29,6 +29,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   transpilePackages: [
+    "@funberry/brand",
     "@funberry/config",
     "@funberry/ui",
     "@funberry/game-engine",

@@ -111,6 +111,7 @@ export async function accountRequest<T>(
   }
   if (!response.ok) {
     const error = new Error(messageFrom(body, "The database did not accept that request.")) as AccountError;
+    error.status = response.status;
     if (body && typeof body === "object" && "needs_verification" in body && body.needs_verification) {
       error.needsVerification = true;
       error.email = "email" in body && typeof body.email === "string" ? body.email : undefined;
@@ -120,7 +121,7 @@ export async function accountRequest<T>(
   return body as T;
 }
 
-export type AccountError = Error & { needsVerification?: boolean; email?: string };
+export type AccountError = Error & { needsVerification?: boolean; email?: string; status?: number };
 
 type AuthPayload = {
   user: AccountUser;

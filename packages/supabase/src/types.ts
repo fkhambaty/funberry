@@ -7,7 +7,8 @@ export interface Database {
           email: string;
           name: string;
           username: string | null;
-          pin: string | null;
+          pin?: string | null;
+          pin_set?: boolean;
           subscription_tier: "free" | "premium_weekly" | "premium_monthly" | "premium_yearly" | "lifetime";
           subscription_expires_at: string | null;
           welcome_email_sent_at: string | null;

@@ -1404,3 +1404,46 @@ input[type="button"] {
     transition: none !important;
   }
 }
+
+.fb-berry-guide {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.fb-berry-mark {
+  width: 72px;
+  height: 78px;
+  flex: none;
+}
+
+.fb-berry-line {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fb-berry-guide-celebrate .fb-berry-mark {
+    animation: fb-berry-pop 0.45s var(--ease-out) both;
+  }
+  .fb-berry-guide-empty .fb-berry-mark,
+  .fb-berry-guide-guide .fb-berry-mark,
+  .fb-berry-guide-timer .fb-berry-mark {
+    animation: fb-berry-bob 1.6s ease-in-out 1;
+  }
+}
+
+@keyframes fb-berry-pop {
+  0% { transform: scale(0.86); }
+  60% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fb-berry-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}

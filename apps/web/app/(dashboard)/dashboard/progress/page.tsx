@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   getChildren,
+  getWeeklySummary,
   refreshParentCoachingReport,
   type ParentCoachingReport,
+  type WeeklySummary,
 } from "@funberry/supabase";
 import type { Child } from "@funberry/supabase";
 import { useRouter } from "next/navigation";
@@ -23,6 +25,7 @@ export default function ProgressPage() {
   const [report, setReport] = useState<ParentCoachingReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [reportLoading, setReportLoading] = useState(false);
+  const [week, setWeek] = useState<WeeklySummary | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -53,6 +56,21 @@ export default function ProgressPage() {
       })
       .finally(() => {
         if (!cancelled) setReportLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedChild]);
+
+  useEffect(() => {
+    if (!selectedChild) return;
+    let cancelled = false;
+    getWeeklySummary(selectedChild)
+      .then((summary) => {
+        if (!cancelled) setWeek(summary);
+      })
+      .catch(() => {
+        if (!cancelled) setWeek(null);
       });
     return () => {
       cancelled = true;
@@ -141,7 +159,8 @@ export default function ProgressPage() {
                   Age {selected.age} · {report.syllabusTrack}
                 </p>
                 <p className="mt-2 text-xs text-slate-400">
-                  Updated {new Date(report.generatedAt).toLocaleString()} · {report.gamesSampleSize} play rows
+                  Report built {new Date(report.generatedAt).toLocaleString()} from {report.gamesSampleSize} saved games.
+                  {week ? ` This week is ${week.period_start} to ${week.period_end}.` : ""}
                 </p>
               </div>
               <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 sm:p-5">
@@ -158,7 +177,7 @@ export default function ProgressPage() {
                   />
                 </div>
                 <p className="mt-2 text-[10px] font-semibold text-amber-900/80">
-                  Updates when games finish (best stars + a bonus ⭐ when you replay a favourite).
+                  The total is the sum of each game&apos;s best score. Replaying a game does not add the same stars again.
                 </p>
               </div>
             </section>
@@ -172,6 +191,29 @@ export default function ProgressPage() {
                 <strong> theme grid</strong> maps ICSE-style EVS. Expand capability rows for at-home ideas.
               </p>
             </details>
+
+            <section className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+              <h2 className="font-display text-sm font-bold uppercase tracking-wide text-emerald-900">Earned skills</h2>
+              <p className="mt-1 text-xs text-emerald-900/80">
+                A skill is listed when this report scores it at 75 or above. Dates are the report time, not a streak.
+              </p>
+              {(() => {
+                const earned = report.skillInsights.filter((skill) => skill.score != null && skill.score >= 75);
+                if (earned.length === 0) {
+                  return <p className="mt-2 text-sm font-semibold text-emerald-950">No skill is marked strong yet.</p>;
+                }
+                return (
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-sm font-semibold text-emerald-950">
+                    {earned.map((skill) => (
+                      <li key={skill.axisId}>
+                        {skill.title}
+                        {skill.score != null ? ` — ${Math.round(skill.score)}` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
+            </section>
 
             <div className="mb-6 space-y-6">
               <StrandMasteryChart report={report} />

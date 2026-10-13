@@ -33,7 +33,7 @@ export default defineConfig({
     },
     {
       name: "account",
-      testMatch: /account\.spec\.ts/,
+      testMatch: /account\.spec\.ts|a11y\.spec\.ts/,
       dependencies: ["public"],
       use: { storageState: "e2e/.auth/dummy.json" },
     },

@@ -26,6 +26,14 @@ interface Stats {
   activeCoupons: number;
   totalRedemptions: number;
   recentUsers: { email: string; name: string; subscription_tier: string; created_at: string }[];
+  funnel?: {
+    verifiedSignups: number;
+    childrenCreated: number;
+    firstGames: number;
+    gamesCompleted: number;
+    checkoutsStarted: number;
+    subscriptionsActivated: number;
+  };
 }
 
 interface AdminChild {
@@ -366,6 +374,12 @@ export default function AdminPage() {
     { label: "Learning packs", value: stats?.totalPacks },
     { label: "Active coupons", value: stats?.activeCoupons },
     { label: "Coupon redemptions", value: stats?.totalRedemptions },
+    { label: "Verified signups", value: stats?.funnel?.verifiedSignups },
+    { label: "Children created", value: stats?.funnel?.childrenCreated },
+    { label: "First games", value: stats?.funnel?.firstGames },
+    { label: "Games completed", value: stats?.funnel?.gamesCompleted },
+    { label: "Checkouts started", value: stats?.funnel?.checkoutsStarted },
+    { label: "Subscriptions activated", value: stats?.funnel?.subscriptionsActivated },
     { label: "Listed weekly value", value: revenue ? `₹${revenue.weekly.listedInr}` : "—" },
     { label: "Listed monthly value", value: revenue ? `₹${revenue.monthly.listedInr}` : "—" },
   ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { brand } from "@funberry/config";
+import { checkoutCopy } from "@funberry/brand/identity";
 
 export default function TermsPage() {
   return (
@@ -33,8 +34,19 @@ export default function TermsPage() {
             the billing period.
           </li>
           <li>
-            Website subscriptions are billed in INR through Razorpay and renew
-            until you cancel. Refunds follow Razorpay and the plan you chose.
+            {checkoutCopy.provides}. The Razorpay page shows the merchant name FKTech.
+            Weekly is ₹99 and monthly is ₹349. Both renew until you turn auto-renew off
+            in the parent dashboard.
+          </li>
+          <li>
+            Closing checkout before payment is not a charge. Turning off auto-renew
+            keeps Premium until the end of the period already paid and does not refund
+            that period.
+          </li>
+          <li>
+            FunBerry does not offer an automatic refund. Email {brand.supportEmail}
+            about a charge. If a refund is approved, it is sent through Razorpay to the
+            original payment method.
           </li>
         </ul>
 

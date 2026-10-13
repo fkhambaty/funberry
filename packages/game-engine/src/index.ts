@@ -80,6 +80,8 @@ export {
 } from "./lesson/ocrQuality";
 export type { OcrQualityInput, OcrPageQuality } from "./lesson/ocrQuality";
 export { emojiFor, hasEmoji, categoryFor } from "./lesson/lexicon";
+export { isCompletedReview, isTrustedReview, scoreEvidenceGate } from "./lesson/evidenceGate";
+export type { FixBurden, PageReview } from "./lesson/evidenceGate";
 
 // Types
 export type * from "./types";

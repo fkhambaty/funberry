@@ -8,26 +8,26 @@ publisher content.
 
 ```mermaid
 flowchart LR
-  Upload[Parent uploads 1–5 pages] --> OCR[Tesseract OCR in browser]
+  Photo[Parent photographs pages on this device] --> OCR[Tesseract OCR in browser]
   OCR --> Edit[Parent corrects extracted text]
   Edit --> Rules[Deterministic rules engine]
   Rules --> Review[Parent reviews and removes weak games]
-  Review --> Pack[Private Supabase pack]
+  Review --> Pack[D1 pack stores text only]
   Pack --> Assign[Parent assigns children]
   Assign --> Play[Child opens My Lessons]
-  Play --> Progress[Progress saved with RLS]
+  Play --> Progress[Progress saved on the worker]
 ```
 
 | Stage | Runtime | Source of truth |
 |---|---|---|
-| Upload and OCR | Parent's browser | `apps/web/app/(dashboard)/dashboard/packs/` |
+| Photograph and OCR | Parent's browser | `apps/web/app/(dashboard)/dashboard/packs/` |
 | OCR quality | Shared pure thresholds | `packages/game-engine/src/lesson/ocrQuality.ts` |
 | Text cleaning and generation | Parent's browser | `packages/game-engine/src/lesson/rulesEngine.ts` |
 | Parent review | Parent dashboard | `PackReviewEditor.tsx` |
-| Pack, pages and assignments | Supabase Postgres | migration `017_learning_packs.sql` |
-| Original photos | Private Supabase Storage | bucket `book-uploads` |
+| Pack, page text and assignments | Cloudflare D1 | `learning_packs`, `pack_pages`, `pack_assignments` |
+| Original photos | Not stored | The browser discards the image after OCR. `storage_path` is unused. |
 | Child play | `/play` client SPA | existing lazy-loaded game templates |
-| Scores and stars | Supabase Postgres | `progress` and ownership-checked RPCs |
+| Scores and stars | Cloudflare D1 | `progress` and `play_events`, owned by the signed-in parent |
 
 There is no LLM in this flow. Tesseract extracts text locally. The rules engine can create
 fill-in-the-blank, true/false, sort, word-match, memory and sequence games from reviewed text.
@@ -35,10 +35,10 @@ fill-in-the-blank, true/false, sort, word-match, memory and sequence games from 
 ## Trust boundaries
 
 - The parent is the authenticated account holder. The child plays inside that parent's session.
-- `learning_packs`, `pack_pages`, and `pack_assignments` are scoped to `auth.uid()` by RLS.
-- Storage paths begin with the parent's user ID. A family cannot read another family's source photos.
+- Pack rows are read and written only when `parent_id` matches the signed-in parent. There is no Postgres RLS on this database.
+- Page photos are not uploaded. Only OCR text and the text the parent edits are stored.
 - A generated game is not available to the child until the parent reviews and saves the pack.
-- Uploaded images and OCR evaluation outputs must never be committed to Git.
+- Textbook photos and OCR evaluation outputs must never be committed to Git.
 - Do not place service-role keys, parent PINs, child photos, OCR text, or textbook photos in logs.
 
 The current parent review is the safety gate. Structural validation removes malformed game
@@ -100,8 +100,15 @@ A page is trusted only when:
 4. usefulness is at least 4/5;
 5. manual fixes are none or minor.
 
-The evidence gate passes at **8 trusted pages out of 10**. Automated counts are diagnostics, not
-the verdict. A high OCR confidence score does not mean the generated lesson is correct.
+The evidence gate passes at **8 trusted pages out of 10**. The same rule lives in
+`packages/game-engine/src/lesson/evidenceGate.ts` and is what `npm run eval:packs -- --score`
+prints. Automated counts are diagnostics, not the verdict. A high OCR confidence score does not
+mean the generated lesson is correct.
+
+### Gate status
+
+No reviewed 10-page bundle is stored in this repository. The gate is **not passed**. Do not describe
+Learning Packs as proven against real textbook pages until a private run scores `pass`.
 
 ## Decision after the gate
 
@@ -143,7 +150,7 @@ Until the evidence gate is measured:
 - no cross-family page library or deduplication schema;
 - no teacher/classroom workflow;
 - no mastery model, difficulty ladder or spaced repetition;
-- no weekly email or broad analytics platform;
+- no weekly email digest (the parent dashboard has an in-app week summary);
 - no child identity-verification design without legal advice.
 
 The next product decision comes from page trust and family renewal, not from adding more features.

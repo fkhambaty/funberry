@@ -36,8 +36,9 @@ export default function PrivacyPage() {
             account and add child profiles.
           </li>
           <li>
-            <strong>Parent PIN.</strong> Settings, purchases, and the way back to
-            the parent dashboard ask for the parent&apos;s 4-digit PIN.
+            <strong>Parent PIN.</strong> The way back to the parent dashboard, the
+            play timer, and settings ask for the parent&apos;s 4-digit PIN. The PIN is
+            checked on the account server. Parent screens do not receive the PIN back.
           </li>
         </ul>
 
@@ -57,8 +58,14 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Subscription data:</strong> Plan type and billing dates.
-            Website payments are handled by Razorpay. We do not store card
-            numbers.
+            Website payments are handled by Razorpay under the merchant name FKTech.
+            We do not store card numbers.
+          </li>
+          <li>
+            <strong>Product counts.</strong> We store that a verified signup, child
+            profile, first game, finished game, checkout start, or active subscription
+            happened. Those rows do not include a child&apos;s name or a page of textbook
+            text.
           </li>
         </ul>
 
@@ -78,7 +85,11 @@ export default function PrivacyPage() {
 
         <h2>Data Deletion</h2>
         <p>
-          To delete a parent account and its child profiles, email{" "}
+          A signed-in parent can download their account as JSON from Account Settings,
+          or delete it there by entering their password and the phrase DELETE MY
+          ACCOUNT. Deletion removes the parent, children, play history, and learning-pack
+          text stored for that account. It does not refund a charge. If auto-renew is
+          still on, turn it off first. You can also email{" "}
           <a href={`mailto:${brand.supportEmail}`}>{brand.supportEmail}</a>.
         </p>
 

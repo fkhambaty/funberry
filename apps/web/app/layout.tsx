@@ -25,9 +25,25 @@ const baloo = Baloo_2({
   display: "swap",
 });
 
+const siteUrl = "https://www.funberrykids.in";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: `${brand.name} - Fun Learning Games for Kids`,
   description: brand.tagline,
+  alternates: { canonical: siteUrl },
+  openGraph: {
+    title: `${brand.name} - Fun Learning Games for Kids`,
+    description: brand.tagline,
+    url: siteUrl,
+    siteName: brand.name,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: brand.name,
+    description: brand.tagline,
+  },
 };
 
 export const viewport: Viewport = {

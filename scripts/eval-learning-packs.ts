@@ -7,6 +7,9 @@ import {
   buildLessonQualityMetrics,
   cleanLessonText,
   generateLesson,
+  isCompletedReview,
+  isTrustedReview,
+  scoreEvidenceGate,
 } from "@funberry/game-engine";
 
 type FixBurden = "none" | "minor" | "major";
@@ -89,26 +92,6 @@ function safePageId(file: string): string {
   return path.basename(file, path.extname(file)).replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function isCompletedReview(review: HumanReview): boolean {
-  return (
-    review.groundedInPage != null &&
-    review.answersCorrect != null &&
-    review.ageSuitability != null &&
-    review.usefulness != null &&
-    review.fixBurden != null
-  );
-}
-
-function isTrustedReview(review: HumanReview): boolean {
-  return (
-    review.groundedInPage === true &&
-    review.answersCorrect === true &&
-    (review.ageSuitability ?? 0) >= 4 &&
-    (review.usefulness ?? 0) >= 4 &&
-    (review.fixBurden === "none" || review.fixBurden === "minor")
-  );
-}
-
 async function loadReviews(file: string | undefined): Promise<HumanReview[] | null> {
   if (!file) return null;
   const parsed: unknown = JSON.parse(await readFile(file, "utf8"));
@@ -125,15 +108,13 @@ function renderReport(
   }>,
   reviews: HumanReview[],
 ): string {
-  const completed = reviews.filter(isCompletedReview);
-  const trusted = completed.filter(isTrustedReview);
-  const required = Math.ceil(pages.length * 0.8);
+  const scored = scoreEvidenceGate(pages.length, reviews);
   const gate =
-    completed.length < pages.length
+    scored.status === "pending"
       ? `PENDING — complete all ${pages.length} human reviews`
-      : trusted.length >= required
-        ? `PASS — ${trusted.length}/${pages.length} trusted pages`
-        : `FAIL — ${trusted.length}/${pages.length} trusted pages; ${required} required`;
+      : scored.status === "pass"
+        ? `PASS — ${scored.trusted}/${pages.length} trusted pages`
+        : `FAIL — ${scored.trusted}/${pages.length} trusted pages; ${scored.required} required`;
 
   const rows = pages
     .map((page) => {
@@ -168,7 +149,7 @@ A page is **trusted** only when all are true:
 4. Usefulness is at least 4/5.
 5. Fix burden is \`none\` or \`minor\` (not \`major\`).
 
-The gate passes at ${required}/${pages.length} trusted pages. Edit \`human-review.json\`, then run
+The gate passes at ${scored.required}/${pages.length} trusted pages. Edit \`human-review.json\`, then run
 \`npm run eval:packs -- --score <this-directory>\` to calculate the final result without repeating OCR.
 
 ## Privacy

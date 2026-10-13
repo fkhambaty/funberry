@@ -22,6 +22,7 @@ export type { ParentalGateProps } from "./ParentalGate";
 export { ZoneCard } from "./ZoneCard";
 export type { ZoneCardProps } from "./ZoneCard";
 
+export { BerryGuide } from "@funberry/brand";
 export { GameResultScreen } from "./GameResultScreen";
 export type { GameResultScreenProps } from "./GameResultScreen";
 

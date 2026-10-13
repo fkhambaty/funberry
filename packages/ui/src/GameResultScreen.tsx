@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { BerryGuide } from "@funberry/brand";
 import { StarRating } from "./StarRating";
 
 export interface GameResultScreenProps {
@@ -31,7 +32,7 @@ export function GameResultScreen({
 
   return (
     <div className="fb-result flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
-      <div className="mb-4 text-7xl animate-bounce">{msg.emoji}</div>
+      <BerryGuide moment="celebrate" compact />
       <h2 className="font-display mb-2 text-3xl font-bold text-sky-900">
         {msg.text}
       </h2>

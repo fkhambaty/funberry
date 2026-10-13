@@ -8,7 +8,7 @@ import { TimerBadge } from "./components/TimerBadge";
 import { LockScreen } from "./components/LockScreen";
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [pin, setPin] = useState<string | null>(null);
+  const [pinSet, setPinSet] = useState(false);
   const [authUserId, setAuthUserId] = useState<string | null | undefined>(undefined);
   const pathname = usePathname();
 
@@ -23,9 +23,9 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         setAuthUserId(user?.id ?? null);
         if (user) {
           const p = await getParent();
-          if (mounted) setPin(p?.pin ?? null);
+          if (mounted) setPinSet(Boolean(p?.pin_set ?? p?.pin));
         } else {
-          setPin(null);
+          setPinSet(false);
         }
 
         const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -33,18 +33,18 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
           if (!mounted) return;
           setAuthUserId(nextUserId);
           if (!nextUserId) {
-            setPin(null);
+            setPinSet(false);
             return;
           }
           const p = await getParent();
-          if (mounted) setPin(p?.pin ?? null);
+          if (mounted) setPinSet(Boolean(p?.pin_set ?? p?.pin));
         });
         unsubscribe = () => data.subscription.unsubscribe();
       })
       .catch(() => {
         if (!mounted) return;
         setAuthUserId(null);
-        setPin(null);
+        setPinSet(false);
       });
 
     return () => {
@@ -69,7 +69,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <TimerProvider
       key={`timer-${authUserId ?? "guest"}`}
-      pin={pin}
+      pinSet={pinSet}
       storageKey={`funberrykids_timer_${authUserId ?? "guest"}`}
       enabled={Boolean(authUserId)}
     >

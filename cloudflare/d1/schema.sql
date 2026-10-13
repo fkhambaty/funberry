@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS parents (
   name TEXT NOT NULL DEFAULT '',
   username TEXT,
   pin TEXT,
+  pin_hash TEXT,
+  pin_salt TEXT,
+  pin_attempts INTEGER NOT NULL DEFAULT 0,
+  pin_locked_until TEXT,
   role TEXT NOT NULL DEFAULT 'parent',
   subscription_tier TEXT NOT NULL DEFAULT 'free',
   subscription_expires_at TEXT,
@@ -158,6 +162,24 @@ CREATE TABLE IF NOT EXISTS coupon_redemptions (
   UNIQUE (coupon_id, parent_id)
 );
 
+CREATE TABLE IF NOT EXISTS product_events (
+  id TEXT PRIMARY KEY,
+  event_name TEXT NOT NULL,
+  parent_id TEXT NOT NULL,
+  occurred_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS play_events (
+  id TEXT PRIMARY KEY,
+  parent_id TEXT NOT NULL,
+  child_id TEXT NOT NULL,
+  game_id TEXT NOT NULL,
+  stars_earned INTEGER NOT NULL DEFAULT 0,
+  stars_credited INTEGER NOT NULL DEFAULT 0,
+  score INTEGER NOT NULL DEFAULT 0,
+  played_at TEXT NOT NULL
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_parents_username ON parents(username);
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_progress_child ON progress(child_id);
@@ -169,3 +191,7 @@ CREATE INDEX IF NOT EXISTS idx_packs_parent ON learning_packs(parent_id);
 CREATE INDEX IF NOT EXISTS idx_pack_pages_pack ON pack_pages(pack_id);
 CREATE INDEX IF NOT EXISTS idx_razorpay_subs_user_plan ON razorpay_subscriptions(user_id, plan, created_at);
 CREATE INDEX IF NOT EXISTS idx_coupon_redemptions_parent ON coupon_redemptions(parent_id);
+CREATE INDEX IF NOT EXISTS idx_product_events_name ON product_events(event_name, occurred_at);
+CREATE INDEX IF NOT EXISTS idx_product_events_parent ON product_events(parent_id, event_name);
+CREATE INDEX IF NOT EXISTS idx_play_events_child ON play_events(child_id, played_at);
+CREATE INDEX IF NOT EXISTS idx_play_events_parent ON play_events(parent_id, played_at);

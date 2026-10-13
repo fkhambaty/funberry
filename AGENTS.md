@@ -70,8 +70,8 @@ The website does not use a Supabase URL or service-role key. Razorpay secrets li
 ## Auth, PIN, and money
 
 - Web session is a bearer token in `localStorage` key `funberry_session`. The worker checks ownership. There is no row-level security.
-- Parent **PIN** is stored on `parents.pin` and compared in the client for lock screen / parent gate. Do not print PINs in logs or kid UI.
-- **Stars:** `POST /v1/progress` adds the stars for that round only when the child belongs to the signed-in parent. Never add a client-only star counter as source of truth.
+- Parent **PIN** is hashed on the worker. Parent APIs return `pin_set` and never the PIN. Lock screen, timer, settings, and the play-to-parent exit call `POST /v1/pin/verify`. A plaintext PIN already in D1 is hashed on the next signed-in request and then cleared. Do not print PINs in logs or kid UI.
+- **Stars:** `POST /v1/progress` credits only the increase over that child's previous best for the game, then sets `total_stars` to the sum of those bests. A repeat of the same score adds nothing. Never add a client-only star counter as source of truth.
 - **Payments:** amounts and plan IDs live on the worker. The browser must not tell the server “charge ₹X.” Checkout signature and webhook HMAC are checked on the worker. The dummy account (`dummy` / `dummy`, PIN `1234`) stays on lifetime access and must never open a real charge. The dashboard stops before Razorpay and shows “Demo account: no charge”; the worker returns that same phrase with HTTP 403. Stripe webhook routes are stubs — do not market Stripe as live.
 - **Coupons:** create, list, and redeem only through the worker. One redemption per account. A code can expire and can have a redemption cap.
 

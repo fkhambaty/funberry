@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@funberry/brand": "*",
     "@funberry/config": "*",
     "@funberry/ui": "*",
     "@funberry/game-engine": "*",

@@ -15,11 +15,11 @@ interface TimerContextType {
   timer: TimerState;
   startTimer: (minutes: number) => void;
   stopTimer: () => void;
-  verifyPin: (pin: string) => boolean;
+  verifyPin: (pin: string) => Promise<boolean>;
   extendTimer: (minutes: number) => void;
   endSession: () => void;
-  parentPin: string | null;
-  setParentPin: (pin: string) => void;
+  pinSet: boolean;
+  setPinSet: (value: boolean) => void;
 }
 
 const LEGACY_STORAGE_KEY = "funberrykids_timer";
@@ -39,11 +39,11 @@ const defaultTimerContext: TimerContextType = {
   timer: defaultTimer,
   startTimer: () => {},
   stopTimer: () => {},
-  verifyPin: () => false,
+  verifyPin: async () => false,
   extendTimer: () => {},
   endSession: () => {},
-  parentPin: null,
-  setParentPin: () => {},
+  pinSet: false,
+  setPinSet: () => {},
 };
 
 export function useTimer() {
@@ -105,20 +105,20 @@ function clearStorage(storageKey: string) {
 
 export function TimerProvider({
   children,
-  pin: initialPin,
+  pinSet: initialPinSet,
   storageKey,
   enabled,
 }: {
   children: React.ReactNode;
-  pin: string | null;
+  pinSet: boolean;
   storageKey: string;
   enabled: boolean;
 }) {
-  const [parentPin, setParentPin] = useState(initialPin);
+  const [pinSet, setPinSet] = useState(initialPinSet);
 
   useEffect(() => {
-    setParentPin(initialPin);
-  }, [initialPin]);
+    setPinSet(initialPinSet);
+  }, [initialPinSet]);
 
   const [timer, setTimer] = useState<TimerState>(() => {
     return defaultTimer;
@@ -178,21 +178,18 @@ export function TimerProvider({
     setTimer(defaultTimer);
   }, [clearTick, storageKey]);
 
-  const verifyPin = useCallback(
-    (enteredPin: string): boolean => {
-      if (enteredPin === parentPin) {
-        setTimer((prev) => ({
-          ...prev,
-          isLocked: false,
-          awaitingDecision: true,
-          isPaused: true,
-        }));
-        return true;
-      }
-      return false;
-    },
-    [parentPin]
-  );
+  const verifyPin = useCallback(async (enteredPin: string): Promise<boolean> => {
+    const { verifyParentPin } = await import("@funberry/supabase");
+    const ok = await verifyParentPin(enteredPin);
+    if (!ok) return false;
+    setTimer((prev) => ({
+      ...prev,
+      isLocked: false,
+      awaitingDecision: true,
+      isPaused: true,
+    }));
+    return true;
+  }, []);
 
   const extendTimer = useCallback(
     (minutes: number) => {
@@ -246,7 +243,7 @@ export function TimerProvider({
   return (
     <TimerContext.Provider value={{
       timer, startTimer, stopTimer, verifyPin,
-      extendTimer, endSession, parentPin, setParentPin,
+      extendTimer, endSession, pinSet, setPinSet,
     }}>
       {children}
     </TimerContext.Provider>

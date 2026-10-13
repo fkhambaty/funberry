@@ -1,6 +1,7 @@
 import { isOwnerEmail } from "./owners.js";
 import { hasActivePremium } from "./payments.js";
 import { json, nowIso, readJson } from "./http.js";
+import { countProductEvents } from "./analytics.js";
 
 const CODE_PATTERN = /^[A-Z0-9_-]{3,32}$/;
 
@@ -126,6 +127,7 @@ export async function handleAdmin(request, db, parent, origin, path) {
         activeCoupons,
         totalRedemptions,
         recentUsers: recent.results || [],
+        funnel: await countProductEvents(db),
       },
       200,
       origin,

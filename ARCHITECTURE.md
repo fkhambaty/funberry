@@ -75,7 +75,7 @@ The browser may only call servers listed in `connect-src` in `apps/web/vercel.js
 
 Test login: username `dummy`, password `dummy`, parent PIN `1234`, one child "Test Kid". It is an ordinary parent account and is not on the admin list. The account stays on lifetime access. Choosing Weekly or Monthly on the dashboard returns before Razorpay and shows “Demo account: no charge”. The worker answers the same phrase with HTTP 403 if a charge is requested anyway. There is no separate payment-return route: a finished checkout reloads `/dashboard` and the page reads `sessionStorage` key `funberry_pending_sub`.
 
-The parent PIN is still compared in the browser. Do not log it.
+The parent PIN is checked on the worker. Responses include `pin_set` and do not include the PIN. An older plaintext value is hashed the next time that parent is loaded, then the plaintext column is cleared. Do not log it.
 
 Old Supabase project ref `tkuakihsswzhrcrqcqel` is no longer the account database. Do not point new login, coupon, admin, or payment code back at it. The website does not call that host.
 
@@ -106,7 +106,9 @@ npx playwright install chromium
 npm run test:responsive
 ```
 
-`test:responsive` starts the already-built site on port 3000. Build the web app first. The suite signs in as `dummy` / `dummy`, then checks public pages, protected redirects, the parent PIN, the dashboard coupon and dummy checkout, the child picker, and one game of every template.
+`test:responsive` starts the already-built site on port 3000. Build the web app first. The suite signs in as `dummy` / `dummy`, then checks public pages, protected redirects, the parent PIN, the dashboard coupon and dummy checkout, the child picker, and one game of every template. `e2e/a11y.spec.ts` runs axe on each of those game templates.
+
+GitHub Actions runs typecheck, the web build, worker tests, lesson tests, and that Playwright suite on every push and pull request. A weekly workflow checks the live homepage, `/v1/health` (email readiness without creating an account), dummy login, a payment call that must answer “Demo account: no charge”, and phone plus desktop overflow. Apply `cloudflare/d1/004_integrity.sql` on the remote D1 database before deploying a worker that expects the PIN hash and event tables.
 
 Never commit `.env`, `.env.local`, or a service-role key.
 
@@ -138,6 +140,6 @@ Rules for a visual edit:
 ## What not to get wrong
 
 - Do not invent user counts, school logos, or city claims.
-- Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Read `docs/LEARNING_PACKS.md` before changing that pipeline.
+- Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Page photos are not stored. Read `docs/LEARNING_PACKS.md` before changing that pipeline. Native delivery and a dedicated Razorpay merchant name wait on `docs/EVIDENCE_GATES.md`.
 - The old Vercel cron that poked Supabase is gone. Accounts live on D1, so that ping had nothing left to keep awake.
 - Resume headers and job-search files do not belong in this repo.

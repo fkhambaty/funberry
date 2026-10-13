@@ -1,4 +1,5 @@
 import { json, nowIso, readJson } from "./http.js";
+import { recordProductEvent, recordProductEventOnce } from "./analytics.js";
 
 export const PLAN_RULES = {
   weekly: { totalCount: 52, tier: "premium_weekly", envKey: "RAZORPAY_PLAN_WEEKLY" },
@@ -155,6 +156,11 @@ async function grantPremium(db, userId, fields) {
     status: fields.status || "active",
     shortUrl: fields.shortUrl || null,
   });
+  try {
+    await recordProductEventOnce(db, "subscription_activated", userId, now);
+  } catch {
+    // A missing analytics table must not block a paid entitlement.
+  }
 }
 
 async function downgradeIfThisSubscription(db, userId, subscriptionId, status) {
@@ -416,6 +422,11 @@ export async function handleRazorpayAuthed(request, env, db, parent, origin, pat
     if (hasActivePremium(fresh)) return json({ error: "You already have Premium." }, 409, origin);
     const reused = await reusableSubscription(env, db, fresh, plan);
     if (reused) {
+      try {
+        await recordProductEvent(db, "checkout_started", fresh.id, nowIso());
+      } catch {
+        // Checkout can continue if the event log is unavailable.
+      }
       return json({ subscription_id: reused.subscription_id, key_id: env.RAZORPAY_KEY_ID, short_url: reused.short_url }, 200, origin);
     }
     const rule = PLAN_RULES[plan];
@@ -439,6 +450,11 @@ export async function handleRazorpayAuthed(request, env, db, parent, origin, pat
       shortUrl: created.data.short_url || null,
       createdAt: now,
     });
+    try {
+      await recordProductEvent(db, "checkout_started", fresh.id, now);
+    } catch {
+      // Checkout can continue if the event log is unavailable.
+    }
     return json(
       { subscription_id: subscriptionId, key_id: env.RAZORPAY_KEY_ID, short_url: created.data.short_url || null },
       200,

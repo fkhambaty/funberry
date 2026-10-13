@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@funberry/brand": "*",
     "@funberry/config": "*",
     "canvas-confetti": "^1.9.4",
     "pixi.js": "^8.17.1"

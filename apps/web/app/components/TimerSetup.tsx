@@ -10,10 +10,10 @@ const PRESETS = [
 ];
 
 export function TimerSetup({ onStart }: { onStart?: () => void }) {
-  const { timer, startTimer, stopTimer, parentPin } = useTimer();
+  const { timer, startTimer, stopTimer, pinSet } = useTimer();
   const [showSetup, setShowSetup] = useState(false);
 
-  if (!parentPin) {
+  if (!pinSet) {
     return (
       <div className="text-sm text-gray-400 italic">
         Set a PIN in your profile to enable the play timer.
