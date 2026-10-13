@@ -158,6 +158,16 @@ function emailReady(env) {
   return Boolean(env.RESEND_API_KEY && env.MAIL_FROM);
 }
 
+async function emailDomainVerified(env) {
+  if (!emailReady(env)) return false;
+  const domain = (String(env.MAIL_FROM).match(/@([^>\s]+)/) || [])[1]?.toLowerCase();
+  const response = await fetch("https://api.resend.com/domains", {
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}` },
+  }).catch(() => null);
+  if (!response || !response.ok) return null;
+  return ((await response.json()).data || []).some((d) => d.name === domain && d.status === "verified");
+}
+
 async function sendEmail(env, to, subject, text) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -274,6 +284,7 @@ export default {
             ok: true,
             service: "funberry-api",
             email_ready: emailReady(env),
+            email_domain_verified: await emailDomainVerified(env),
             payments_configured: paymentsConfigured(env),
             checkout_mode: "modal-with-hosted-fallback",
           },
