@@ -23,16 +23,22 @@ It is not Okavo and it is not Data For Dummies.
 
 ## How a request moves
 
+```mermaid
+flowchart LR
+  browser[Browser]
+  vercel["Vercel<br/>funberrykids.in"]
+  worker["Worker<br/>funberry-api"]
+  d1["D1 database<br/>funberry"]
+  razor["Razorpay FKTech<br/>EdTech merchant"]
+  mail["Resend<br/>funberrykids.in verified"]
+  browser --> vercel
+  vercel --> worker
+  worker --> d1
+  worker --> razor
+  worker --> mail
 ```
-Browser
-  → Vercel (Next.js 15 app in apps/web)
-      → marketing pages are server-rendered
-      → /play and /dashboard are client-heavy
-  → Cloudflare Worker https://funberry-api.fkhambaty.workers.dev
-      → D1 database funberry (e0bf4f89-c29d-4c0d-9674-b5977847e7d1)
-      → parent accounts, children, stars, packs, coupons, admin
-      → Razorpay subscriptions on the shared FKTech account
-```
+
+Marketing pages are server-rendered. `/play` and `/dashboard` are client-heavy. Accounts, children, stars, packs, coupons, and admin data live in D1 database `funberry` (`e0bf4f89-c29d-4c0d-9674-b5977847e7d1`). Razorpay subscriptions use the FKTech EdTech merchant, shared only with Data For Dummies. Okavo is not on this merchant.
 
 Mobile (`apps/mobile`, Expo) has auth and a home screen. The in-app game player is not the live product. Do not promise it.
 
@@ -143,3 +149,9 @@ Rules for a visual edit:
 - Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Page photos are not stored. Read `docs/LEARNING_PACKS.md` before changing that pipeline. Native delivery and a dedicated Razorpay merchant name wait on `docs/EVIDENCE_GATES.md`.
 - The old Vercel cron that poked Supabase is gone. Accounts live on D1, so that ping had nothing left to keep awake.
 - Resume headers and job-search files do not belong in this repo.
+
+## If this computer is gone
+
+`https://github.com/fkhambaty/funberry` is the copy that matters. It contains this guide, `AGENTS.md`, the Next.js app, the Worker, the D1 schema, and `cloudflare/worker/wrangler.toml`. Vercel rebuilds the website from that repository.
+
+These names are Worker secrets and are not stored in Git: `RESEND_API_KEY`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`. They remain in the Cloudflare Worker even if this laptop is lost. A local copy under `~/.config/fk-products/` is only a convenience and must never be committed. Public values that are safe in Git are the key id and the two plan ids in `wrangler.toml`.
