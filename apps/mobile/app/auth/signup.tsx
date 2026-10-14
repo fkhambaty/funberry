@@ -1,19 +1,9 @@
 import { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from "react-native";
 import { useRouter } from "expo-router";
-import { resendSignupConfirmation, signUp, verifyEmailOtp } from "@funberry/supabase";
-
-const LEAF = "#18b05a";
-const APP_NAME = "FunBerry Kids";
+import { signUp } from "@funberry/supabase";
+import { Button, Card, Field, Header, Notice, Screen } from "../../components/ui";
+import { messageOf } from "../../lib/api";
+import { emailError, passwordError, pinError } from "../../lib/validation";
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -21,224 +11,72 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [awaitingEmail, setAwaitingEmail] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [failure, setFailure] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  async function handleSignup() {
-    setError("");
-    if (!name || !email || !password || !pin) {
-      setError("Please fill in all fields");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-    if (!/^\d{4}$/.test(pin)) {
-      setError("Parent PIN must be exactly 4 digits");
-      return;
-    }
-    setLoading(true);
+  async function submit() {
+    const next = {
+      name: name.trim() ? null : "Enter your name.",
+      email: emailError(email),
+      password: passwordError(password),
+      pin: pin ? pinError(pin) : null,
+    };
+    setErrors(next);
+    setFailure(null);
+    if (Object.values(next).some(Boolean)) return;
+    setBusy(true);
     try {
-      const data = await signUp(email, password, name, pin);
-
-      if (data.session) {
-        router.replace("/(tabs)" as never);
-      } else {
-        setAwaitingEmail(true);
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Signup failed. Please try again.");
+      const address = email.trim().toLowerCase();
+      await signUp(address, password, name.trim(), pin || undefined);
+      router.replace({ pathname: "/auth/verify", params: { email: address } });
+    } catch (error) {
+      setFailure(messageOf(error, "Could not create the account."));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
-  }
-
-  async function handleVerify() {
-    if (!/^\d{6}$/.test(code)) {
-      setError("Enter the 6-digit code from your email");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      await verifyEmailOtp(email, code);
-      router.replace("/(tabs)" as never);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "That code could not be verified.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (awaitingEmail) {
-    return (
-      <View style={[styles.container, { justifyContent: "center", padding: 24 }]}>
-        <Text style={styles.emoji}>📧</Text>
-        <Text style={styles.title}>Enter your confirmation code</Text>
-        <Text style={[styles.subtitle, { marginBottom: 16 }]}>
-          We sent a 6-digit code to <Text style={styles.linkBold}>{email}</Text>.
-        </Text>
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        <TextInput
-          style={styles.input}
-          placeholder="6-digit code"
-          value={code}
-          onChangeText={(value) => setCode(value.replace(/\D/g, "").slice(0, 6))}
-          keyboardType="number-pad"
-          autoComplete="one-time-code"
-          textContentType="oneTimeCode"
-          placeholderTextColor="#9ca3af"
-        />
-        <Pressable style={[styles.button, { backgroundColor: "#2180ee" }]} onPress={handleVerify} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? "Checking..." : "Confirm account"}</Text>
-        </Pressable>
-        <Pressable onPress={() => void resendSignupConfirmation(email)}>
-          <Text style={styles.link}>Send a new code</Text>
-        </Pressable>
-      </View>
-    );
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.emoji}>🍓</Text>
-        <Text style={styles.title}>Join {APP_NAME}</Text>
-        <Text style={styles.subtitle}>
-          Create a free account to start learning!
-        </Text>
-
-        <View style={styles.form}>
-          {error ? (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
-
-          <TextInput
-            style={styles.input}
-            placeholder="Your Name"
-            value={name}
-            onChangeText={setName}
-            placeholderTextColor="#9ca3af"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholderTextColor="#9ca3af"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password (8+ characters)"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholderTextColor="#9ca3af"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="4-digit parent PIN"
-            value={pin}
-            onChangeText={(value) => setPin(value.replace(/\D/g, "").slice(0, 4))}
-            keyboardType="number-pad"
-            secureTextEntry
-            placeholderTextColor="#9ca3af"
-          />
-
-          <Pressable
-            style={[styles.button, { backgroundColor: LEAF }, loading && styles.buttonDisabled]}
-            onPress={handleSignup}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>
-              {loading ? "Creating account..." : "Create Free Account"}
-            </Text>
-          </Pressable>
-
-          <Pressable onPress={() => router.push("/auth/login" as never)}>
-            <Text style={styles.link}>
-              Already have an account?{" "}
-              <Text style={styles.linkBold}>Sign in</Text>
-            </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <Screen>
+      <Header title="Create an account" subtitle="For a parent or guardian." onBack={() => router.back()} />
+      <Card>
+        <Field label="Your name" value={name} onChangeText={setName} autoComplete="name" error={errors.name} />
+        <Field
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          error={errors.email}
+          testID="signup-email"
+        />
+        <Field
+          label="Password (6 or more characters)"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoComplete="new-password"
+          textContentType="newPassword"
+          error={errors.password}
+        />
+        <Field
+          label="Parent PIN (optional, 4 digits)"
+          value={pin}
+          onChangeText={(value) => setPin(value.replace(/\D/g, "").slice(0, 4))}
+          keyboardType="number-pad"
+          secureTextEntry
+          maxLength={4}
+          error={errors.pin}
+        />
+        <Notice text="We email a 6-digit code to confirm the address. The PIN keeps children out of the parent screens." />
+        {failure ? <Notice role="alert" tone="berry" text={failure} /> : null}
+        <Button label="Create account" onPress={() => void submit()} busy={busy} testID="signup-submit" />
+      </Card>
+      <Button variant="ghost" label="I already have an account" onPress={() => router.replace("/auth/login")} />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#eff8ff" },
-  scroll: { flexGrow: 1, justifyContent: "center", padding: 24 },
-  emoji: { fontSize: 60, textAlign: "center", marginBottom: 8 },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#1c498c",
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 15,
-    color: "#6b7280",
-    textAlign: "center",
-    marginTop: 4,
-    marginBottom: 32,
-  },
-  form: {
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 24,
-    gap: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: "#e5e7eb",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 17,
-    color: "#111827",
-  },
-  button: {
-    paddingVertical: 16,
-    borderRadius: 20,
-    alignItems: "center",
-    marginTop: 4,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "white", fontSize: 18, fontWeight: "700" },
-  errorBox: {
-    backgroundColor: "#fef2f2",
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#fecaca",
-  },
-  errorText: { color: "#b91c1c", fontSize: 14 },
-  link: {
-    textAlign: "center",
-    color: "#6b7280",
-    fontSize: 14,
-    marginTop: 4,
-  },
-  linkBold: { color: "#2180ee", fontWeight: "700" },
-});

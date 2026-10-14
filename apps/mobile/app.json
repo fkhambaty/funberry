@@ -2,43 +2,59 @@
   "expo": {
     "name": "FunBerry Kids",
     "slug": "funberrykids",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "funberrykids",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
-    "splash": {
-      "backgroundColor": "#379df9",
-      "resizeMode": "contain"
-    },
+    "backgroundColor": "#eff8ff",
+    "primaryColor": "#379df9",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.funberrykids.app"
+      "bundleIdentifier": "com.funberrykids.app",
+      "buildNumber": "3",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.funberrykids.app",
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#379df9"
+        "backgroundColor": "#eff8ff"
       },
-      "package": "com.funberrykids.app",
-      "versionCode": 2,
-      "permissions": [
-        "INTERNET",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+      "allowBackup": false,
+      "permissions": [],
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
       ]
-    },
-    "extra": {
-      "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
-      }
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#eff8ff"
+        }
+      ]
     ]
   }
 }

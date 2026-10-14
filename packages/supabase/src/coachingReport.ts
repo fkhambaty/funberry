@@ -1,5 +1,6 @@
 import { zones } from "@funberry/config";
-import { allEvsGames } from "@funberry/game-engine";
+// Data-only path: the package root also exports DOM templates that the Expo bundle cannot load.
+import { allEvsGames } from "@funberry/game-engine/src/games/evs";
 import type { Child } from "./types";
 
 export type CoachingSkillAxisRow = {

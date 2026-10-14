@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/dashboard", "/play", "/admin", "/api/"],
+      disallow: ["/dashboard", "/play", "/admin", "/api/", "/embed/"],
     },
     sitemap: "https://www.funberrykids.in/sitemap.xml",
     host: "https://www.funberrykids.in",

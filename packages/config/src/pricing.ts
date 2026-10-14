@@ -45,46 +45,16 @@ export const pricing = {
     maxChildren: 4,
     maxFreeGamesPerZone: Infinity,
   },
-  premiumMonthly: {
-    id: "premium_monthly",
-    name: "Premium Monthly",
-    price: 4.99,
-    period: "month" as const,
-    stripeProductId: "prod_funberrykids_monthly",
-    stripePriceId: "price_funberrykids_monthly",
-    revenueCatProductId: "funberrykids_premium_monthly",
-    features: [
-      "All Learning Worlds",
-      "All Games Unlocked",
-      "Detailed Progress Reports",
-      "Up to 4 Child Profiles",
-      "No Ads",
-      "Offline Mode",
-    ],
-    maxChildren: 4,
-    maxFreeGamesPerZone: Infinity,
-  },
-  premiumYearly: {
-    id: "premium_yearly",
-    name: "Premium Yearly",
-    price: 39.99,
-    period: "year" as const,
-    stripeProductId: "prod_funberrykids_yearly",
-    stripePriceId: "price_funberrykids_yearly",
-    revenueCatProductId: "funberrykids_premium_yearly",
-    features: [
-      "All Learning Worlds",
-      "All Games Unlocked",
-      "Detailed Progress Reports",
-      "Up to 4 Child Profiles",
-      "No Ads",
-      "Offline Mode",
-      "Save 33%!",
-    ],
-    maxChildren: 4,
-    maxFreeGamesPerZone: Infinity,
-  },
 } as const;
+
+/** Parent-facing names for stored tiers. `premium_yearly` is a legacy value with no live plan. */
+export const tierLabels: Record<SubscriptionTier, string> = {
+  free: "Free",
+  premium_weekly: "Premium Weekly",
+  premium_monthly: "Premium Monthly",
+  premium_yearly: "Premium (legacy yearly)",
+  lifetime: "Lifetime access",
+};
 
 export type PricingTier = keyof typeof pricing;
 export type SubscriptionTier =

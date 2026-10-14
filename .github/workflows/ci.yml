@@ -23,3 +23,18 @@ jobs:
       # Keep pull-request CI deterministic; authenticated production checks run
       # in production-smoke and must not depend on the shared D1 daily quota.
       - run: npm run test:responsive:public
+
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Lint, strict typecheck, unit tests and the claims scan. Native APK/IPA
+      # builds stay out of CI because they need JDK 17, an Android SDK and Xcode.
+      - run: npm run check --workspace=@funberry/mobile
+      - run: npm run doctor --workspace=@funberry/mobile

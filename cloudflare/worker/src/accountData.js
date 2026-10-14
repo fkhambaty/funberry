@@ -112,6 +112,7 @@ export async function deleteParentAccount(db, parent) {
     .bind(parentId)
     .run();
   await db.prepare("DELETE FROM play_events WHERE parent_id = ?").bind(parentId).run();
+  await db.prepare("DELETE FROM play_tickets WHERE parent_id = ?").bind(parentId).run();
   await db.prepare("DELETE FROM product_events WHERE parent_id = ?").bind(parentId).run();
   await db.prepare("DELETE FROM pack_assignments WHERE parent_id = ?").bind(parentId).run();
   await db.prepare("DELETE FROM pack_pages WHERE parent_id = ?").bind(parentId).run();

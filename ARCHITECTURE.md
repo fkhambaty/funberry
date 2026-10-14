@@ -50,13 +50,13 @@ flowchart LR
 
 Marketing pages are server-rendered. `/play` and `/dashboard` are client-heavy. Accounts, children, stars, packs, coupons, and admin data live in D1 database `funberry` (`e0bf4f89-c29d-4c0d-9674-b5977847e7d1`). Razorpay subscriptions use the FKTech EdTech merchant, shared only with Data For Dummies. Okavo is not on this merchant.
 
-Mobile (`apps/mobile`, Expo) has auth and a home screen. The in-app game player is not the live product. Do not promise it.
+Mobile (`apps/mobile`, Expo) signs in against this Worker, stores the session in the device keychain, and can play. Simple games run natively. Motion and Pixi games run in an allowlisted WebView on `/embed/game/<id>`, with a one-time play ticket instead of the parent session. The website is still the primary surface. The app does not sell a subscription. Read `apps/mobile/docs/MOBILE_ARCHITECTURE.md` and `apps/mobile/docs/MOBILE_RELEASE.md`. Play tickets need `cloudflare/d1/005_play_tickets.sql` applied before that Worker route is deployed.
 
 ## Repository map
 
 ```
 apps/web                 Next.js site. Vercel builds this workspace.
-apps/mobile              Expo app. Not the live game player.
+apps/mobile              Expo app. Parent tools, native simple games, WebView for the rest.
 packages/config          Brand, zones, prices. Change the name only in brand.ts.
 packages/game-engine     Game templates and EVS content. Loaded on demand.
 packages/supabase        Account client. Talks to the Cloudflare worker, not Supabase.
@@ -116,7 +116,9 @@ Coupons and `/admin` also live on the worker. Owner emails `fakhruddinkhambaty@g
 npm install
 cp apps/web/.env.example apps/web/.env.local
 npm run dev:web          # http://localhost:3000
+npm run dev:mobile       # Expo, signed in against the same Worker
 npm run typecheck
+npm run check --workspace=@funberry/mobile
 npm run build --workspace=@funberry/web
 npx playwright install chromium
 npm run test:responsive
@@ -124,7 +126,7 @@ npm run test:responsive
 
 `test:responsive` starts the already-built site on port 3000. Build the web app first. The suite signs in as `dummy` / `dummy`, then checks public pages, protected redirects, the parent PIN, the dashboard coupon and dummy checkout, the child picker, and one game of every template. `e2e/a11y.spec.ts` runs axe on each of those game templates.
 
-GitHub Actions runs typecheck, the web build, worker tests, lesson tests, and that Playwright suite on every push and pull request. A weekly workflow checks the live homepage, `/v1/health` (email readiness without creating an account), dummy login, a payment call that must answer “Demo account: no charge”, and phone plus desktop overflow. Apply `cloudflare/d1/004_integrity.sql` on the remote D1 database before deploying a worker that expects the PIN hash and event tables.
+GitHub Actions runs typecheck, the web build, worker tests, lesson tests, and that Playwright suite on every push and pull request. A separate `mobile` job lints, typechecks and unit-tests the Expo app. It does not build an APK or an iOS app. A weekly workflow checks the live homepage, `/v1/health` (email readiness without creating an account), dummy login, a payment call that must answer “Demo account: no charge”, and phone plus desktop overflow. Apply `cloudflare/d1/004_integrity.sql` on the remote D1 database before deploying a worker that expects the PIN hash and event tables. Apply `cloudflare/d1/005_play_tickets.sql` before deploying a worker that issues play tickets. Neither migration was applied from this change.
 
 Never commit `.env`, `.env.local`, or a service-role key.
 
@@ -156,7 +158,7 @@ Rules for a visual edit:
 ## What not to get wrong
 
 - Do not invent user counts, school logos, or city claims.
-- Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Page photos are not stored. Read `docs/LEARNING_PACKS.md` before changing that pipeline. Native delivery and a dedicated Razorpay merchant name wait on `docs/EVIDENCE_GATES.md`.
+- Do not market Stripe, offline mode, or an AI that writes lessons. Learning Packs use OCR plus rules, not a lesson-writing model. Page photos are not stored. Read `docs/LEARNING_PACKS.md` before changing that pipeline. The Expo app can play games; it is not the primary surface and it is not in an app store. Those claims wait on `docs/EVIDENCE_GATES.md`. A dedicated Razorpay merchant name waits on the same file.
 - The old Vercel cron that poked Supabase is gone. Accounts live on D1, so that ping had nothing left to keep awake.
 - Resume headers and job-search files do not belong in this repo.
 

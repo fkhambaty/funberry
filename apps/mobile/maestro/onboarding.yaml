@@ -1,0 +1,11 @@
+appId: com.funberrykids.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: "FunBerry Kids"
+- assertVisible: "Learn through play — fun games for curious little minds!"
+- tapOn: "Grown-up sign in"
+- assertVisible: "Email or username"
+- assertVisible: "Forgot password?"
+- back
+- assertVisible: "Create a free account"

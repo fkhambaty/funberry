@@ -18,8 +18,8 @@ export function createMemoryD1() {
         },
         async run() {
           const stmt = db.prepare(sql);
-          stmt.run(...params);
-          return { success: true };
+          const info = stmt.run(...params);
+          return { success: true, meta: { changes: Number(info.changes) } };
         },
       });
       return {

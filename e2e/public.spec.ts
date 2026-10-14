@@ -60,3 +60,49 @@ for (const viewport of VIEWPORTS) {
     await assertProblems(problems);
   });
 }
+
+const EMBED_GAME = "plants-bubble-pop";
+
+test("app embed route stays inert outside the app and is not indexed", async ({ page }) => {
+  const problems = watchConsole(page);
+  await page.goto(`/embed/game/${EMBED_GAME}`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("This page opens inside the FunBerry Kids app.")).toBeVisible();
+  await expect(page.locator(".fb-game-shell")).toHaveCount(0);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await assertVisibleTapTargets(page);
+  await assertProblems(problems);
+});
+
+test("app embed route runs a game only after the Worker accepts the ticket", async ({ page }) => {
+  const problems = watchConsole(page);
+  const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type" };
+  let accept = false;
+  await page.route("**/v1/play-tickets/check", (route) => {
+    if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
+    return accept
+      ? route.fulfill({ status: 200, headers: cors, json: { ok: true, game_id: EMBED_GAME } })
+      : route.fulfill({ status: 401, headers: cors, json: { error: "expired", code: "ticket_invalid" } });
+  });
+  await page.addInitScript(() => {
+    const sent: string[] = [];
+    Object.assign(window, { __fbSent: sent, ReactNativeWebView: { postMessage: (m: string) => sent.push(m) } });
+  });
+  const init = JSON.stringify({ v: 1, source: "funberry-native", type: "init", gameId: EMBED_GAME, ticket: "b".repeat(64) });
+  const sentTypes = () =>
+    page.evaluate(() => ((window as unknown as { __fbSent: string[] }).__fbSent).map((m) => JSON.parse(m).type));
+
+  await page.goto(`/embed/game/${EMBED_GAME}`, { waitUntil: "domcontentloaded" });
+  await expect.poll(sentTypes).toContain("ready");
+  await page.evaluate((data) => window.dispatchEvent(new MessageEvent("message", { data })), init);
+  await expect(page.getByText("This game needs to be opened again from the app.")).toBeVisible();
+  await expect(page.locator(".fb-game-shell")).toHaveCount(0);
+
+  accept = true;
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect.poll(sentTypes).toContain("ready");
+  await page.evaluate((data) => window.dispatchEvent(new MessageEvent("message", { data })), init);
+  await expect.poll(sentTypes).toContain("loaded");
+  await expect(page.locator(".fb-game-shell")).toBeVisible();
+  await assertNoHorizontalOverflow(page);
+  await assertProblems(problems.filter((p) => !/401/.test(p)));
+});

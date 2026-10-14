@@ -1,90 +1,53 @@
-import { useEffect, useState } from "react";
-import { View, Image, ActivityIndicator, StyleSheet } from "react-native";
+import { useEffect } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import type { AccountSession } from "@funberry/supabase";
-import { supabase } from "../lib/supabase";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Loading } from "../components/ui";
+import { redirectFor } from "../lib/routing";
+import { SessionProvider, useSession } from "../lib/session";
+import { colors } from "../lib/theme";
 
-/**
- * Watches Supabase auth state and redirects based on whether the user
- * is signed in or not. This fires on every auth change (login, logout,
- * token refresh) — so navigation always reflects the real session state.
- */
-function useAuthRedirect(session: AccountSession | null, ready: boolean) {
-  const router = useRouter();
+void SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+function Navigator() {
+  const { status, mode } = useSession();
   const segments = useSegments();
+  const router = useRouter();
+  const target = redirectFor(status, mode, segments);
 
   useEffect(() => {
-    if (!ready) return;
-
-    const inAuthGroup = segments[0] === "auth";
-    const inTabs = segments[0] === "(tabs)";
-
-    if (session && !inTabs) {
-      // User is signed in — send to tabs
-      router.replace("/(tabs)");
-    } else if (!session && !inAuthGroup && segments[0] !== undefined) {
-      // User is signed out and not on a public screen — send to welcome
-      router.replace("/");
-    }
-  }, [session, ready, segments, router]);
-}
-
-export default function RootLayout() {
-  const [session, setSession] = useState<AccountSession | null>(null);
-  const [ready, setReady] = useState(false);
+    if (status !== "loading") void SplashScreen.hideAsync().catch(() => undefined);
+  }, [status]);
 
   useEffect(() => {
-    // 1. Restore any persisted session from SecureStore
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setReady(true);
-    });
+    if (target) router.replace(target as never);
+  }, [target, router]);
 
-    // 2. Listen for future auth state changes (login, logout, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useAuthRedirect(session, ready);
-
-  if (!ready) {
-    return (
-      <View style={styles.loading}>
-        <Image source={require("../assets/icon.png")} style={styles.logo} resizeMode="contain" />
-        <ActivityIndicator size="large" color="#379df9" style={{ marginTop: 16 }} />
-      </View>
-    );
-  }
+  if (status === "loading") return <Loading label="Opening FunBerry Kids…" />;
 
   return (
-    <>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: "#eff8ff" },
-          animation: "slide_from_right",
-        }}
-      />
-    </>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.paper },
+        animation: "slide_from_right",
+        gestureEnabled: mode.kind === "parent",
+      }}
+    >
+      <Stack.Screen name="play/gate" options={{ presentation: "modal", gestureEnabled: true }} />
+      <Stack.Screen name="play/game/[gameId]" options={{ gestureEnabled: false }} />
+    </Stack>
   );
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    flex: 1,
-    backgroundColor: "#eff8ff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logo: {
-    width: 100,
-    height: 100,
-  },
-});
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <SessionProvider>
+        <StatusBar style="dark" />
+        <Navigator />
+      </SessionProvider>
+    </SafeAreaProvider>
+  );
+}

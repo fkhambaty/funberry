@@ -29,3 +29,8 @@ blob-report/
 e2e/.auth/
 .env*
 !.env.example
+google-service-account.json
+*.jks
+*.keystore
+*.p8
+*.mobileprovision

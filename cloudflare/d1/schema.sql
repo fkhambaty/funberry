@@ -180,6 +180,16 @@ CREATE TABLE IF NOT EXISTS play_events (
   played_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS play_tickets (
+  token_hash TEXT PRIMARY KEY,
+  parent_id TEXT NOT NULL,
+  child_id TEXT NOT NULL,
+  game_id TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
+  created_at TEXT NOT NULL
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_parents_username ON parents(username);
 CREATE INDEX IF NOT EXISTS idx_children_parent ON children(parent_id);
 CREATE INDEX IF NOT EXISTS idx_progress_child ON progress(child_id);
@@ -195,3 +205,4 @@ CREATE INDEX IF NOT EXISTS idx_product_events_name ON product_events(event_name,
 CREATE INDEX IF NOT EXISTS idx_product_events_parent ON product_events(parent_id, event_name);
 CREATE INDEX IF NOT EXISTS idx_play_events_child ON play_events(child_id, played_at);
 CREATE INDEX IF NOT EXISTS idx_play_events_parent ON play_events(parent_id, played_at);
+CREATE INDEX IF NOT EXISTS idx_play_tickets_parent ON play_tickets(parent_id, expires_at);

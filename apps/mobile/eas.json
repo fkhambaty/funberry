@@ -1,38 +1,34 @@
 {
   "cli": {
-    "version": ">= 7.0.0",
-    "requireCommit": false
+    "version": ">= 12.0.0",
+    "appVersionSource": "local",
+    "requireCommit": true
   },
   "build": {
+    "base": {
+      "node": "22.12.0",
+      "env": {
+        "EXPO_PUBLIC_FUNBERRY_API": "https://funberry-api.fkhambaty.workers.dev",
+        "EXPO_PUBLIC_FUNBERRY_WEB": "https://www.funberrykids.in"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleDebug"
-      },
-      "ios": {
-        "simulator": true
-      }
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": true }
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "ios": {
-        "simulator": true
-      },
-      "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "https://tkuakihsswzhrcrqcqel.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRrdWFraWhzc3d6aHJjcnFjcWVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNTQ2MTksImV4cCI6MjA5OTkzMDYxOX0.ULwIeYXyF79MrZR9ultc5wXbAACP1x8fbobpKBdvVug"
-      }
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": true }
     },
     "production": {
+      "extends": "base",
       "distribution": "store",
-      "android": {
-        "buildType": "app-bundle"
-      }
+      "android": { "buildType": "app-bundle" }
     }
   },
   "submit": {

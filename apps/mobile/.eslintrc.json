@@ -1,5 +1,15 @@
 {
-  "extends": [
-    "expo"
+  "root": true,
+  "extends": ["expo"],
+  "ignorePatterns": ["node_modules/", "android/", "ios/", ".expo/", "dist/"],
+  "rules": {
+    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "react-hooks/exhaustive-deps": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/__tests__/**", "jest.setup.js", "*.config.js", "scripts/**"],
+      "env": { "jest": true, "node": true }
+    }
   ]
 }

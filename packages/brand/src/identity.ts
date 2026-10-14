@@ -36,7 +36,7 @@ export const nativeDeliveryGate = {
   primarySurface: "responsive web",
   d7Retention: "At least 25% of new parent accounts return with a child play on day 7.",
   freeToPaid: "At least 3% of verified free accounts start a paid week or month within 30 days.",
-  rule: "Do not ship the Expo game player as the product until both targets are measured on production. The targets are gates, not a claim that they have been met.",
+  rule: "The Expo app can play games, but the website stays the primary surface. Do not market the app as the way children play, and do not submit it to a store, until both targets are measured on production. The targets are gates, not a claim that they have been met.",
 } as const;
 
 export const merchantBrandingGate = {

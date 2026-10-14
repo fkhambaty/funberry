@@ -7,7 +7,7 @@ import {
   paymentsConfigured,
   syncParentBilling,
 } from "./payments.js";
-import { gameEntitlement } from "./gameCatalog.js";
+import { handlePlayTicketPublic, issuePlayTicket, saveEntitledRound } from "./playTickets.js";
 import { roleForEmail } from "./owners.js";
 import { bytesToHex, hashSecret, sha256 } from "./crypto.js";
 import {
@@ -21,7 +21,7 @@ import {
   recordPinFailure,
   storeParentPin,
 } from "./pin.js";
-import { reconcileChildStars, recordGameProgress } from "./progress.js";
+import { reconcileChildStars } from "./progress.js";
 import { countProductEvents, loadWeeklySummary, parentProductCounts, recordProductEvent, recordProductEventOnce } from "./analytics.js";
 import { DELETE_PHRASE, deleteParentAccount, deletionAllowed, exportParentAccount, passwordMatches } from "./accountData.js";
 
@@ -460,6 +460,9 @@ export default {
         return handleRazorpayWebhook(request, env, db, origin);
       }
 
+      const ticketRoute = await handlePlayTicketPublic(request, db, origin, path);
+      if (ticketRoute) return ticketRoute;
+
       const parent = await requireParent(request, db);
       if (!parent) return json({ error: "Not authenticated" }, 401, origin);
 
@@ -601,8 +604,13 @@ export default {
       if (childMatch && request.method === "DELETE") {
         const child = await ownChild(db, parent.id, childMatch[1]);
         if (!child) return json({ error: "Child not found" }, 404, origin);
+        await db.prepare("DELETE FROM play_tickets WHERE child_id = ? AND parent_id = ?").bind(child.id, parent.id).run();
         await db.prepare("DELETE FROM children WHERE id = ? AND parent_id = ?").bind(child.id, parent.id).run();
         return json({ ok: true }, 200, origin);
+      }
+
+      if (request.method === "POST" && path === "/v1/play-tickets") {
+        return issuePlayTicket(request, db, parent, origin);
       }
 
       if (request.method === "GET" && path === "/v1/progress") {
@@ -623,21 +631,9 @@ export default {
         const child = await ownChild(db, parent.id, childId);
         if (!child) return json({ error: "Child not found" }, 404, origin);
         if (!gameId) return json({ error: "Missing game." }, 400, origin);
-        const entitlement = gameEntitlement(gameId, child.total_stars, hasActivePremium(parent));
-        if (entitlement.reason === "unknown") return json({ error: "Unknown game." }, 400, origin);
-        if (!entitlement.allowed) return json({ error: "That game is still locked." }, 403, origin);
-        const now = nowIso();
-        const prior = await db
-          .prepare(
-            `SELECT progress.id FROM progress
-             JOIN children ON children.id = progress.child_id
-             WHERE children.parent_id = ? LIMIT 1`,
-          )
-          .bind(parent.id)
-          .first();
-        const saved = await recordGameProgress(db, parent.id, body, now);
-        if (!prior) await recordProductEventOnce(db, "first_game", parent.id, now);
-        if (saved.first_completion) await recordProductEvent(db, "game_completed", parent.id, now);
+        const round = await saveEntitledRound(db, parent, child, body, nowIso());
+        if (!round.saved) return json(round.body, round.status, origin);
+        const saved = round.saved;
         return json(
           { progress: progressOut(saved.progress), stars_credited: saved.stars_credited, total_stars: saved.total_stars },
           200,

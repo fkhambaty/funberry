@@ -4,14 +4,14 @@ These gates decide later work. Meeting the words on this page is not the same as
 
 ## Native game delivery
 
-The live product is the responsive website. The Expo app can sign in and show a home screen. It is not the game player.
+The live product is the responsive website. The Expo app in `apps/mobile` can sign in, manage children, and play: simple templates run natively, and motion or Pixi games run in an allowlisted WebView. That app is not the primary way children play, and it has not been submitted to an app store.
 
-Ship native game delivery only after both of these are measured on production:
+Do not market the app as the product, and do not submit it, until both of these are measured on production:
 
 - Day-7 retention: at least 25% of new parent accounts return with a child play on day 7.
 - Free to paid: at least 3% of verified free accounts start a paid week or month within 30 days.
 
-Until both numbers exist and clear those bars, do not move the game player into the Expo app or describe the app as the way children play.
+Store billing is a separate requirement. The app does not sell a subscription. Read `apps/mobile/docs/MOBILE_ARCHITECTURE.md`.
 
 ## Dedicated merchant branding
 

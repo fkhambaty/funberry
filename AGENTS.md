@@ -37,7 +37,7 @@ Kid “Home” on `/play` stays inside the play SPA (worlds or child picker). Th
 ```
 funberry/
 ├── apps/web/              # Next.js 15 — the website
-├── apps/mobile/           # Expo — auth/home exist; in-app game player is still a placeholder
+├── apps/mobile/           # Expo — parent tools, native simple games, WebView for motion/Pixi games
 ├── packages/config/       # Brand, zones, pricing (runtime source of truth for zone metadata)
 ├── packages/ui/           # Shared kid UI
 ├── packages/game-engine/  # Templates, EVS game data, lesson rules engine, Pixi labs
@@ -61,7 +61,7 @@ Game UIs load **on demand** via `loadGameTemplate()` so PixiJS is not in the pla
 |-------------|--------|
 | **Production** | Cloudflare D1 database `funberry`. Site `www.funberrykids.in`. Accounts, coupons, and Razorpay state live there. |
 | **Local web** | `npm run dev:web` → `http://localhost:3000`. Copy [`apps/web/.env.example`](apps/web/.env.example) to `apps/web/.env.local`. |
-| **Local mobile** | `npm run dev:mobile`. Uses `EXPO_PUBLIC_SUPABASE_*`. |
+| **Local mobile** | `npm run dev:mobile`. Session uses `EXPO_PUBLIC_FUNBERRY_API` (defaults to the production Worker) and `EXPO_PUBLIC_FUNBERRY_WEB` (defaults to `https://www.funberrykids.in`). Docs: `apps/mobile/docs/MOBILE_ARCHITECTURE.md`. |
 
 Never commit `.env`, `.env.local`, or service-role keys. The browser client **must not** hardcode a fallback anon JWT; URL + anon key come from env.
 
@@ -84,7 +84,7 @@ The website does not use a Supabase URL or service-role key. Razorpay secrets li
 ## Ground rules (product honesty)
 
 - **Do not invent social proof** (user counts, school logos, “used in N cities”) unless it is real and already on the site.
-- **Do not claim a feature that is off.** Mobile games, Stripe, offline mode, and “AI that writes lessons” are not live product promises.
+- **Do not claim a feature that is off.** The Expo app plays simple games natively and heavy games in a WebView, but the website is still the primary surface and the app is not in a store. Stripe, offline mode, and “AI that writes lessons” are not live product promises. The app shows the current plan and says purchases are unavailable. It must not link to checkout, the pricing page, or the parent dashboard.
 - **Do not expand Learning Packs before measuring their evidence gate.** Run the documented 10-page trust test first; automated OCR/game counts do not prove factual correctness.
 - **Kid copy stays kind and simple.** Parent copy can be more precise. Never show developer jargon (RLS, JWT, RPC) on `/play`.
 - **Prices** live in [`packages/config/src/pricing.ts`](packages/config/src/pricing.ts). Play-side free/premium split is also in `PlayContent` (`FREE_GAME_FRACTION`). If those disagree, fix both; do not hardcode rupees in a random button.
@@ -95,6 +95,8 @@ The website does not use a Supabase URL or service-role key. Razorpay secrets li
 ```bash
 npm install
 npm run dev:web          # website
+npm run dev:mobile       # Expo app
+npm run check --workspace=@funberry/mobile
 npm run typecheck        # all workspaces
 npm run build --workspace=@funberry/web
 npx playwright install chromium

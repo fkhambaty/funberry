@@ -59,6 +59,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const hideFloatingHome =
     pathname === "/" ||
     pathname?.startsWith("/play") ||
+    pathname?.startsWith("/embed") ||
     pathname?.startsWith("/login") ||
     pathname?.startsWith("/signup") ||
     pathname?.startsWith("/forgot-password") ||
