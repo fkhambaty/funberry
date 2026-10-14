@@ -23,7 +23,7 @@ export function watchConsole(page: Page) {
     if (message.type() !== "error") return;
     const text = message.text();
     if (/favicon|Failed to load resource/i.test(text)) return;
-    if (/hydration|did not match|Minified React error/i.test(text)) problems.push(text);
+    problems.push(text);
   });
   return problems;
 }
