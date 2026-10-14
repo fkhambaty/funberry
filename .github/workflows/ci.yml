@@ -20,4 +20,6 @@ jobs:
       - run: npm run test:lesson-gen
       - run: npm run build --workspace=@funberry/web
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:responsive
+      # Keep pull-request CI deterministic; authenticated production checks run
+      # in production-smoke and must not depend on the shared D1 daily quota.
+      - run: npm run test:responsive:public
