@@ -165,3 +165,5 @@ Rules for a visual edit:
 `https://github.com/fkhambaty/funberry` is the copy that matters. It contains this guide, `AGENTS.md`, the Next.js app, the Worker, the D1 schema, and `cloudflare/worker/wrangler.toml`. Vercel rebuilds the website from that repository.
 
 These names are Worker secrets and are not stored in Git: `RESEND_API_KEY`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`. They remain in the Cloudflare Worker even if this laptop is lost. A local copy under `~/.config/fk-products/` is only a convenience and must never be committed. Public values that are safe in Git are the key id and the two plan ids in `wrangler.toml`.
+
+The estate-wide handover (all three products, accounts, DNS, runbooks, history and diagrams) is the private repository https://github.com/fkhambaty/products-handover. Start there on a new computer.
