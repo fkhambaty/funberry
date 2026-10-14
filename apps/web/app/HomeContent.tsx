@@ -2,6 +2,7 @@
 
 import { brand, pricing } from "@funberry/config";
 import { motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import { FunBerryLogo } from "./components/FunBerryLogo";
 
 const fadeUp = {
@@ -49,12 +50,12 @@ export default function HomeContent() {
 
       <header className="fb-nav">
         <div className="fb-nav-inner">
-          <a href="/" className="rounded-lg outline-none ring-sky-400/50 focus-visible:ring-2">
+          <Link href="/" className="rounded-lg outline-none ring-sky-400/50 focus-visible:ring-2">
             <FunBerryLogo size="sm" variant="editorial" />
-          </a>
+          </Link>
           <nav className="flex items-center gap-2" aria-label="Primary">
-            <a href="/login" className="fb-cta fb-cta-ink px-4 text-sm">Log in</a>
-            <a href="/signup" className="fb-cta fb-cta-berry px-5 text-sm">Get started</a>
+            <Link href="/login" className="fb-cta fb-cta-ink px-4 text-sm">Log in</Link>
+            <Link href="/signup" className="fb-cta fb-cta-berry px-5 text-sm">Get started</Link>
           </nav>
         </div>
       </header>

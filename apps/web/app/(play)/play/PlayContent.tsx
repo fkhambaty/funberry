@@ -17,7 +17,6 @@ import type { GameConfig, GameResult } from "@funberry/game-engine";
 import { getChildren, getChildBestProgress, saveProgress, verifyParentPin, getChildRank, getAssignedPacksForChild, getParent, getChildProgress, getCurrentUser, getWeeklySummary } from "@funberry/supabase";
 import type { Child, LearningPack, Parent, Progress } from "@funberry/supabase";
 import { LeaderboardModal } from "../../components/Leaderboard";
-import { FunBerryLogo } from "../../components/FunBerryLogo";
 import { GamePlayer } from "./GamePlayer";
 import { SectionedGameList } from "./SectionedGameList";
 
@@ -44,8 +43,6 @@ function computeIsPaid(parent: Parent | null): boolean {
 /** Kid-facing copy: web records each completed round for stars and parent coaching reports. */
 const KID_SAVED_PROGRESS_WHO =
   "Your stars save when you play. Grown-ups have their own screen to cheer you on!";
-const KID_SAVED_PROGRESS_ZONES =
-  "Finishing games saves your stars and scores for next time — parents see friendly summaries on their dashboard.";
 const KID_SAVED_PROGRESS_GAMES =
   "Each game saves your stars and score when you finish a round — keep playing to level up!";
 const KID_SAVED_PROGRESS_INGAME =
@@ -83,23 +80,6 @@ const GAME_LABELS: Record<string, string> = {
   pixi_lab: "WEBGL LAB",
 };
 
-
-// Hidden mapping for parent analytics; never shown in kid UI.
-const GAME_LEARNING_MAP: Record<string, { subject: "Math" | "Science" | "English"; topic: string }> = {
-  picture_quiz: { subject: "Science", topic: "Observation" },
-  drag_sort: { subject: "Science", topic: "Classification" },
-  memory_match: { subject: "English", topic: "Recall" },
-  sequence_builder: { subject: "Math", topic: "Ordering" },
-  spot_difference: { subject: "Science", topic: "Detail recognition" },
-  odd_one_out: { subject: "Math", topic: "Patterns" },
-  true_false: { subject: "English", topic: "Comprehension" },
-  color_activity: { subject: "Science", topic: "Color concepts" },
-  word_picture_link: { subject: "English", topic: "Vocabulary" },
-  interactive_story: { subject: "English", topic: "Reading flow" },
-  bubble_pop: { subject: "Math", topic: "Speed and counting" },
-  star_catcher: { subject: "Math", topic: "Focus and reaction" },
-  pixi_lab: { subject: "Science", topic: "Cause and effect" },
-};
 
 function ChildCard({ child, onSelect }: { child: Child; onSelect: () => void }) {
   const photoUrl = child.photo_url;
@@ -377,7 +357,6 @@ export default function PlayContent() {
   const [selectedPack, setSelectedPack] = useState<LearningPack | null>(null);
   const [playingFromPack, setPlayingFromPack] = useState(false);
   const [completedGames, setCompletedGames] = useState<Record<string, number>>({});
-  const [loadingProgress, setLoadingProgress] = useState(false);
   const [showParentGate, setShowParentGate] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [childRank, setChildRank] = useState<{ rank: number; total: number } | null>(null);
@@ -396,14 +375,11 @@ export default function PlayContent() {
 
   // Load DB progress when a child is selected
   const loadProgress = useCallback(async (childId: string) => {
-    setLoadingProgress(true);
     try {
       const best = await getChildBestProgress(childId);
       setCompletedGames(best);
     } catch {
       setCompletedGames({});
-    } finally {
-      setLoadingProgress(false);
     }
   }, []);
 

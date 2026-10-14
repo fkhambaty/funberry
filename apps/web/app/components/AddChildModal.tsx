@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { addChild, updateChild } from "@funberry/supabase";
+import { addChild, deleteChild, updateChild } from "@funberry/supabase";
 import type { Child } from "@funberry/supabase";
 
 interface AddChildModalProps {
@@ -45,6 +45,20 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
         setError(isEdit ? "Couldn't update child. Please try again." : "Couldn't add child. Please try again.");
       }
     } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!editChild || !window.confirm(`Remove ${editChild.name}'s profile and saved progress? This cannot be undone.`)) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteChild(editChild.id);
+      onAdded();
+      onClose();
+    } catch (err: unknown) {
+      setError(err instanceof Error && err.message ? err.message : "Couldn't remove child. Please try again.");
       setLoading(false);
     }
   }
@@ -198,6 +212,16 @@ export function AddChildModal({ onClose, onAdded, editChild }: AddChildModalProp
             >
               {loading ? (isEdit ? "Saving..." : "Adding...") : (isEdit ? "💾 Save Changes" : "🎉 Add Child!")}
             </motion.button>
+            {isEdit && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleDelete}
+                className="mt-3 w-full rounded-kid border border-red-200 px-4 py-3 text-sm font-bold text-red-700 disabled:opacity-60"
+              >
+                Remove child and saved progress
+              </button>
+            )}
           </form>
         </motion.div>
       </motion.div>

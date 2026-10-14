@@ -21,6 +21,16 @@ It is not Okavo and it is not Data For Dummies.
 
 `www` is a CNAME to `cname.vercel-dns.com`. Apex and www both answered on 13 Oct 2026, so DNS was left unchanged.
 
+GoDaddy reported on 14 October 2026 that `funberrykids.in` expires **31 March 2029** and automatic renewal is **off**. The site does not survive that date unless the owner renews it or explicitly enables auto-renew in GoDaddy. This is an account/billing action, not a code deployment.
+
+### Shared D1 quota dependency
+
+All D1 databases in Cloudflare account `ec00d4a6131c20118d82605d6b969c8e` share the free-tier daily limits. On 14 October 2026 an unrelated `customjobseek` database used 167,866 row writes, exhausting the account's 100,000 free daily row-write allowance even though FunBerry used only 6. Account, session and progress writes then failed until Cloudflare's 00:00 UTC reset. The Worker detects this exact condition and returns a truthful retryable HTTP 503 instead of a generic 500; it cannot restore writes.
+
+This can recur every day while that workload remains in the same free account. The durable remedies are to upgrade the Cloudflare account to Workers Paid or isolate/stop the unrelated workload. Do not modify `customjobseek` from this repository. Cloudflare documents the shared daily allowance and reset at https://developers.cloudflare.com/d1/platform/pricing/ and https://developers.cloudflare.com/d1/platform/limits/.
+
+The owner explicitly declined a billing-plan change on 14 October 2026. Therefore daily write outages remain an accepted external risk until that decision changes.
+
 ## How a request moves
 
 ```mermaid

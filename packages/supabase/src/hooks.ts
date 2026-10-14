@@ -226,6 +226,12 @@ export async function updateChild(
   return data.child;
 }
 
+export async function deleteChild(childId: string) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not authenticated");
+  await accountRequest(`/v1/children/${childId}`, { method: "DELETE" });
+}
+
 export async function updateChildPhoto(childId: string, photoUrl: string) {
   const user = await getCurrentUser();
   if (!user) throw new Error("Not authenticated");

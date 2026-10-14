@@ -17,12 +17,16 @@
     "test:lesson-gen": "tsx --test packages/game-engine/src/lesson/rulesEngine.test.ts packages/game-engine/src/lesson/evidenceGate.test.ts packages/game-engine/src/games/evs/computers.test.ts packages/game-engine/src/core/contrast.test.ts",
     "test:worker": "node --test cloudflare/worker/src/payments.test.js cloudflare/worker/src/integrity.test.js",
     "test:responsive": "playwright test",
+    "test:responsive:public": "playwright test --config=playwright.public.config.ts",
     "test:smoke": "playwright test --config=playwright.smoke.config.ts",
     "eval:packs": "tsx scripts/eval-learning-packs.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
     "@playwright/test": "^1.64.0",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "^8.0.1",
+    "eslint-config-next": "^15.5.27",
     "tesseract.js": "^5.1.1",
     "tsx": "^4.23.12",
     "turbo": "^2.4.0",

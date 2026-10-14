@@ -2,10 +2,12 @@ import { handleAdmin, handleCouponRedeem } from "./admin.js";
 import {
   handleRazorpayAuthed,
   handleRazorpayWebhook,
+  hasActivePremium,
   isDemoParent,
   paymentsConfigured,
   syncParentBilling,
 } from "./payments.js";
+import { gameEntitlement } from "./gameCatalog.js";
 import { roleForEmail } from "./owners.js";
 import { bytesToHex, hashSecret, sha256 } from "./crypto.js";
 import {
@@ -156,6 +158,10 @@ function newCode() {
 
 function emailReady(env) {
   return Boolean(env.RESEND_API_KEY && env.MAIL_FROM);
+}
+
+function d1DailyLimitReached(error) {
+  return /exceeded D1's free tier daily row (?:write|read) limit/i.test(String(error?.message || ""));
 }
 
 async function emailDomainVerified(env) {
@@ -529,6 +535,7 @@ export default {
           .prepare("UPDATE parents SET password_hash = ?, password_salt = ?, updated_at = ? WHERE id = ?")
           .bind(passwordHash, salt, nowIso(), parent.id)
           .run();
+        await db.prepare("DELETE FROM sessions WHERE user_id = ?").bind(parent.id).run();
         return json({ ok: true }, 200, origin);
       }
 
@@ -591,6 +598,13 @@ export default {
         return json({ child: childOut(row) }, 200, origin);
       }
 
+      if (childMatch && request.method === "DELETE") {
+        const child = await ownChild(db, parent.id, childMatch[1]);
+        if (!child) return json({ error: "Child not found" }, 404, origin);
+        await db.prepare("DELETE FROM children WHERE id = ? AND parent_id = ?").bind(child.id, parent.id).run();
+        return json({ ok: true }, 200, origin);
+      }
+
       if (request.method === "GET" && path === "/v1/progress") {
         const childId = url.searchParams.get("child_id") || "";
         const child = await ownChild(db, parent.id, childId);
@@ -609,6 +623,9 @@ export default {
         const child = await ownChild(db, parent.id, childId);
         if (!child) return json({ error: "Child not found" }, 404, origin);
         if (!gameId) return json({ error: "Missing game." }, 400, origin);
+        const entitlement = gameEntitlement(gameId, child.total_stars, hasActivePremium(parent));
+        if (entitlement.reason === "unknown") return json({ error: "Unknown game." }, 400, origin);
+        if (!entitlement.allowed) return json({ error: "That game is still locked." }, 403, origin);
         const now = nowIso();
         const prior = await db
           .prepare(
@@ -719,7 +736,7 @@ export default {
 
       if (request.method === "GET" && path === "/v1/rank") {
         const childId = url.searchParams.get("child_id") || "";
-        const child = await db.prepare("SELECT id, total_stars FROM children WHERE id = ?").bind(childId).first();
+        const child = await ownChild(db, parent.id, childId);
         if (!child) return json({ rank: null }, 200, origin);
         const higher = await db
           .prepare("SELECT COUNT(*) AS n FROM children WHERE total_stars > ? OR (total_stars = ? AND id < ?)")
@@ -971,7 +988,15 @@ export default {
       }
 
       return json({ error: "Not found" }, 404, origin);
-    } catch {
+    } catch (error) {
+      console.error("request failed", request.method, path, error?.name || "Error", error?.message || "unknown");
+      if (d1DailyLimitReached(error)) {
+        return json(
+          { error: "Accounts and saved progress are temporarily unavailable because today's storage allowance has been reached. Nothing was charged. Please try again after the daily reset." },
+          503,
+          origin,
+        );
+      }
       return json({ error: "The database did not accept that request." }, 500, origin);
     }
   },

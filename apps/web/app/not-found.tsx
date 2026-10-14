@@ -1,4 +1,5 @@
 import { FunBerryLogo } from "./components/FunBerryLogo";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -14,9 +15,9 @@ export default function NotFound() {
         <p className="mb-6 font-semibold text-ink-500">
           This path is not part of FunBerry. Head back to the village.
         </p>
-        <a href="/" className="fb-cta fb-cta-sky px-6">
+        <Link href="/" className="fb-cta fb-cta-sky px-6">
           Go home
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -1,11 +1,8 @@
 import { View, Text, ScrollView, Pressable, StyleSheet, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../lib/supabase";
 
 export default function ProfileTab() {
-  const router = useRouter();
-
   function handleSignOut() {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       { text: "Cancel", style: "cancel" },

@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getZoneById, colors } from "@funberry/config";
+import { getZoneById } from "@funberry/config";
 
 const colorBg: Record<string, { bg: string; border: string }> = {
   berry: { bg: "#fff0f3", border: "#ffc6d6" },

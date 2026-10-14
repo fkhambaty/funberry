@@ -1,7 +1,6 @@
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { brand, colors } from "@funberry/config";
 
 /**
  * In-app subscription screen for mobile.

@@ -87,6 +87,26 @@ function call(db, token, path, method, body) {
   );
 }
 
+test("D1 daily quota exhaustion returns a clear retryable response", async () => {
+  const db = {
+    prepare() {
+      throw new Error("D1_ERROR: Your account has exceeded D1's free tier daily row write limit.");
+    },
+  };
+  const response = await worker.fetch(
+    new Request("https://funberry-api.example/v1/signup", {
+      method: "POST",
+      headers: { origin: "http://localhost:3000", "content-type": "application/json" },
+      body: JSON.stringify({ email: "quota@example.com", password: "password12", name: "Quota Test" }),
+    }),
+    { DB: db, RESEND_API_KEY: "test-key", MAIL_FROM: "FunBerry Kids <no-reply@funberrykids.in>" },
+  );
+  const body = await response.json();
+  assert.equal(response.status, 503);
+  assert.match(body.error, /storage allowance/i);
+  assert.match(body.error, /Nothing was charged/i);
+});
+
 test("repeat plays credit only the improvement and reconcile an inflated total", async () => {
   const { db, token } = await seedFamily();
   const first = await call(db, token, "/v1/progress", "POST", {
@@ -148,6 +168,63 @@ test("repeat plays credit only the improvement and reconcile an inflated total",
   assert.equal(week.streak, null);
   assert.ok(week.period_start);
   assert.ok(week.period_end);
+});
+
+test("progress rejects invented and locked game identifiers", async () => {
+  const { db, token } = await seedFamily();
+  await db.prepare("UPDATE children SET total_stars = 0 WHERE id = 'child-1'").run();
+
+  const invented = await call(db, token, "/v1/progress", "POST", {
+    child_id: "child-1",
+    game_id: "invented-three-stars",
+    score: 100,
+    stars_earned: 3,
+    completed: true,
+  });
+  assert.equal(invented.status, 400);
+
+  const locked = await call(db, token, "/v1/progress", "POST", {
+    child_id: "child-1",
+    game_id: "transport-medium-sort",
+    score: 100,
+    stars_earned: 3,
+    completed: true,
+  });
+  assert.equal(locked.status, 403);
+});
+
+test("rank does not disclose another family's child", async () => {
+  const { db, token } = await seedFamily();
+  await db
+    .prepare("INSERT INTO parents (id, email, username, password_hash, password_salt) VALUES ('parent-2', 'other@example.com', 'other', 'hash', 'salt')")
+    .run();
+  await db
+    .prepare("INSERT INTO children (id, parent_id, name, age, total_stars) VALUES ('child-2', 'parent-2', 'Other Child', 7, 50)")
+    .run();
+  const response = await call(db, token, "/v1/rank?child_id=child-2", "GET");
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.rank, null);
+});
+
+test("password changes revoke sessions and parents can remove a child", async () => {
+  const passwordFamily = await seedFamily();
+  const changed = await call(passwordFamily.db, passwordFamily.token, "/v1/password", "POST", {
+    password: "new-password",
+  });
+  assert.equal(changed.status, 200);
+  const sessions = await passwordFamily.db
+    .prepare("SELECT COUNT(*) AS n FROM sessions WHERE user_id = 'parent-1'")
+    .first();
+  assert.equal(Number(sessions.n), 0);
+
+  const deleteFamily = await seedFamily();
+  const removed = await call(deleteFamily.db, deleteFamily.token, "/v1/children/child-1", "DELETE");
+  assert.equal(removed.status, 200);
+  const children = await deleteFamily.db
+    .prepare("SELECT COUNT(*) AS n FROM children WHERE id = 'child-1'")
+    .first();
+  assert.equal(Number(children.n), 0);
 });
 
 test("parent APIs never return the PIN and verify it on the server", async () => {

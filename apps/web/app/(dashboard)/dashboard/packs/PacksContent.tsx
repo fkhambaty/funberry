@@ -86,7 +86,7 @@ export default function PacksContent() {
           <PackList
             loading={loading}
             packs={packs}
-            children={children}
+            childProfiles={children}
             onNew={() => setView("wizard")}
             onDelete={async (id) => {
               await deleteLearningPack(id);
@@ -96,7 +96,7 @@ export default function PacksContent() {
           />
         ) : (
           <PackWizard
-            children={children}
+            childProfiles={children}
             onCancel={() => setView("list")}
             onSaved={async () => {
               setView("list");
@@ -110,7 +110,7 @@ export default function PacksContent() {
         {assignEditor && (
           <AssignModal
             pack={assignEditor}
-            children={children}
+            childProfiles={children}
             onClose={() => setAssignEditor(null)}
             onSaved={async () => {
               setAssignEditor(null);
@@ -128,19 +128,19 @@ export default function PacksContent() {
 function PackList({
   loading,
   packs,
-  children,
+  childProfiles,
   onNew,
   onDelete,
   onEditAssign,
 }: {
   loading: boolean;
   packs: LearningPackWithMeta[];
-  children: Child[];
+  childProfiles: Child[];
   onNew: () => void;
   onDelete: (id: string) => Promise<void>;
   onEditAssign: (pack: LearningPackWithMeta) => void;
 }) {
-  const childName = (id: string) => children.find((c) => c.id === id)?.name ?? "Child";
+  const childName = (id: string) => childProfiles.find((c) => c.id === id)?.name ?? "Child";
 
   return (
     <div>
@@ -164,8 +164,8 @@ function PackList({
           <p className="mb-2 text-4xl">📚</p>
           <p className="font-display text-lg font-bold text-slate-700">No packs yet</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-            Snap a few pages from your child&apos;s textbook, and we&apos;ll turn them into games that
-            teach exactly those pages.
+            Snap a few pages from your child&apos;s textbook to create practice games. Review the
+            generated questions before assigning the pack.
           </p>
         </div>
       ) : (
@@ -225,12 +225,12 @@ function PackList({
 
 function AssignModal({
   pack,
-  children,
+  childProfiles,
   onClose,
   onSaved,
 }: {
   pack: LearningPackWithMeta;
-  children: Child[];
+  childProfiles: Child[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -263,8 +263,8 @@ function AssignModal({
         <h3 className="font-display text-lg font-black text-slate-800">Assign &ldquo;{pack.title}&rdquo;</h3>
         <p className="mt-1 text-sm text-slate-500">Pick which children play this pack.</p>
         <div className="mt-4 space-y-2">
-          {children.length === 0 && <p className="text-sm text-slate-500">Add a child first from the dashboard.</p>}
-          {children.map((c) => {
+          {childProfiles.length === 0 && <p className="text-sm text-slate-500">Add a child first from the dashboard.</p>}
+          {childProfiles.map((c) => {
             const on = selected.has(c.id);
             return (
               <button
@@ -308,11 +308,11 @@ function AssignModal({
 // ── Create wizard ─────────────────────────────────────────────────────────────
 
 function PackWizard({
-  children,
+  childProfiles,
   onCancel,
   onSaved,
 }: {
-  children: Child[];
+  childProfiles: Child[];
   onCancel: () => void;
   onSaved: () => void;
 }) {
@@ -686,8 +686,8 @@ function PackWizard({
 
           <label className="mt-5 block text-sm font-bold text-slate-600">Assign to (optional now)</label>
           <div className="mt-2 space-y-2">
-            {children.length === 0 && <p className="text-sm text-slate-400">Add a child from the dashboard to assign.</p>}
-            {children.map((c) => {
+            {childProfiles.length === 0 && <p className="text-sm text-slate-400">Add a child from the dashboard to assign.</p>}
+            {childProfiles.map((c) => {
               const on = selected.has(c.id);
               return (
                 <button
