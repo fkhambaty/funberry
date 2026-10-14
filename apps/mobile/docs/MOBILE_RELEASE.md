@@ -77,7 +77,9 @@ the administrator prompt required to install full Xcode. That native check
 remains explicit rather than being claimed.
 
 - `eas init` has not been run, so there is no cloud build or store signing.
-- `cloudflare/d1/005_play_tickets.sql` is in git and has not been applied to the remote D1 database. Do not deploy the Worker until it is applied, or ticket routes will fail on the missing table. Existing website routes do not need that table.
+- `cloudflare/d1/005_play_tickets.sql` has been applied to the remote D1
+  database and the Worker has been deployed successfully. The remaining
+  production check is an end-to-end play with a non-demo parent.
 - Real email delivery, a real Razorpay charge, and App Store or Play review were not run.
 - `npm audit --omit=dev` still reports upstream Expo 52 build-tool advisories,
   including `tar`; an attempted incompatible `query-string` bump caused a
@@ -89,6 +91,7 @@ remains explicit rather than being claimed.
 
 1. Measure the two gates in `docs/EVIDENCE_GATES.md`. They are not met.
 2. Add store billing and server receipt checks before any in-app sale. The current plan screen is read-only and does not link to a website checkout.
-3. Apply the play-ticket migration, deploy the Worker, and play one native game and one WebView game against production with a non-demo parent.
+3. Play one native game and one WebView game against production with a
+   non-demo parent.
 4. Confirm the binary's permission list has no camera, microphone, location or photo library.
 5. Keep the privacy and terms URLs pointed at `https://www.funberrykids.in`.

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+    <defs>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#163B74" flood-opacity="0.12"/>
+      </filter>
+      <clipPath id="phoneClip"><rect x="1166" y="95" width="304" height="660" rx="42"/></clipPath>
+    </defs>
+    
+    
+    <rect width="1600" height="900" fill="#F0F8FF"/>
+    <circle cx="1510" cy="-30" r="245" fill="#FF2462" opacity="0.11"/>
+    <circle cx="35" cy="910" r="210" fill="#6D28D9" opacity="0.09"/>
+    <rect x="64" y="46" width="236" height="42" rx="21" fill="#FFE4EE"/>
+    <text x="182" y="74" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="17" font-weight="700" text-anchor="middle" opacity="1"  letter-spacing="1.1">
+    <tspan x="182" dy="0">QUALITY EVIDENCE</tspan>
+  </text>
+    <text x="64" y="132" fill="#163B74" font-family="Arial Rounded MT Bold" font-size="48" font-weight="800" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="64" dy="0">Verified like a product, not a</tspan><tspan x="64" dy="56">mock-up</tspan>
+  </text>
+    <line x1="64" y1="842" x2="1536" y2="842" stroke="#BFE2FA" stroke-width="2"/>
+    <text x="64" y="874" fill="#4F6990" font-family="Arial" font-size="17" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="64" dy="0">FunBerry Kids</tspan>
+  </text>
+    <text x="1536" y="874" fill="#4F6990" font-family="Arial" font-size="17" font-weight="700" text-anchor="end" opacity="1"  letter-spacing="0">
+    <tspan x="1536" dy="0">09</tspan>
+  </text>
+  
+    <text x="64" y="220" fill="#4F6990" font-family="Arial" font-size="25" font-weight="500" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="64" dy="0">The release path covers the app, its APIs and the database change needed by ticketed</tspan><tspan x="64" dy="34">play.</tspan>
+  </text>
+    <rect x="64" y="330" width="346" height="175" rx="28" fill="#FF2462" stroke="#FF2462" stroke-width="2"/>
+        <text x="92" y="405" fill="#FFFFFF" font-family="Arial Rounded MT Bold" font-size="41" font-weight="850" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="92" dy="0">2</tspan>
+  </text>
+        <text x="92" y="456" fill="#FFFFFF" font-family="Arial" font-size="17" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="92" dy="0">platform targets</tspan>
+  </text><rect x="440" y="330" width="346" height="175" rx="28" fill="#FFFFFF" stroke="#BFE2FA" stroke-width="2"/>
+        <text x="468" y="405" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="41" font-weight="850" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="468" dy="0">API 36</tspan>
+  </text>
+        <text x="468" y="456" fill="#4F6990" font-family="Arial" font-size="17" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="468" dy="0">Android emulator</tspan><tspan x="468" dy="23">verification</tspan>
+  </text><rect x="816" y="330" width="346" height="175" rx="28" fill="#FFFFFF" stroke="#BFE2FA" stroke-width="2"/>
+        <text x="844" y="405" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="41" font-weight="850" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="844" dy="0">Hermes</tspan>
+  </text>
+        <text x="844" y="456" fill="#4F6990" font-family="Arial" font-size="17" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="844" dy="0">iOS JavaScript export</tspan>
+  </text><rect x="1192" y="330" width="346" height="175" rx="28" fill="#FFFFFF" stroke="#BFE2FA" stroke-width="2"/>
+        <text x="1220" y="405" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="41" font-weight="850" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="1220" dy="0">LIVE</tspan>
+  </text>
+        <text x="1220" y="456" fill="#4F6990" font-family="Arial" font-size="17" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="1220" dy="0">game-ticket migration</tspan><tspan x="1220" dy="23">deployed</tspan>
+  </text>
+    <circle cx="86" cy="565" r="20" fill="#FFE4EE"/>
+   <text x="86" y="570.2" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="17.2" font-weight="800" text-anchor="middle" opacity="1"  letter-spacing="0">
+    <tspan x="86" dy="0">✓</tspan>
+  </text>
+        <text x="122" y="572" fill="#163B74" font-family="Arial" font-size="18" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="122" dy="0">Release APK built and installed</tspan>
+  </text><circle cx="830" cy="565" r="20" fill="#FFE4EE"/>
+   <text x="830" y="570.2" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="17.2" font-weight="800" text-anchor="middle" opacity="1"  letter-spacing="0">
+    <tspan x="830" dy="0">✓</tspan>
+  </text>
+        <text x="866" y="572" fill="#163B74" font-family="Arial" font-size="18" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="866" dy="0">Family and child flows exercised</tspan>
+  </text><circle cx="86" cy="629" r="20" fill="#FFE4EE"/>
+   <text x="86" y="634.2" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="17.2" font-weight="800" text-anchor="middle" opacity="1"  letter-spacing="0">
+    <tspan x="86" dy="0">✓</tspan>
+  </text>
+        <text x="122" y="636" fill="#163B74" font-family="Arial" font-size="18" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="122" dy="0">Worker deployment verified healthy</tspan>
+  </text><circle cx="830" cy="629" r="20" fill="#FFE4EE"/>
+   <text x="830" y="634.2" fill="#FF2462" font-family="Arial Rounded MT Bold" font-size="17.2" font-weight="800" text-anchor="middle" opacity="1"  letter-spacing="0">
+    <tspan x="830" dy="0">✓</tspan>
+  </text>
+        <text x="866" y="636" fill="#163B74" font-family="Arial" font-size="18" font-weight="600" text-anchor="start" opacity="1"  letter-spacing="0">
+    <tspan x="866" dy="0">Tests and release documentation included</tspan>
+  </text>
+  
+  </svg>

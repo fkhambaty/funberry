@@ -1,0 +1,364 @@
+{
+  "name": "FunBerry Kids",
+  "shortName": "FunBerry",
+  "slug": "funberry-kids",
+  "appId": "com.funberrykids.app",
+  "font": "Arial Rounded MT Bold",
+  "bodyFont": "Arial",
+  "coverTitle": "Big curiosity.\nSafe little steps.",
+  "tagline": "A joyful learning playground where children explore and grown-ups stay confidently in control.",
+  "screenshot": "assets",
+  "palette": {
+    "bg": "#F0F8FF",
+    "cover": "#163B74",
+    "coverInk": "#FFFFFF",
+    "coverMuted": "#D9EAFE",
+    "ink": "#163B74",
+    "muted": "#4F6990",
+    "accent": "#FF2462",
+    "secondary": "#6D28D9",
+    "tint": "#FFE4EE",
+    "card": "#FFFFFF",
+    "line": "#BFE2FA",
+    "phone": "#14213A",
+    "onAccent": "#FFFFFF"
+  },
+  "slides": [
+    {
+      "type": "cover"
+    },
+    {
+      "type": "statement",
+      "eyebrow": "Why this product",
+      "title": "Learning works better when it feels like play",
+      "lead": "FunBerry gives children a world they want to revisit while keeping the important decisions in a grown-up space.",
+      "items": [
+        {
+          "icon": "★",
+          "title": "Joy first",
+          "body": "Colourful zones, short games and friendly rewards invite exploration."
+        },
+        {
+          "icon": "↗",
+          "title": "Progress that matters",
+          "body": "Skills and play history help families see where curiosity is growing."
+        },
+        {
+          "icon": "✓",
+          "title": "Grown-up control",
+          "body": "Children play through profiles; account and privacy controls stay with adults."
+        }
+      ]
+    },
+    {
+      "type": "personas",
+      "eyebrow": "Every user point of view",
+      "title": "Designed for a family, not one generic user",
+      "lead": "Each person gets the right level of control, language and complexity.",
+      "items": [
+        {
+          "icon": "G",
+          "title": "Visiting grown-up",
+          "goal": "“Is this right for my family?”",
+          "value": "A clear welcome, product promise, sign-in and free account path."
+        },
+        {
+          "icon": "P",
+          "title": "Parent or guardian",
+          "goal": "“Set it up and keep it safe.”",
+          "value": "Dashboard, child profiles, PINs, progress, settings, export and deletion."
+        },
+        {
+          "icon": "C",
+          "title": "Child player",
+          "goal": "“Let me pick and play!”",
+          "value": "Friendly profile picker, themed zones, games, tickets and rewards."
+        },
+        {
+          "icon": "F",
+          "title": "Returning family",
+          "goal": "“Continue without confusion.”",
+          "value": "Remembered account, fast child selection and persistent progress."
+        }
+      ]
+    },
+    {
+      "type": "journey",
+      "eyebrow": "Family journey",
+      "title": "The adult sets the stage. The child explores.",
+      "lead": "The hand-off between grown-up and child is visible, simple and intentionally separated.",
+      "steps": [
+        {
+          "title": "Join",
+          "body": "Adult account"
+        },
+        {
+          "title": "Create",
+          "body": "Child profiles"
+        },
+        {
+          "title": "Choose",
+          "body": "Child picker"
+        },
+        {
+          "title": "Explore",
+          "body": "Learning zones"
+        },
+        {
+          "title": "Play",
+          "body": "Games and tickets"
+        },
+        {
+          "title": "Celebrate",
+          "body": "Rewards + progress"
+        }
+      ],
+      "footer": "One adult account can support multiple children with separate progress"
+    },
+    {
+      "type": "features",
+      "eyebrow": "Grown-up experience",
+      "title": "The family control centre",
+      "lead": "Parents can create the right play setup, understand progress and retain control of family data.",
+      "groups": [
+        {
+          "icon": "P",
+          "title": "Parent dashboard",
+          "highlight": true,
+          "items": [
+            "Family overview at a glance",
+            "Choose who is playing",
+            "Return to grown-up controls"
+          ]
+        },
+        {
+          "icon": "+",
+          "title": "Child profiles",
+          "items": [
+            "Create, update and remove children",
+            "Names and age-appropriate setup",
+            "Optional child PIN protection"
+          ]
+        },
+        {
+          "icon": "↗",
+          "title": "Progress",
+          "items": [
+            "Per-child activity view",
+            "Learning progress and rewards",
+            "Read-only plan visibility"
+          ]
+        },
+        {
+          "icon": "S",
+          "title": "Account controls",
+          "items": [
+            "Password recovery",
+            "Data export and deletion",
+            "Privacy and legal destinations"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "features",
+      "eyebrow": "Child experience",
+      "title": "A playful world with clear choices",
+      "lead": "Large controls, friendly copy and a vivid reward loop help children act independently without exposing adult account settings.",
+      "groups": [
+        {
+          "icon": "☺",
+          "title": "Pick a profile",
+          "highlight": true,
+          "items": [
+            "Recognisable child names",
+            "Simple profile hand-off",
+            "PIN-aware entry when enabled"
+          ]
+        },
+        {
+          "icon": "Z",
+          "title": "Explore zones",
+          "items": [
+            "Themed learning destinations",
+            "Age-friendly visual navigation",
+            "Short, purposeful activities"
+          ]
+        },
+        {
+          "icon": "▶",
+          "title": "Play games",
+          "items": [
+            "Native simple-game experiences",
+            "Ticketed complex-game access",
+            "Controlled game web content"
+          ]
+        },
+        {
+          "icon": "★",
+          "title": "Earn rewards",
+          "items": [
+            "Tickets and completion feedback",
+            "Persistent per-child progress",
+            "Positive, non-competitive cues"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "features",
+      "eyebrow": "Kids and family safety",
+      "title": "Fun on the surface. Guardrails underneath.",
+      "lead": "The product avoids pretending that child safety is one switch; it is built from account separation, constrained navigation and adult control.",
+      "groups": [
+        {
+          "icon": "A",
+          "title": "Adult authority",
+          "highlight": true,
+          "items": [
+            "Grown-up owns the account",
+            "Child profiles are subordinate",
+            "Sensitive controls remain adult-facing"
+          ]
+        },
+        {
+          "icon": "W",
+          "title": "Controlled web content",
+          "items": [
+            "Only ticketed game routes open",
+            "Unexpected navigation is blocked",
+            "External URLs leave the app safely"
+          ]
+        },
+        {
+          "icon": "D",
+          "title": "Data control",
+          "items": [
+            "Export request path",
+            "Account deletion path",
+            "Explicit privacy and legal links"
+          ]
+        },
+        {
+          "icon": "R",
+          "title": "Responsible design",
+          "items": [
+            "No ads or invented social features",
+            "No open chat or stranger contact",
+            "Read-only plan presentation"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "architecture",
+      "eyebrow": "Mobile architecture",
+      "title": "A native family shell with controlled game reuse",
+      "lead": "Core family journeys remain native; selected complex games reuse existing content through a tightly constrained bridge.",
+      "layers": [
+        {
+          "title": "Android + iOS",
+          "body": "One React Native product with branded platform packaging and icons."
+        },
+        {
+          "title": "Native family shell",
+          "body": "Auth, dashboard, profiles, picker, zones, rewards, progress and settings."
+        },
+        {
+          "title": "Ticketed game WebView",
+          "body": "Only authorised complex-game routes run inside the controlled web surface."
+        },
+        {
+          "title": "Existing services",
+          "body": "Accounts, child state, game tickets, rewards and progress APIs."
+        }
+      ],
+      "nativeLabel": "Native: family controls + simple games",
+      "webLabel": "WebView: authorised complex games",
+      "safetyLabel": "Guardrails: ticket + allowlist + exit"
+    },
+    {
+      "type": "evidence",
+      "eyebrow": "Quality evidence",
+      "title": "Verified like a product, not a mock-up",
+      "lead": "The release path covers the app, its APIs and the database change needed by ticketed play.",
+      "metrics": [
+        {
+          "value": "2",
+          "label": "platform targets"
+        },
+        {
+          "value": "API 36",
+          "label": "Android emulator verification"
+        },
+        {
+          "value": "Hermes",
+          "label": "iOS JavaScript export"
+        },
+        {
+          "value": "LIVE",
+          "label": "game-ticket migration deployed"
+        }
+      ],
+      "checks": [
+        "Release APK built and installed",
+        "Family and child flows exercised",
+        "Worker deployment verified healthy",
+        "Tests and release documentation included"
+      ]
+    },
+    {
+      "type": "readiness",
+      "eyebrow": "Store readiness",
+      "title": "Prepared for owner-led store submission",
+      "lead": "The product is not yet store-approved. Credentials, signed iOS testing and store declarations remain controlled owner steps.",
+      "ready": [
+        "Branded icon, launch and family experience",
+        "Android release build and device verification",
+        "iOS export verification and native project",
+        "Export, deletion, privacy and legal entry points",
+        "Architecture, migration and release documentation"
+      ],
+      "before": [
+        "Provide Apple signing and App Store Connect access",
+        "Provide Google Play Console access and signing",
+        "Complete full signed iOS build and device test",
+        "Complete Kids/family store policy declarations",
+        "Capture listing media and submit for review"
+      ]
+    },
+    {
+      "type": "statement",
+      "eyebrow": "Why approve",
+      "title": "A family product with a memorable heart",
+      "lead": "FunBerry is designed to delight children without asking grown-ups to surrender clarity or control.",
+      "items": [
+        {
+          "icon": "♥",
+          "title": "Children want to return",
+          "body": "The Berry identity, zones and reward loop create a recognisable world."
+        },
+        {
+          "icon": "✓",
+          "title": "Grown-ups stay informed",
+          "body": "Profiles, progress and account controls make family use understandable."
+        },
+        {
+          "icon": "↗",
+          "title": "The platform can grow",
+          "body": "Native and ticketed-game paths support a broader learning catalogue."
+        }
+      ]
+    },
+    {
+      "type": "approval",
+      "title": "Approve a safer,\nsmarter kind of play",
+      "lead": "The product experience, family model and technical foundation are ready. Owner-controlled signing and store operations are the final gates.",
+      "actions": [
+        "Approve the family experience",
+        "Release store credentials and assets",
+        "Run final signed builds and submit"
+      ]
+    }
+  ]
+}
