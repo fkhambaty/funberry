@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 :root {
+  --font-nunito: "Nunito Variable";
+  --font-fredoka: "Fredoka Variable";
+  --font-baloo: "Baloo 2 Variable";
   --color-berry: #ff2d6a;
   --color-berry-deep: #c4144e;
   --color-leaf: #18b05a;
@@ -41,7 +44,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Inline styles still name these families; map them to next/font variables. */
+/* Inline styles still name these families; map them to the self-hosted fonts. */
 [style*="Fredoka"] {
   font-family: var(--font-fredoka), ui-rounded, sans-serif !important;
 }

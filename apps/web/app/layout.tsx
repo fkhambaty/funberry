@@ -1,29 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Fredoka, Nunito } from "next/font/google";
 import { brand } from "@funberry/config";
+import "@fontsource-variable/baloo-2";
+import "@fontsource-variable/fredoka";
+import "@fontsource-variable/nunito";
 import "./globals.css";
 import { ClientLayout } from "./ClientLayout";
-
-const nunito = Nunito({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-nunito",
-  display: "swap",
-});
-
-const fredoka = Fredoka({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-fredoka",
-  display: "swap",
-});
-
-const baloo = Baloo_2({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-baloo",
-  display: "swap",
-});
 
 const siteUrl = "https://www.funberrykids.in";
 
@@ -59,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${nunito.variable} ${fredoka.variable} ${baloo.variable}`}>
+    <html lang="en">
       <body className="fb-app min-h-dvh">
         <ClientLayout>{children}</ClientLayout>
       </body>
